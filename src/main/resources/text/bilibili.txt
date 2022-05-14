@@ -1,0 +1,21 @@
+Koishi bot BILIBILI 模块帮助
+#
+作用: 获取B站数据。
+#
+获取视频信息格式:
+输入满足格式的av号和bv号(bv号可从B站移动端直接获取)
+#
+获取专栏信息格式:
+输入满足格式的cv号(可通过B站移动端直接获取)
+#
+获取音频信息格式:
+输入满足格式的au号(可通过B站移动端直接获取)
+#
+获取剧集信息格式:
+输入满足格式的epid或者ssid(B站移动端不能直接获取，需要使用网页版)
+#
+该功能只能在群聊和私聊中触发，临时会话和陌生人对话不能生效。
+#
+API说明: https://github.com/SocialSisterYi/bilibili-API-collect
+License: CC BY-NC 4.0
+#

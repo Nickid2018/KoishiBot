@@ -1,0 +1,8 @@
+Koishi bot 1.0 帮助手册
+请使用 ~help <module> 查看指定模块的帮助信息
+下面为模块列表：
+info - 运行信息模块
+translation - 翻译模块
+bugtracker - Mojira漏洞追踪器模块
+curseforge - CurseForge模组模块
+bilibili - Bilibili模块
