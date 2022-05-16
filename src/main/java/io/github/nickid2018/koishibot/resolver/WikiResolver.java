@@ -76,28 +76,36 @@ public class WikiResolver extends MessageResolver {
         PageInfo page = wiki.parsePageInfo(title, 0);
         StringBuilder data = new StringBuilder();
         if (page.isSearched) {
-            MessageChain chain = MessageUtils.newChain(
-                    new QuoteReply(info.data),
-                    new PlainText("[[" + title + "]]不存在，你要查看的是否为[[" + page.title + "]](打y确认)")
-            );
-            info.sendMessageAwait(chain, (sourceData, newInfo) -> {
-                try {
-                    sourceData.receipt.recall();
-                    boolean accept = false;
-                    for (SingleMessage content : newInfo.data) {
-                        if (!(content instanceof PlainText))
-                            continue;
-                        if (((PlainText) content).component1().equalsIgnoreCase("y")) {
-                            accept = true;
-                            break;
+            if (page.title != null) {
+                MessageChain chain = MessageUtils.newChain(
+                        new QuoteReply(info.data),
+                        new PlainText("[[" + title + "]]不存在，你要查看的是否为[[" + page.title + "]](打y确认)")
+                );
+                info.sendMessageAwait(chain, (sourceData, newInfo) -> {
+                    try {
+                        sourceData.receipt.recall();
+                        boolean accept = false;
+                        for (SingleMessage content : newInfo.data) {
+                            if (!(content instanceof PlainText))
+                                continue;
+                            if (((PlainText) content).component1().equalsIgnoreCase("y")) {
+                                accept = true;
+                                break;
+                            }
                         }
+                        if (accept)
+                            requestWikiPage(namespace, page.title, info);
+                    } catch (Exception e) {
+                        MessageManager.onError(e, "wiki.re_search", info, true);
                     }
-                    if (accept)
-                        requestWikiPage(namespace, page.title, info);
-                } catch (Exception e) {
-                    MessageManager.onError(e, "wiki.re_search", info, true);
-                }
-            });
+                });
+            } else {
+                MessageChain chain = MessageUtils.newChain(
+                        new QuoteReply(info.data),
+                        new PlainText("没有搜索到有关于[[" + title + "]]的页面")
+                );
+                info.sendMessageWithQuote(chain);
+            }
         } else {
             if (page.redirected)
                 data.append("(重定向[[").append(page.titlePast).append("]] -> [[").append(page.title).append("]])\n");
