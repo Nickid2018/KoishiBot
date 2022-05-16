@@ -8,11 +8,12 @@ import org.apache.http.client.methods.HttpGet;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 
 public class WikiInfo {
 
-    public static final String WIKI_META = "action=query&format=json&meta=siteinfo&siprop=extensions";
+    public static final String WIKI_META = "action=query&format=json&meta=siteinfo&siprop=extensions%7Cgeneral";
     public static final String QUERY_PAGE = "action=query&format=json&inprop=url&iiprop=url&prop=info%7Cimageinfo%7Cextracts%7Cpageprops&" +
                                             "ppprop=description%7Cdisplaytitle%7Cdisambiguation%7Cinfoboxes&explaintext&" +
                                             "exsectionformat=plain&exchars=200&redirects";
@@ -20,17 +21,27 @@ public class WikiInfo {
     public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text&srlimit=1&srenablerewrite";
 
     private final String url;
+    private final Map<String, String> additionalHeaders;
+
     private boolean available;
     private boolean useTextExtracts;
+    private String realURL;
+    private String script;
 
     public WikiInfo(String url) {
         this.url = url;
+        additionalHeaders = new HashMap<>();
     }
 
-    public boolean notAvailable() {
+    public WikiInfo(String url, Map<String, String> additionalHeaders) {
+        this.url = url;
+        this.additionalHeaders = additionalHeaders;
+    }
+
+    public boolean notAvailable() throws IOException {
         if (!available) {
             try {
-                JsonObject object = WebUtil.fetchDataInJson(new HttpGet(url + WIKI_META)).getAsJsonObject();
+                JsonObject object = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_META)).getAsJsonObject();
                 JsonArray extensions = object.getAsJsonObject("query").getAsJsonArray("extensions");
                 for (JsonElement element : extensions) {
                     String name = element.getAsJsonObject().get("name").getAsString();
@@ -39,9 +50,15 @@ public class WikiInfo {
                         break;
                     }
                 }
+                String server = WebUtil.getDataInPathOrNull(object, "query.general.server");
+                if (server != null && server.startsWith("/"))
+                    realURL = url.split("/")[0] + server;
+                else
+                    realURL = server;
+                script = realURL + WebUtil.getDataInPathOrNull(object, "query.general.script");
                 available = true;
             } catch (IOException e) {
-                return true;
+                throw new IOException("无法获取信息，可能机器人被验证码阻止或CloudFlare拦截");
             }
         }
         return false;
@@ -53,12 +70,16 @@ public class WikiInfo {
 
         JsonObject query;
         String queryFormat = useTextExtracts ? QUERY_PAGE : QUERY_PAGE_NOE;
-        if (title == null)
-            query = WebUtil.fetchDataInJson(new HttpGet(url + queryFormat + "&pageid=" + pageID))
-                    .getAsJsonObject().getAsJsonObject("query");
-        else
-            query = WebUtil.fetchDataInJson(new HttpGet(url + queryFormat + "&titles=" + URLEncoder.encode(title, "UTF-8")))
-                    .getAsJsonObject().getAsJsonObject("query");
+        try {
+            if (title == null)
+                query = WebUtil.fetchDataInJson(getWithHeader(url + queryFormat + "&pageid=" + pageID))
+                        .getAsJsonObject().getAsJsonObject("query");
+            else
+                query = WebUtil.fetchDataInJson(getWithHeader(url + queryFormat + "&titles=" + URLEncoder.encode(title, "UTF-8")))
+                        .getAsJsonObject().getAsJsonObject("query");
+        } catch (IOException e) {
+            throw new IOException("无法获取信息，可能机器人被验证码阻止或CloudFlare拦截");
+        }
 
         PageInfo pageInfo = new PageInfo();
         pageInfo.title = title;
@@ -69,7 +90,7 @@ public class WikiInfo {
         for (Map.Entry<String, JsonElement> entry : pages.entrySet()) {
             String id = entry.getKey();
             JsonObject object = entry.getValue().getAsJsonObject();
-            pageInfo.url = object.get("fullurl").getAsString();
+            pageInfo.url = script + "?curid=" + id;
             if (object.has("missing")) {
                 if (title != null)
                     return search(title);
@@ -86,8 +107,8 @@ public class WikiInfo {
     }
 
     private PageInfo search(String key) throws IOException {
-        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(
-                url + WIKI_SEARCH + "&srsearch=" + key)).getAsJsonObject();
+        JsonObject data = WebUtil.fetchDataInJson(getWithHeader(
+                url + WIKI_SEARCH + "&srsearch=" + URLEncoder.encode(key, "UTF-8"))).getAsJsonObject();
         JsonArray search = data.getAsJsonObject("query").getAsJsonArray("search");
         PageInfo info = new PageInfo();
         info.isSearched = true;
@@ -112,7 +133,15 @@ public class WikiInfo {
         }
     }
 
+    private HttpGet getWithHeader(String url) {
+        HttpGet get = new HttpGet(url);
+        for (Map.Entry<String, String> entry : additionalHeaders.entrySet())
+            get.setHeader(entry.getKey(), entry.getValue());
+        return get;
+    }
+
     private String resolveText(String source) {
+        source = source.replaceAll("(\n){2,}+", "\n");
         int index = 0;
         int blankets = 0;
         boolean quote = false;
@@ -148,6 +177,6 @@ public class WikiInfo {
                         break INDEX_FIND;
             }
         }
-        return source.substring(0, index + 1);
+        return source.substring(0, Math.min(source.length(), index + 1));
     }
 }

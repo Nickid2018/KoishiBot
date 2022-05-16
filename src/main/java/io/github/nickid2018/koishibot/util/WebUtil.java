@@ -33,11 +33,14 @@ public class WebUtil {
     );
     private static final Pattern PATTERN_SECTION = Pattern.compile(".*?##[^#].*?");
 
-    public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException {
+    public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException, ErrorCodeException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
+            int status = httpResponse.getStatusLine().getStatusCode();
+            if (status / 100 != 2)
+                throw new ErrorCodeException(status);
             Header[] headers = httpResponse.getHeaders("Content-Type");
             if (headers.length > 0 && !headers[0].getValue()
                     .startsWith(ContentType.APPLICATION_JSON.getMimeType()))
@@ -61,6 +64,9 @@ public class WebUtil {
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
+            int status = httpResponse.getStatusLine().getStatusCode();
+            if (status / 100 != 2)
+                throw new ErrorCodeException(status);
             HttpEntity httpEntity = httpResponse.getEntity();
             String text = EntityUtils.toString(httpEntity, "UTF-8");
             EntityUtils.consume(httpEntity);

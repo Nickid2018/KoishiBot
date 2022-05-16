@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.translation;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -20,8 +21,6 @@ import java.util.Map;
 public class YoudaoTranslation implements TranslationProvider {
 
     private static final String YOUDAO_URL = "https://openapi.youdao.com/api";
-    private static final String APP_KEY = "064779e28d74a7d5";
-    private static final String APP_SECRET = "YOQhCG79qHe0gCnK17oEyTsjQMq6njPz";
     private static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
     @Override
@@ -36,9 +35,9 @@ public class YoudaoTranslation implements TranslationProvider {
         params.put("signType", "v3");
         String curtime = String.valueOf(System.currentTimeMillis() / 1000);
         params.put("curtime", curtime);
-        String signStr = APP_KEY + truncate(text) + salt + curtime + APP_SECRET;
+        String signStr = Settings.YOUDAO_APP_KEY + truncate(text) + salt + curtime + Settings.YOUDAO_APP_SECRET;
         String sign = getDigest(signStr);
-        params.put("appKey", APP_KEY);
+        params.put("appKey", Settings.YOUDAO_APP_KEY);
         params.put("q", text);
         params.put("salt", salt);
         params.put("sign", sign);

@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.resolver;
 import io.github.nickid2018.koishibot.Constants;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
+import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.util.LazyLoadValue;
 import net.mamoe.mirai.message.data.*;
 import org.apache.commons.io.IOUtils;
@@ -55,7 +56,7 @@ public class HelpResolver extends MessageResolver {
                 if (line.equals("#")) {
                     PlainText text = new PlainText(message.toString().trim());
                     message.delete(0, message.length());
-                    builder.add(KoishiBotMain.BOT_QQ, "Koishi bot", text, Constants.TIME_OF_514);
+                    builder.add(Settings.BOT_QQ, "Koishi bot", text, Constants.TIME_OF_514);
                 } else
                     message.append(line).append("\n");
             });

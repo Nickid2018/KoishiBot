@@ -32,7 +32,7 @@ public class ErrorRecord {
             builder.append("错误模块: ").append(entry.getSecond()).append("\n");
             builder.append("错误描述: ").append(entry.getThird().getMessage()).append("\n");
             builder.append("栈顶层: ").append(entry.getThird().getStackTrace()[0]);
-            fmb.add(KoishiBotMain.BOT_QQ, "Koishi bot", new PlainText(builder), Constants.TIME_OF_514);
+            fmb.add(Settings.BOT_QQ, "Koishi bot", new PlainText(builder), Constants.TIME_OF_514);
         }
         return fmb.build();
     }

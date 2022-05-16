@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
+import io.github.nickid2018.koishibot.core.MessageManager;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import net.mamoe.mirai.message.data.MessageChain;
@@ -64,12 +65,7 @@ public class CurseForgeResolver extends MessageResolver {
                 else
                     displayMod(resolve, info);
             } catch (Exception e) {
-                MessageChain chain = MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText("调用API产生了错误：" + e.getMessage())
-                );
-                info.sendMessage(chain);
-                ErrorRecord.enqueueError("curseforge", e);
+                MessageManager.onError(e, "curseforge", info, false);
             }
         });
         return true;

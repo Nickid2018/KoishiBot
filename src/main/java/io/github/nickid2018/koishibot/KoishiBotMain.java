@@ -1,12 +1,11 @@
 package io.github.nickid2018.koishibot;
 
-import io.github.nickid2018.koishibot.core.ErrorRecord;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import io.github.nickid2018.koishibot.core.MessageManager;
+import io.github.nickid2018.koishibot.core.*;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
+import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 import net.mamoe.mirai.event.EventChannel;
@@ -18,48 +17,55 @@ import net.mamoe.mirai.message.data.MessageUtils;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.utils.BotConfiguration;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 public final class KoishiBotMain extends JavaPlugin {
 
     // Singleton
     public static final KoishiBotMain INSTANCE = new KoishiBotMain();
 
-    public static final long BOT_QQ = 753836054;
-
+    public File workingDir = new File(".");
     public Bot botKoishi;
-
     public ExecutorService executor;
 
     private KoishiBotMain() {
         super(new JvmPluginDescriptionBuilder("io.github.nickid2018.koishibot", "1.0-SNAPSHOT").build());
-        botKoishi = BotFactory.INSTANCE.newBot(BOT_QQ, "koishi233", new BotConfiguration() {{
-            setHeartbeatStrategy(HeartbeatStrategy.STAT_HB);
-            if (System.getProperty("IDE") != null) {
-                enableContactCache();
-                setWorkingDir(new File("D:/KoishiBot/bots/753836054"));
-            } else
-                setWorkingDir(new File("C:/Koishi bot/botKoishi"));
-            fileBasedDeviceInfo("device.json");
-        }});
-        registerEvents();
     }
 
     @Override
     public void onEnable() {
+        try {
+            Settings.load();
+        } catch (IOException e) {
+            e.printStackTrace();
+            botKoishi = null;
+            return;
+        }
+        botKoishi = BotFactory.INSTANCE.newBot(Settings.BOT_QQ, Settings.BOT_PASSWORD, new BotConfiguration() {{
+            setHeartbeatStrategy(HeartbeatStrategy.STAT_HB);
+            if (System.getProperty("IDE") != null) {
+                enableContactCache();
+                setWorkingDir(workingDir = new File("D:/KoishiBot/bots/753836054"));
+            } else {
+                setWorkingDir(workingDir = new File("C:/Koishi Bot/botKoishi"));
+            }
+            fileBasedDeviceInfo("device.json");
+        }});
+        registerEvents();
+        CommandManager.INSTANCE.registerCommand(new BotKoishiCommand(this), true);
+        botKoishi.login();
         executor = Executors.newCachedThreadPool(new BasicThreadFactory.Builder().uncaughtExceptionHandler(
                 (th, t) -> ErrorRecord.enqueueError("concurrent", t)
         ).build());
-        botKoishi.login();
     }
 
     @Override
     public void onDisable() {
+        if (botKoishi == null)
+            return;
         botKoishi.close();
         executor.shutdown();
         executor = null;

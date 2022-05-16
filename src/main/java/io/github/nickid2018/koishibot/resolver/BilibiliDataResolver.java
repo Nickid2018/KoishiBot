@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
+import io.github.nickid2018.koishibot.core.MessageManager;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import net.mamoe.mirai.contact.Contact;
@@ -67,12 +68,7 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
                 else
                     choose(key, info);
             } catch (Exception e) {
-                MessageChain chain = MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText("调用API产生了错误：" + e.getMessage())
-                );
-                info.sendMessageWithQuote(chain);
-                ErrorRecord.enqueueError("bilibili", e);
+                MessageManager.onError(e, "bilibili", info, true);
             }
         });
         return true;
@@ -340,12 +336,7 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
                 url = url.split("\\?")[0];
                 fromShortLink(url, info);
             } catch (IOException e) {
-                ErrorRecord.enqueueError("bilibili.service", e);
-                MessageChain chain = MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText("调用API产生了错误：" + e.getMessage())
-                );
-                info.sendMessageWithQuote(chain);
+                MessageManager.onError(e, "bilibili.service", info, false);
             }
         });
     }

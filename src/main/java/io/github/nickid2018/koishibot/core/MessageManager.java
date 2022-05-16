@@ -4,8 +4,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.resolver.*;
+import io.github.nickid2018.koishibot.util.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import kotlin.Pair;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.event.events.FriendMessageEvent;
 import net.mamoe.mirai.event.events.GroupMessageEvent;
 import net.mamoe.mirai.event.events.MessageEvent;
@@ -13,6 +15,8 @@ import net.mamoe.mirai.event.events.MessageRecallEvent;
 import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Predicate;
@@ -40,11 +44,11 @@ public class MessageManager {
         boolean replyMe = false;
         for (SingleMessage content : chain) {
             if (content instanceof At)
-                at |= ((At) content).component1() == KoishiBotMain.BOT_QQ;
+                at |= ((At) content).component1() == Settings.BOT_QQ;
             else if (content instanceof PlainText)
                 strings.add(((PlainText) content).component1());
             else if (content instanceof QuoteReply)
-                replyMe |= ((QuoteReply) content).component1().getFromId() == KoishiBotMain.BOT_QQ;
+                replyMe |= ((QuoteReply) content).component1().getFromId() == Settings.BOT_QQ;
         }
         boolean finalAt = at;
         MutableBoolean bool = new MutableBoolean(false);
@@ -87,6 +91,36 @@ public class MessageManager {
 
     public static void resolveStrangerMessage(MessageChain chain, MessageInfo info) {
         resolveTempMessage(chain, info, MessageResolver::strangerChat);
+    }
+
+    public static void onError(Throwable t, String module, MessageInfo info, boolean quote) {
+        ErrorRecord.enqueueError(module, t);
+        MessageChain chain;
+        if (t instanceof ErrorCodeException) {
+            int code = ((ErrorCodeException) t).code;
+            try {
+                Image image = Contact.uploadImage(KoishiBotMain.INSTANCE.botKoishi.getAsFriend(),
+                                new URL("https://http.cat/" + code).openStream());
+                chain = MessageUtils.newChain(
+                        new QuoteReply(info.data),
+                        new PlainText("调用API返回了状态码" + code),
+                        image
+                );
+            } catch (IOException e) {
+                chain = MessageUtils.newChain(
+                        new QuoteReply(info.data),
+                        new PlainText("调用API返回了状态码" + code)
+                );
+            }
+        } else
+            chain = MessageUtils.newChain(
+                    new QuoteReply(info.data),
+                    new PlainText("调用API产生了错误：" + t.getMessage())
+            );
+        if (quote)
+            info.sendMessageWithQuote(chain);
+        else
+            info.sendMessage(chain);
     }
 
     static {

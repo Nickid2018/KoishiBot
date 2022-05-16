@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
+import io.github.nickid2018.koishibot.core.MessageManager;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import net.mamoe.mirai.contact.Contact;
@@ -58,12 +59,7 @@ public class BugTrackerResolver extends MessageResolver {
                 if (isSearch)
                     doBugSearch(resolve.substring(7), info);
             } catch (Exception e) {
-                MessageChain chain = MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText("调用API产生了错误：" + e.getMessage())
-                );
-                info.sendMessage(chain);
-                ErrorRecord.enqueueError("bugtracker", e);
+                MessageManager.onError(e, "bugtracker", info, false);
             }
         });
         return true;
