@@ -37,9 +37,10 @@ public class WikiResolver extends MessageResolver {
             String[] splits = finalKey.split(":", 2);
             try {
                 if (splits.length == 1 || !Settings.SUPPORT_WIKIS.containsKey(splits[0].toLowerCase(Locale.ROOT)))
-                    requestWikiPage(Settings.BASE_WIKI, finalKey, info);
+                    requestWikiPage(Settings.SUPPORT_WIKIS.get(Settings.BASE_WIKI), null, finalKey, info);
                 else
-                    requestWikiPage(splits[0].toLowerCase(Locale.ROOT), splits[1], info);
+                    requestWikiPage(Settings.SUPPORT_WIKIS.get(splits[0].toLowerCase(Locale.ROOT)), splits[0].toLowerCase(Locale.ROOT),
+                            splits[1], info);
             } catch (Exception e) {
                 MessageManager.onError(e, "wiki", info, true);
             }
@@ -47,15 +48,16 @@ public class WikiResolver extends MessageResolver {
         return true;
     }
 
-    private static void requestWikiPage(String namespace, String title, MessageInfo info) throws Exception {
-        WikiInfo wiki = Settings.SUPPORT_WIKIS.get(namespace);
-        PageInfo page = wiki.parsePageInfo(title, 0);
+    private static void requestWikiPage(WikiInfo wiki, String namespace, String title, MessageInfo info)
+            throws Exception {
+        PageInfo page = wiki.parsePageInfo(title, 0, namespace);
         StringBuilder data = new StringBuilder();
         if (page.isSearched) {
             if (page.title != null) {
                 MessageChain chain = MessageUtils.newChain(
                         new QuoteReply(info.data),
-                        new PlainText("[[" + title + "]]不存在，你要查看的是否为[[" + page.title + "]](打y确认)")
+                        new PlainText("[[" + (namespace == null ? "" : namespace + ":") + title + "]]不存在，" +
+                                "你要查看的是否为[[" + (page.prefix == null ? "" : page.prefix + ":") + page.title + "]](打y确认)")
                 );
                 info.sendMessageAwait(chain, (sourceData, newInfo) -> {
                     try {
@@ -70,7 +72,7 @@ public class WikiResolver extends MessageResolver {
                             }
                         }
                         if (accept)
-                            requestWikiPage(namespace, page.title, info);
+                            requestWikiPage(page.info, page.title, page.prefix, info);
                     } catch (Exception e) {
                         MessageManager.onError(e, "wiki.re_search", info, true);
                     }
@@ -78,15 +80,16 @@ public class WikiResolver extends MessageResolver {
             } else {
                 MessageChain chain = MessageUtils.newChain(
                         new QuoteReply(info.data),
-                        new PlainText("没有搜索到有关于[[" + title + "]]的页面")
+                        new PlainText("没有搜索到有关于[[" + (namespace == null ? "" : namespace + ":") + title + "]]的页面")
                 );
                 info.sendMessageWithQuote(chain);
             }
         } else {
             if (page.redirected)
-                data.append("(重定向[[").append(page.titlePast).append("]] -> [[").append(page.title).append("]])\n");
+                data.append("(重定向[[").append(page.prefix == null ? "" : page.prefix + ":").append(page.titlePast)
+                        .append("]] -> [[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
             if (!Settings.HIDE_WIKIS.contains(namespace))
-                data.append("(页面URL:").append(page.url).append(")\n");
+                data.append(page.url).append("\n");
             data.append(page.shortDescription);
 
             MessageChain chain = MessageUtils.newChain(

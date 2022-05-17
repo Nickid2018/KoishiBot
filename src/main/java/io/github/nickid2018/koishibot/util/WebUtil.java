@@ -5,13 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequest;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -60,12 +57,16 @@ public class WebUtil {
     }
 
     public static String fetchDataInPlain(HttpUriRequest post) throws IOException {
+        return fetchDataInPlain(post, false);
+    }
+
+    public static String fetchDataInPlain(HttpUriRequest post, boolean ignoreErrorCode) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
             int status = httpResponse.getStatusLine().getStatusCode();
-            if (status / 100 != 2)
+            if (status / 100 != 2 && !ignoreErrorCode)
                 throw new ErrorCodeException(status);
             HttpEntity httpEntity = httpResponse.getEntity();
             String text = EntityUtils.toString(httpEntity, "UTF-8");
