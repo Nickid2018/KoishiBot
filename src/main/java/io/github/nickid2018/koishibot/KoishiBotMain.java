@@ -85,43 +85,57 @@ public final class KoishiBotMain extends JavaPlugin {
         });
         channel.exceptionHandler(create("group.message"))
                 .subscribe(GroupMessageEvent.class, messageEvent -> {
+            if (MemberFilter.shouldNotResponse(messageEvent.getSender()))
+                return ListeningStatus.LISTENING;
             MessageInfo info = new MessageInfo();
             info.data = messageEvent.getMessage();
             info.sender = messageEvent.getSender();
             info.group = messageEvent.getGroup();
             info.event = messageEvent;
-            MessageManager.resolveGroupMessage(messageEvent.getMessage(), info);
+            if (MessageManager.resolveGroupMessage(messageEvent.getMessage(), info))
+                MemberFilter.refreshRequestTime(messageEvent.getSender());
             return ListeningStatus.LISTENING;
         });
         channel.exceptionHandler(create("friend.message"))
                 .subscribe(FriendMessageEvent.class, messageEvent -> {
+            if (MemberFilter.shouldNotResponse(messageEvent.getSender()))
+                return ListeningStatus.LISTENING;
             MessageInfo info = new MessageInfo();
             info.data = messageEvent.getMessage();
             info.friend = messageEvent.getFriend();
             info.event = messageEvent;
-            MessageManager.resolveFriendMessage(messageEvent.getMessage(), info);
+            if (MessageManager.resolveFriendMessage(messageEvent.getMessage(), info))
+                MemberFilter.refreshRequestTime(messageEvent.getSender());
             return ListeningStatus.LISTENING;
         });
         channel.exceptionHandler(create("stranger.message"))
                 .subscribe(StrangerMessageEvent.class, messageEvent -> {
+            if (MemberFilter.shouldNotResponse(messageEvent.getSender()))
+                return ListeningStatus.LISTENING;
             MessageInfo info = new MessageInfo();
             info.data = messageEvent.getMessage();
             info.stranger = messageEvent.getSender();
             info.event = messageEvent;
-            MessageManager.resolveStrangerMessage(messageEvent.getMessage(), info);
+            if (MessageManager.resolveStrangerMessage(messageEvent.getMessage(), info))
+                MemberFilter.refreshRequestTime(messageEvent.getSender());
             return ListeningStatus.LISTENING;
         });
         channel.exceptionHandler(create("group.message.temp"))
                 .subscribe(GroupTempMessageEvent.class, messageEvent -> {
+            if (MemberFilter.shouldNotResponse(messageEvent.getSender()))
+                return ListeningStatus.LISTENING;
             MessageInfo info = new MessageInfo();
             info.data = messageEvent.getMessage();
             info.sender = messageEvent.getSender();
             info.event = messageEvent;
-            MessageManager.resolveGroupTempMessage(messageEvent.getMessage(), info);
+            if (MessageManager.resolveGroupTempMessage(messageEvent.getMessage(), info))
+                MemberFilter.refreshRequestTime(messageEvent.getSender());
             return ListeningStatus.LISTENING;
         });
         channel.exceptionHandler(create("group.join"))
                 .subscribe(MemberJoinEvent.class, memberJoinEvent -> {
+            if (MemberFilter.shouldNotResponse(memberJoinEvent.getMember()))
+                return ListeningStatus.LISTENING;
             MessageChain chain = MessageUtils.newChain(
                     new At(memberJoinEvent.getMember().getId()),
                     new PlainText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")

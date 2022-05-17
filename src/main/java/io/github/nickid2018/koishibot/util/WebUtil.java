@@ -42,7 +42,7 @@ public class WebUtil {
             if (status / 100 != 2)
                 throw new ErrorCodeException(status);
             Header[] headers = httpResponse.getHeaders("Content-Type");
-            if (headers.length > 0 && !headers[0].getValue()
+            if (headers.length > 0 && headers[0] != null && !headers[0].getValue()
                     .startsWith(ContentType.APPLICATION_JSON.getMimeType()))
                 throw new IOException("Return a non-JSON Content.");
             HttpEntity httpEntity = httpResponse.getEntity();

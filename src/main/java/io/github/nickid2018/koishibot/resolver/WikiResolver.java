@@ -1,7 +1,6 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.MessageInfo;
 import io.github.nickid2018.koishibot.core.MessageManager;
 import io.github.nickid2018.koishibot.core.Settings;
@@ -9,35 +8,12 @@ import io.github.nickid2018.koishibot.wiki.PageInfo;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import net.mamoe.mirai.message.data.*;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class WikiResolver extends MessageResolver {
 
     public static final Pattern WIKI_PATTERN = Pattern.compile("\\[\\[.+?]]");
-
-//    public static final Map<String, WikiInfo> SUPPORT_WIKIS = new HashMap<>();
-//
-//    static {
-//        SUPPORT_WIKIS.put("mcw", new WikiInfo("https://minecraft.fandom.com/zh/api.php?"));
-//        SUPPORT_WIKIS.put("thw", new WikiInfo("https://thwiki.cc/api.php?"));
-//        SUPPORT_WIKIS.put("acw", new WikiInfo("https://assassinscreed.fandom.com/zh/api.php?"));
-//        Map<String, String> moeHeader = new HashMap<>();
-//        moeHeader.put("accept", "*/*");
-//        moeHeader.put("accept-encoding", "gzip, deflate");
-//        moeHeader.put("accept-language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7,en-GB;q=0.6");
-//        moeHeader.put("content-type", "application/json");
-//        moeHeader.put("user-agent",
-//                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)" +
-//                        " Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62");
-//        SUPPORT_WIKIS.put("moe", new WikiInfo("https://zh.moegirl.org.cn/api.php?", moeHeader));
-//        /* Mirror Website!! */
-//        SUPPORT_WIKIS.put("wzh", new WikiInfo("https://zh.wikipedia.ahau.cf/w/api.php?"));
-//    }
 
     public WikiResolver() {
         super(WIKI_PATTERN);

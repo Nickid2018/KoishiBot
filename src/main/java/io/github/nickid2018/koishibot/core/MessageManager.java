@@ -28,16 +28,16 @@ public class MessageManager {
 
     public static final Queue<Pair<MessageEvent, MessageReceipt<?>>> SENT_QUOTE_QUEUE = new ConcurrentLinkedDeque<>();
 
-    public static void resolveGroupMessage(MessageChain chain, MessageInfo info) {
+    public static boolean resolveGroupMessage(MessageChain chain, MessageInfo info) {
         if (UserAwaitData.onMessage(info))
-            return;
+            return true;
         if (chain.get(1) instanceof RichMessage) {
             RichMessage message = (RichMessage) chain.get(1);
             JsonObject content = JsonParser.parseString(message.getContent()).getAsJsonObject();
             String desc = content.get("desc").getAsString();
             if (SERVICES.containsKey(desc))
                 SERVICES.get(desc).resolveService(content, info);
-            return;
+            return true;
         }
         List<String> strings = new ArrayList<>();
         boolean at = false;
@@ -59,38 +59,49 @@ public class MessageManager {
                 }));
         if (at && !bool.getValue() && !replyMe)
             info.sendMessage(MessageUtils.newChain(new QuoteReply(chain), new PlainText("不要乱@人，会被514打电话的。")));
+        return bool.getValue() || at;
     }
 
-    public static void resolveFriendMessage(MessageChain chain, MessageInfo info) {
+    public static boolean resolveFriendMessage(MessageChain chain, MessageInfo info) {
         if (UserAwaitData.onMessage(info))
-            return;
+            return true;
         List<String> strings = new ArrayList<>();
         for (SingleMessage content : chain) {
             if (content instanceof PlainText)
                 strings.add(((PlainText) content).component1());
         }
+        MutableBoolean bool = new MutableBoolean(false);
         RESOLVERS.stream().filter(messageResolver -> !messageResolver.groupOnly())
-                .forEach(messageResolver -> strings.forEach(string -> messageResolver.resolve(string, info)));
+                .forEach(messageResolver -> strings.forEach(string -> {
+                    if (!bool.getValue() && messageResolver.resolve(string, info))
+                        bool.setValue(true);
+                }));
+        return bool.getValue();
     }
 
-    public static void resolveTempMessage(MessageChain chain, MessageInfo info, Predicate<MessageResolver> predicate) {
+    public static boolean resolveTempMessage(MessageChain chain, MessageInfo info, Predicate<MessageResolver> predicate) {
         if (UserAwaitData.onMessage(info))
-            return;
+            return true;
         List<String> strings = new ArrayList<>();
         for (SingleMessage content : chain) {
             if (content instanceof PlainText)
                 strings.add(((PlainText) content).component1());
         }
+        MutableBoolean bool = new MutableBoolean(false);
         RESOLVERS.stream().filter(predicate)
-                .forEach(messageResolver -> strings.forEach(string -> messageResolver.resolve(string, info)));
+                .forEach(messageResolver -> strings.forEach(string -> {
+                    if (!bool.getValue() && messageResolver.resolve(string, info))
+                        bool.setValue(true);
+                }));
+        return bool.getValue();
     }
 
-    public static void resolveGroupTempMessage(MessageChain chain, MessageInfo info) {
-        resolveTempMessage(chain, info, MessageResolver::groupTempChat);
+    public static boolean resolveGroupTempMessage(MessageChain chain, MessageInfo info) {
+        return resolveTempMessage(chain, info, MessageResolver::groupTempChat);
     }
 
-    public static void resolveStrangerMessage(MessageChain chain, MessageInfo info) {
-        resolveTempMessage(chain, info, MessageResolver::strangerChat);
+    public static boolean resolveStrangerMessage(MessageChain chain, MessageInfo info) {
+        return resolveTempMessage(chain, info, MessageResolver::strangerChat);
     }
 
     public static void onError(Throwable t, String module, MessageInfo info, boolean quote) {
