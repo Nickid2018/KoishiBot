@@ -1,26 +1,29 @@
 package io.github.nickid2018.koishibot.wiki;
 
 import com.google.gson.*;
+import io.github.nickid2018.koishibot.util.MutableBoolean;
 import io.github.nickid2018.koishibot.util.WebUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
 
+import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class WikiInfo {
 
     public static final String WIKI_META = "action=query&format=json&meta=siteinfo&siprop=extensions%7Cgeneral%7Cinterwikimap";
-    public static final String QUERY_PAGE = "action=query&format=json&inprop=url&iiprop=url&prop=info%7Cimageinfo%7Cextracts%7Cpageprops&" +
+    public static final String QUERY_PAGE = "action=query&format=json&prop=info%7Cimageinfo%7Cextracts%7Cpageprops&inprop=url&iiprop=url&" +
                                             "ppprop=description%7Cdisplaytitle%7Cdisambiguation%7Cinfoboxes&explaintext&" +
                                             "exsectionformat=plain&exchars=200&redirects";
     public static final String QUERY_PAGE_NOE = "action=query&format=json&inprop=url&iiprop=url&prop=info%7Cimageinfo&redirects";
+    public static final String QUERY_PAGE_TEXT = "action=parse&format=json&prop=text";
     public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text&srlimit=1&srenablerewrite";
-
-    public static final Pattern EDIT_URI = Pattern.compile("<link\\w+rel=\"EditURI\"\\w+type=\"application/rsd\\+xml\"\\w+href=" +
-            "\"https?://.*?/api\\.php\\?action=rsd\"\\w*/?>", Pattern.CASE_INSENSITIVE);
 
     public static final String EDIT_URI_STR = "<link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"";
 
@@ -31,7 +34,7 @@ public class WikiInfo {
 
     private boolean available;
     private boolean useTextExtracts;
-    private String realURL;
+    private String articleURL;
     private String script;
     private final Map<String, String> interWikiMap = new HashMap<>();
 
@@ -78,10 +81,12 @@ public class WikiInfo {
                 }
             }
             String server = WebUtil.getDataInPathOrNull(object, "query.general.server");
+            String realURL;
             if (server != null && server.startsWith("/"))
                 realURL = url.split("/")[0] + server;
             else
                 realURL = server;
+            articleURL = realURL + WebUtil.getDataInPathOrNull(object, "query.general.articlepath");
             script = realURL + WebUtil.getDataInPathOrNull(object, "query.general.script");
 
             JsonArray interwikiMap = object.getAsJsonObject("query").getAsJsonArray("interwikimap");
@@ -98,6 +103,8 @@ public class WikiInfo {
     }
 
     public PageInfo parsePageInfo(String title, int pageID, String prefix) throws IOException {
+        if (title != null && title.isEmpty())
+            throw new IOException("无效的wiki查询");
         checkAvailable();
 
         if (prefix != null && prefix.split(":").length > 5)
@@ -110,6 +117,13 @@ public class WikiInfo {
                 return skip.parsePageInfo(title.split(":", 2)[1], 0,
                         (prefix == null ? "" : prefix + ":") + namespace);
             }
+        }
+
+        String section = null;
+        if (title != null && title.contains("#")) {
+            String[] titleSplit = title.split("#", 2);
+            title = titleSplit[0];
+            section = titleSplit[1];
         }
 
         JsonObject query;
@@ -142,16 +156,25 @@ public class WikiInfo {
         for (Map.Entry<String, JsonElement> entry : pages.entrySet()) {
             String id = entry.getKey();
             JsonObject object = entry.getValue().getAsJsonObject();
+            if (object.has("special")) {
+                pageInfo.url = articleURL.replace("$1", URLEncoder.encode(title, "UTF-8"));
+                pageInfo.shortDescription = "特殊页面";
+                return pageInfo;
+            }
             pageInfo.url = script + "?curid=" + id;
             if (object.has("missing")) {
                 if (title != null)
                     return search(title);
                 throw new IOException("无法找到页面，可能不存在或页面为文件");
             }
-            if (useTextExtracts && object.has("extract")) {
+            if (useTextExtracts && object.has("extract") && section == null)
                 pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
-            } else {
-                // ...
+            else
+                pageInfo.shortDescription = resolveText(getWikiText(title, section));
+            if (object.has("imageinfo")) {
+                JsonArray array = object.getAsJsonArray("imageinfo");
+                if (array.size() > 0)
+                    pageInfo.imageStream = new URL(array.get(0).getAsJsonObject().get("url").getAsString()).openStream();
             }
         }
 
@@ -239,10 +262,45 @@ public class WikiInfo {
                 case '？':
                 case '！':
                 case '。':
-                    if (blankets == 0 && !quote && !subQuote && index > 30)
+                    if (blankets == 0 && !quote && !subQuote && index > 15)
+                        break INDEX_FIND;
+                case '\n':
+                    if (index > 20)
                         break INDEX_FIND;
             }
         }
         return source.substring(0, Math.min(source.length(), index + 1));
+    }
+
+    private String getWikiText(String page, String section) throws IOException {
+        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page=" + page))
+                .getAsJsonObject();
+        String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
+        if (html == null)
+            throw new IOException("页面无内容");
+        String markdown = WebUtil.getAsMarkdownClean(html);
+        if (section != null) {
+            StringBuilder builder = new StringBuilder();
+            MutableBoolean bool = new MutableBoolean(false);
+            String sectionName = "## " + section + " ##";
+            new BufferedReader(new StringReader(markdown)).lines().forEach(s -> {
+                if (s.startsWith("##"))
+                    bool.setValue(sectionName.equals(s));
+                else if (bool.getValue())
+                    builder.append(s).append("\n");
+            });
+            String sectionData = builder.toString().trim();
+            return sectionData.isEmpty() ? markdown : sectionData;
+        }
+        return markdown;
+    }
+
+    public static void main(String[] args) {
+        try {
+            IOUtils.write(new WikiInfo("https://minecraft.fandom.com/zh/api.php?")
+                    .getWikiText("Minecraft", null), new FileWriter("C:\\Users\\Nickid2018\\Desktop\\a.txt"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -4,6 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.overzealous.remark.Options;
+import com.overzealous.remark.Remark;
+import com.overzealous.remark.convert.AbstractNodeHandler;
+import com.overzealous.remark.convert.DocumentConverter;
+import com.overzealous.remark.convert.NodeHandler;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.Header;
@@ -17,9 +22,12 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.safety.Safelist;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -29,6 +37,7 @@ public class WebUtil {
             Arrays.asList("jpg", "png", "bmp", "gif")
     );
     private static final Pattern PATTERN_SECTION = Pattern.compile(".*?##[^#].*?");
+    private static final Remark REMARK;
 
     public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException, ErrorCodeException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -163,5 +172,34 @@ public class WebUtil {
             plain = builder.toString();
         }
         return plain;
+    }
+
+    public static String getAsMarkdownClean(String str) {
+        StringBuilder detail = new StringBuilder();
+        new BufferedReader(new StringReader(REMARK.convert(str))).lines().forEach(s -> {
+            s = s.trim();
+            if (!s.isEmpty())
+                detail.append(s.replaceAll("\\\\\\[\\d*\\\\]", "")).append("\n");
+        });
+        return detail.toString();
+    }
+
+    static {
+        Options options = new Options();
+        options.tables = Options.Tables.REMOVE;
+        options.hardwraps = true;
+        REMARK = new Remark(options);
+        DocumentConverter converter = REMARK.getConverter();
+        converter.addInlineNode(new AbstractNodeHandler() {
+            @Override
+            public void handleNode(NodeHandler nodeHandler, Element element, DocumentConverter documentConverter) {
+            }
+        }, "img");
+        converter.addInlineNode(new AbstractNodeHandler() {
+            @Override
+            public void handleNode(NodeHandler parent, Element node, DocumentConverter documentConverter) {
+                converter.walkNodes(parent, node);
+            }
+        }, "a,i,em,b,strong,font,span");
     }
 }

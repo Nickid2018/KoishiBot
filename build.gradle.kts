@@ -15,6 +15,7 @@ dependencies {
     implementation("org.jsoup:jsoup:1.14.3")
     implementation("org.apache.commons:commons-text:1.9")
     implementation("commons-io:commons-io:2.11.0")
+    implementation("com.kotcrab.remark:remark:1.2.0")
 }
 
 group = "io.github.nickid2018"

@@ -6,6 +6,7 @@ import io.github.nickid2018.koishibot.core.MessageManager;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.wiki.PageInfo;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
+import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.message.data.*;
 
 import java.util.Locale;
@@ -97,6 +98,10 @@ public class WikiResolver extends MessageResolver {
                     new PlainText(data.toString())
             );
             info.sendMessageWithQuote(chain);
+
+            if (page.imageStream != null)
+                info.sendMessageWithQuote(Contact.uploadImage(
+                        KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), page.imageStream));
         }
     }
 }
