@@ -16,6 +16,10 @@ dependencies {
     implementation("org.apache.commons:commons-text:1.9")
     implementation("commons-io:commons-io:2.11.0")
     implementation("com.kotcrab.remark:remark:1.2.0")
+    implementation("org.scilab.forge:jlatexmath:1.0.7")
+    implementation("org.apache.xmlgraphics:batik-svggen:1.14")
+    implementation("org.apache.xmlgraphics:fop:2.7")
+
 }
 
 group = "io.github.nickid2018"

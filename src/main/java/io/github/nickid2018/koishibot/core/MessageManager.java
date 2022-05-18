@@ -142,6 +142,7 @@ public class MessageManager {
         RESOLVERS.add(new BugTrackerResolver());
         RESOLVERS.add(new CurseForgeResolver());
         RESOLVERS.add(new HelpResolver());
+        RESOLVERS.add(new LaTeXResolver());
 
         SERVICES.put("哔哩哔哩", new BilibiliDataResolver());
     }

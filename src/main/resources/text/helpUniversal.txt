@@ -7,3 +7,4 @@ bugtracker - Mojira漏洞追踪器模块
 curseforge - CurseForge模组模块
 bilibili - Bilibili模块
 wiki - Wiki模块
+latex - LaTeX模块
