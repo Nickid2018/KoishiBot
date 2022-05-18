@@ -6,3 +6,4 @@ translation - 翻译模块
 bugtracker - Mojira漏洞追踪器模块
 curseforge - CurseForge模组模块
 bilibili - Bilibili模块
+wiki - Wiki模块

@@ -2,20 +2,14 @@ package io.github.nickid2018.koishibot.wiki;
 
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
-import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class WikiInfo {
 
@@ -292,19 +286,32 @@ public class WikiInfo {
             });
             String sectionData = builder.toString().trim();
             if (!sectionData.isEmpty()) {
-                info.title += "#" + section;
+                info.url += "#" + URLEncoder.encode(section, "UTF-8");
                 return sectionData;
             }
         }
         return markdown;
     }
 
-    public static void main(String[] args) throws IOException {
-        JsonObject data = WebUtil.fetchDataInJson(new HttpGet("https://minecraft.fandom.com/zh/api.php?action=parse&format=json&page=%E7%BA%A2%E7%9F%B3%E4%B8%AD%E7%BB%A7%E5%99%A8"))
-                .getAsJsonObject();
-        String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
-        FileWriter writer = new FileWriter("C:\\Users\\Nickid2018\\Desktop\\a.txt");
-        writer.write(html);
-        writer.close();
-    }
+    // --- TEST FOR WIKI PAGE PREVIEW, RESULT: FAILED
+//    public static void main(String[] args) throws IOException {
+//        Document data = Jsoup.parse(
+//                new FileInputStream("C:\\Users\\Nickid2018\\Desktop\\TEST.HTML"),
+//                "UTF-8", "https://minecraft.fandom.com/zh/wiki/");
+//        Element content = data.getElementsByClass("mw-parser-output").get(0);
+//
+//        Document parsed = new Document("https://minecraft.fandom.com/zh/wiki/");
+//        Element head = data.head();
+//        Element parsedHead = new Element(Tag.valueOf("head"), "https://minecraft.fandom.com/zh/wiki/");
+//        head.getElementsByTag("meta").forEach(parsedHead::appendChild);
+//        head.getElementsByTag("link").forEach(parsedHead::appendChild);
+//        parsed.appendChild(parsedHead);
+//        Element body = new Element(Tag.valueOf("body"), "https://minecraft.fandom.com/zh/wiki/");
+//        Element infobox = content.getElementsByClass("notaninfobox").get(0);
+//        parsed.appendChild(body);
+//        body.appendChild(infobox);
+//        String html = parsed.html();
+//
+//        System.out.println(html);
+//    }
 }

@@ -10,7 +10,6 @@ import com.overzealous.remark.convert.AbstractNodeHandler;
 import com.overzealous.remark.convert.DocumentConverter;
 import com.overzealous.remark.convert.NodeHandler;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,23 +19,18 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.safety.Safelist;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class WebUtil {
 
     public static final Set<String> SUPPORTED_IMAGE = new HashSet<>(
             Arrays.asList("jpg", "png", "bmp", "gif")
     );
-    private static final Pattern PATTERN_SECTION = Pattern.compile(".*?##[^#].*?");
     private static final Remark REMARK;
 
     public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException, ErrorCodeException {
