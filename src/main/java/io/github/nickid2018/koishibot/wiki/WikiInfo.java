@@ -292,26 +292,4 @@ public class WikiInfo {
         }
         return markdown;
     }
-
-    // --- TEST FOR WIKI PAGE PREVIEW, RESULT: FAILED
-//    public static void main(String[] args) throws IOException {
-//        Document data = Jsoup.parse(
-//                new FileInputStream("C:\\Users\\Nickid2018\\Desktop\\TEST.HTML"),
-//                "UTF-8", "https://minecraft.fandom.com/zh/wiki/");
-//        Element content = data.getElementsByClass("mw-parser-output").get(0);
-//
-//        Document parsed = new Document("https://minecraft.fandom.com/zh/wiki/");
-//        Element head = data.head();
-//        Element parsedHead = new Element(Tag.valueOf("head"), "https://minecraft.fandom.com/zh/wiki/");
-//        head.getElementsByTag("meta").forEach(parsedHead::appendChild);
-//        head.getElementsByTag("link").forEach(parsedHead::appendChild);
-//        parsed.appendChild(parsedHead);
-//        Element body = new Element(Tag.valueOf("body"), "https://minecraft.fandom.com/zh/wiki/");
-//        Element infobox = content.getElementsByClass("notaninfobox").get(0);
-//        parsed.appendChild(body);
-//        body.appendChild(infobox);
-//        String html = parsed.html();
-//
-//        System.out.println(html);
-//    }
 }
