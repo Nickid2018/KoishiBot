@@ -284,10 +284,9 @@ public class WikiInfo {
         if (section != null) {
             StringBuilder builder = new StringBuilder();
             MutableBoolean bool = new MutableBoolean(false);
-            Pattern sectionPattern = Pattern.compile("## " + section + "(\\\\\\[.*?\\\\])? ##");
             new BufferedReader(new StringReader(markdown)).lines().forEach(s -> {
                 if (s.startsWith("##"))
-                    bool.setValue(RegexUtil.match(sectionPattern, s));
+                    bool.setValue(s.startsWith("## " + section));
                 else if (bool.getValue())
                     builder.append(s).append("\n");
             });
