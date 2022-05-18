@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.wiki;
 
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
+import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
@@ -14,6 +15,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class WikiInfo {
 
@@ -170,7 +172,7 @@ public class WikiInfo {
             if (useTextExtracts && object.has("extract") && section == null)
                 pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
             else
-                pageInfo.shortDescription = resolveText(getWikiText(title, section));
+                pageInfo.shortDescription = resolveText(getMarkdown(title, section, pageInfo));
             if (object.has("imageinfo")) {
                 JsonArray array = object.getAsJsonArray("imageinfo");
                 if (array.size() > 0)
@@ -272,7 +274,7 @@ public class WikiInfo {
         return source.substring(0, Math.min(source.length(), index + 1));
     }
 
-    private String getWikiText(String page, String section) throws IOException {
+    private String getMarkdown(String page, String section, PageInfo info) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page=" + page))
                 .getAsJsonObject();
         String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
@@ -282,25 +284,28 @@ public class WikiInfo {
         if (section != null) {
             StringBuilder builder = new StringBuilder();
             MutableBoolean bool = new MutableBoolean(false);
-            String sectionName = "## " + section + " ##";
+            Pattern sectionPattern = Pattern.compile("## " + section + "(\\\\\\[.*?\\\\])? ##");
             new BufferedReader(new StringReader(markdown)).lines().forEach(s -> {
                 if (s.startsWith("##"))
-                    bool.setValue(sectionName.equals(s));
+                    bool.setValue(RegexUtil.match(sectionPattern, s));
                 else if (bool.getValue())
                     builder.append(s).append("\n");
             });
             String sectionData = builder.toString().trim();
-            return sectionData.isEmpty() ? markdown : sectionData;
+            if (!sectionData.isEmpty()) {
+                info.title += "#" + section;
+                return sectionData;
+            }
         }
         return markdown;
     }
 
-    public static void main(String[] args) {
-        try {
-            IOUtils.write(new WikiInfo("https://minecraft.fandom.com/zh/api.php?")
-                    .getWikiText("Minecraft", null), new FileWriter("C:\\Users\\Nickid2018\\Desktop\\a.txt"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public static void main(String[] args) throws IOException {
+        JsonObject data = WebUtil.fetchDataInJson(new HttpGet("https://minecraft.fandom.com/zh/api.php?action=parse&format=json&page=%E7%BA%A2%E7%9F%B3%E4%B8%AD%E7%BB%A7%E5%99%A8"))
+                .getAsJsonObject();
+        String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
+        FileWriter writer = new FileWriter("C:\\Users\\Nickid2018\\Desktop\\a.txt");
+        writer.write(html);
+        writer.close();
     }
 }

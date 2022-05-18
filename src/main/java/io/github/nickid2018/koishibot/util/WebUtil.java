@@ -144,36 +144,6 @@ public class WebUtil {
             return null;
     }
 
-    public static String htmlToText(String html, String section) {
-        Document htmlDocument = Jsoup.parse(html);
-        Document.OutputSettings settings = new Document.OutputSettings().prettyPrint(false);
-        htmlDocument.outputSettings(settings)
-                .select("br").append("\\n")
-                .select("p").append("\\n")
-                .select("p").prepend("\\n");
-        String newHTMLParsed = htmlDocument.html().replaceAll("\\\\n", "\n");
-        String plain = StringEscapeUtils.escapeHtml3(
-                Jsoup.clean(newHTMLParsed, "", Safelist.none(), settings));
-        plain = plain.replaceAll("&amp;nbsp;", " ");
-        if (section != null) {
-            String[] splitLines = plain.split("\n");
-            StringBuilder builder = new StringBuilder();
-            boolean write = false;
-            for (String line : splitLines) {
-                if (!write) {
-                    if (RegexUtil.match(PATTERN_SECTION, line) && line.contains(section))
-                        write = true;
-                    continue;
-                }
-                if (RegexUtil.match(PATTERN_SECTION, line))
-                    break;
-                builder.append(line).append("\n");
-            }
-            plain = builder.toString();
-        }
-        return plain;
-    }
-
     public static String getAsMarkdownClean(String str) {
         StringBuilder detail = new StringBuilder();
         new BufferedReader(new StringReader(REMARK.convert(str))).lines().forEach(s -> {

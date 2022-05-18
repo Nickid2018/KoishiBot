@@ -47,7 +47,8 @@ public class InfoResolver extends MessageResolver {
         builder.append("使用").append(String.format("%.2f", (total - free) / 1048576)).append("M, ");
         builder.append("最大堆内存").append(String.format("%.2f", max / 1048576)).append("M, ");
         builder.append("占比").append(String.format("%.2f", (total - free) / max * 100)).append("%\n");
-        builder.append("系统信息: ").append(System.getProperty("os.name"));
+        builder.append("系统信息: ").append(System.getProperty("os.name")).append("\n");
+        builder.append("项目已在Github上开源: https://github.com/Nickid2018/KoishiBot (AGPL v3)");
         KoishiBotMain.INSTANCE.executor.execute(() -> info.sendMessage(new PlainText(builder)));
     }
 
