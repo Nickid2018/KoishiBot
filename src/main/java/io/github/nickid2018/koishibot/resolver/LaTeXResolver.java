@@ -40,7 +40,7 @@ public class LaTeXResolver extends MessageResolver {
                 List<BufferedImage> images = new ArrayList<>();
                 for (String line : latex.split("\n")) {
                     if (!line.isEmpty()) {
-                        TeXFormula formula = new TeXFormula(latex);
+                        TeXFormula formula = new TeXFormula(line);
                         TeXIcon icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 40);
                         icon.setInsets(new Insets(5, 5, 5, 5));
 
@@ -60,6 +60,8 @@ public class LaTeXResolver extends MessageResolver {
 
                 BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
                 Graphics2D g2 = image.createGraphics();
+                g2.setColor(Color.WHITE);
+                g2.fillRect(0, 0, width, height);
 
                 int now = 0;
                 for (BufferedImage imageNow : images) {
