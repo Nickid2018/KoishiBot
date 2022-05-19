@@ -4,6 +4,10 @@ import com.google.gson.*;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.io.*;
 import java.net.URL;
@@ -94,6 +98,8 @@ public class WikiInfo {
                         url.substring(0, url.lastIndexOf('?') + 1) : url + "?"));
             }
 
+            getInterWikiDataFromPage();
+
             available = true;
         }
     }
@@ -160,10 +166,12 @@ public class WikiInfo {
             pageInfo.url = script + "?curid=" + id;
             if (object.has("missing")) {
                 if (title != null)
-                    return search(title);
+                    return search(title, prefix);
                 throw new IOException("无法找到页面，可能不存在或页面为文件");
             }
-            if (useTextExtracts && object.has("extract") && section == null)
+            if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation"))
+                pageInfo.shortDescription = "消歧义页面";
+            else if (useTextExtracts && object.has("extract") && section == null)
                 pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
             else
                 pageInfo.shortDescription = resolveText(getMarkdown(title, section, pageInfo));
@@ -177,11 +185,13 @@ public class WikiInfo {
         return pageInfo;
     }
 
-    private PageInfo search(String key) throws IOException {
+    private PageInfo search(String key, String prefix) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(
                 url + WIKI_SEARCH + "&srsearch=" + URLEncoder.encode(key, "UTF-8"))).getAsJsonObject();
         JsonArray search = data.getAsJsonObject("query").getAsJsonArray("search");
         PageInfo info = new PageInfo();
+        info.prefix = prefix;
+        info.info = this;
         info.isSearched = true;
         if (search.size() != 0)
             info.title = search.get(0).getAsJsonObject().get("title").getAsString();
@@ -291,5 +301,24 @@ public class WikiInfo {
             }
         }
         return markdown;
+    }
+
+    private void getInterWikiDataFromPage(){
+        try {
+            String data = WebUtil.fetchDataInPlain(
+                    new HttpGet(articleURL.replace("$1", "Special:%E8%B7%A8wiki")));
+            Document page = Jsoup.parse(data);
+            Elements interWikiSection = page.getElementsByClass("mw-interwikitable-row");
+            for (Element entry : interWikiSection) {
+                Element prefixEntry = entry.getElementsByClass("mw-interwikitable-prefix").get(0);
+                Element urlEntry = entry.getElementsByClass("mw-interwikitable-url").get(0);
+                String prefix = prefixEntry.ownText();
+                String url = urlEntry.ownText();
+                interWikiMap.put(prefix, url);
+                STORED_WIKI_INFO.put(url, new WikiInfo(url.contains("?") ?
+                        url.substring(0, url.lastIndexOf('?') + 1) : url + "?"));
+            }
+        } catch (Exception ignored) {
+        }
     }
 }

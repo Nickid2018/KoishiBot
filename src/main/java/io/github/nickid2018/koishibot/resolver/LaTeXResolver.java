@@ -75,7 +75,7 @@ public class LaTeXResolver extends MessageResolver {
                 info.sendMessageWithQuote(Contact.uploadImage(
                         KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), new ByteArrayInputStream(boas.toByteArray())));
             } catch (Exception e) {
-                MessageManager.onError(e, "无法转换到LaTeX图像", info, true);
+                MessageManager.onError(e, "latex", info, true);
             }
         });
         return true;

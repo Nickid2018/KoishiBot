@@ -73,7 +73,7 @@ public class WikiResolver extends MessageResolver {
                             }
                         }
                         if (accept)
-                            requestWikiPage(page.info, page.title, page.prefix, info);
+                            requestWikiPage(page.info, page.prefix, page.title, info);
                     } catch (Exception e) {
                         MessageManager.onError(e, "wiki.re_search", info, true);
                     }

@@ -24,11 +24,10 @@ public class MemberFilter {
         if (USER_BAN_TIME.containsKey(member) && USER_BAN_TIME.get(member) >= nowTime)
             return true;
         if (USER_REQUEST_TIME.containsKey(member) && nowTime - USER_REQUEST_TIME.get(member) <= REQUEST_DURATION) {
-            int times = USER_REQUEST_FAIL.get(member);
+            int times = USER_REQUEST_FAIL.getOrDefault(member, 0);
             times++;
-            if (times >= REQUEST_MAX_FAIL) {
+            if (times >= REQUEST_MAX_FAIL)
                 USER_BAN_TIME.put(member, nowTime + FIRST_BAN);
-            }
             USER_REQUEST_FAIL.put(member, times);
             USER_REQUEST_TIME.put(member, nowTime);
             return true;
