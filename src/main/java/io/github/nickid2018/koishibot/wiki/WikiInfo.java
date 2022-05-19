@@ -12,12 +12,14 @@ import org.jsoup.select.Elements;
 import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class WikiInfo {
 
-    public static final String WIKI_META = "action=query&format=json&meta=siteinfo&siprop=extensions%7Cgeneral";
+    public static final String WIKI_META = "action=query&format=json&meta=siteinfo&siprop=extensions%7Cgeneral%7Cinterwikimap";
     public static final String QUERY_PAGE = "action=query&format=json&prop=info%7Cimageinfo%7Cextracts%7Cpageprops&inprop=url&iiprop=url&" +
                                             "ppprop=description%7Cdisplaytitle%7Cdisambiguation%7Cinfoboxes&explaintext&" +
                                             "exsectionformat=plain&exchars=200&redirects";
@@ -90,7 +92,19 @@ public class WikiInfo {
             articleURL = realURL + WebUtil.getDataInPathOrNull(object, "query.general.articlepath");
             script = realURL + WebUtil.getDataInPathOrNull(object, "query.general.script");
 
-            getInterWikiDataFromPage();
+            if (!getInterWikiDataFromPage()) {
+                JsonArray interwikiMap = object.getAsJsonObject("query").getAsJsonArray("interwikimap");
+                for (JsonElement element : interwikiMap) {
+                    JsonObject obj = element.getAsJsonObject();
+                    String url = obj.get("url").getAsString();
+                    String prefix = obj.get("prefix").getAsString();
+                    interWikiMap.put(prefix, url);
+                    WikiInfo info = new WikiInfo(url.contains("?") ?
+                            url.substring(0, url.lastIndexOf('?') + 1) : url + "?");
+                    STORED_WIKI_INFO.put(url, info);
+                    STORED_INTERWIKI_SOURCE_URL.put(info, url);
+                }
+            }
 
             available = true;
         }
@@ -109,7 +123,7 @@ public class WikiInfo {
                 pageInfo.prefix = prefix;
                 pageInfo.title = title;
                 pageInfo.url = STORED_INTERWIKI_SOURCE_URL.get(this)
-                        .replace("$1", URLEncoder.encode(title, "UTF-8"));
+                        .replace("$1", title);
                 pageInfo.shortDescription = "目标可能不是一个MediaWiki，已自动转换为网址链接";
                 return pageInfo;
             } else
@@ -177,7 +191,7 @@ public class WikiInfo {
                 throw new IOException("无法找到页面，可能不存在或页面为文件");
             }
             if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation"))
-                pageInfo.shortDescription = "消歧义页面";
+                pageInfo.shortDescription = getDisambiguationText(title);
             else if (useTextExtracts && object.has("extract") && section == null)
                 pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
             else
@@ -310,10 +324,34 @@ public class WikiInfo {
         return markdown;
     }
 
-    private void getInterWikiDataFromPage() throws IOException {
+    private String getDisambiguationText(String page) throws IOException {
+        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page=" + page))
+                .getAsJsonObject();
+        String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
+        if (html == null)
+            throw new IOException("页面无内容");
+
+        List<String> items = new ArrayList<>();
+
+        Document document = Jsoup.parse(html);
+        String markdown = WebUtil.getAsMarkdownClean(html);
+        Elements elements = document.getElementsByTag("a");
+
+        for (Element element : elements) {
+            String title = element.ownText();
+            if (title.isEmpty())
+                title = element.attr("title");
+            if (markdown.contains("*  " + title + " "))
+                items.add(title);
+        }
+
+        return "消歧义页面，" + page + "可以指:\n" + String.join(", ", items);
+    }
+
+    private boolean getInterWikiDataFromPage(){
         try {
             String data = WebUtil.fetchDataInPlain(
-                    new HttpGet(articleURL.replace("$1", "Special:%E8%B7%A8wiki")));
+                    new HttpGet(articleURL.replace("$1", "Special:Interwiki")));
             Document page = Jsoup.parse(data);
             Elements interWikiSection = page.getElementsByClass("mw-interwikitable-row");
             for (Element entry : interWikiSection) {
@@ -327,8 +365,9 @@ public class WikiInfo {
                 STORED_WIKI_INFO.put(url, info);
                 STORED_INTERWIKI_SOURCE_URL.put(info, url);
             }
+            return true;
         } catch (Exception ignored) {
-            throw new IOException("无法获取跨wiki数据");
+            return false;
         }
     }
 }
