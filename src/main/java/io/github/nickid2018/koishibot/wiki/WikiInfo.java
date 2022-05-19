@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class WikiInfo {
 
-    public static final String WIKI_META = "action=query&format=json&meta=siteinfo&siprop=extensions%7Cgeneral%7Cinterwikimap";
+    public static final String WIKI_META = "action=query&format=json&meta=siteinfo&siprop=extensions%7Cgeneral";
     public static final String QUERY_PAGE = "action=query&format=json&prop=info%7Cimageinfo%7Cextracts%7Cpageprops&inprop=url&iiprop=url&" +
                                             "ppprop=description%7Cdisplaytitle%7Cdisambiguation%7Cinfoboxes&explaintext&" +
                                             "exsectionformat=plain&exchars=200&redirects";
@@ -28,6 +28,7 @@ public class WikiInfo {
     public static final String EDIT_URI_STR = "<link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"";
 
     private static final Map<String, WikiInfo> STORED_WIKI_INFO = new HashMap<>();
+    private static final Map<WikiInfo, String> STORED_INTERWIKI_SOURCE_URL = new HashMap<>();
 
     private final Map<String, String> additionalHeaders;
     private String url;
@@ -89,15 +90,6 @@ public class WikiInfo {
             articleURL = realURL + WebUtil.getDataInPathOrNull(object, "query.general.articlepath");
             script = realURL + WebUtil.getDataInPathOrNull(object, "query.general.script");
 
-            JsonArray interwikiMap = object.getAsJsonObject("query").getAsJsonArray("interwikimap");
-            for (JsonElement element : interwikiMap) {
-                JsonObject obj = element.getAsJsonObject();
-                String url = obj.get("url").getAsString();
-                interWikiMap.put(obj.get("prefix").getAsString(), url);
-                STORED_WIKI_INFO.put(url, new WikiInfo(url.contains("?") ?
-                        url.substring(0, url.lastIndexOf('?') + 1) : url + "?"));
-            }
-
             getInterWikiDataFromPage();
 
             available = true;
@@ -107,7 +99,22 @@ public class WikiInfo {
     public PageInfo parsePageInfo(String title, int pageID, String prefix) throws IOException {
         if (title != null && title.isEmpty())
             throw new IOException("无效的wiki查询");
-        checkAvailable();
+
+        try {
+            checkAvailable();
+        } catch (IOException e) {
+            if (STORED_INTERWIKI_SOURCE_URL.containsKey(this)) {
+                PageInfo pageInfo = new PageInfo();
+                pageInfo.info = this;
+                pageInfo.prefix = prefix;
+                pageInfo.title = title;
+                pageInfo.url = STORED_INTERWIKI_SOURCE_URL.get(this)
+                        .replace("$1", URLEncoder.encode(title, "UTF-8"));
+                pageInfo.shortDescription = "目标可能不是一个MediaWiki，已自动转换为网址链接";
+                return pageInfo;
+            } else
+                throw e;
+        }
 
         if (prefix != null && prefix.split(":").length > 5)
             throw new IOException("请求跳转wiki次数过多");
@@ -303,7 +310,7 @@ public class WikiInfo {
         return markdown;
     }
 
-    private void getInterWikiDataFromPage(){
+    private void getInterWikiDataFromPage() throws IOException {
         try {
             String data = WebUtil.fetchDataInPlain(
                     new HttpGet(articleURL.replace("$1", "Special:%E8%B7%A8wiki")));
@@ -315,10 +322,13 @@ public class WikiInfo {
                 String prefix = prefixEntry.ownText();
                 String url = urlEntry.ownText();
                 interWikiMap.put(prefix, url);
-                STORED_WIKI_INFO.put(url, new WikiInfo(url.contains("?") ?
-                        url.substring(0, url.lastIndexOf('?') + 1) : url + "?"));
+                WikiInfo info = new WikiInfo(url.contains("?") ?
+                        url.substring(0, url.lastIndexOf('?') + 1) : url + "?");
+                STORED_WIKI_INFO.put(url, info);
+                STORED_INTERWIKI_SOURCE_URL.put(info, url);
             }
         } catch (Exception ignored) {
+            throw new IOException("无法获取跨wiki数据");
         }
     }
 }
