@@ -23,6 +23,7 @@ public class WikiInfo {
     public static final String QUERY_PAGE_NOE = "action=query&format=json&inprop=url&iiprop=url&prop=info%7Cimageinfo&redirects";
     public static final String QUERY_PAGE_TEXT = "action=parse&format=json&prop=text";
     public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text&srlimit=1&srenablerewrite";
+    public static final String WIKI_RANDOM = "action=query&format=json&list=random";
 
     public static final String EDIT_URI_STR = "<link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"";
 
@@ -147,6 +148,9 @@ public class WikiInfo {
             }
         }
 
+        if (title != null && title.equalsIgnoreCase("~rd"))
+            return random(prefix);
+
         String section = null;
         if (title != null && title.contains("#")) {
             String[] titleSplit = title.split("#", 2);
@@ -158,7 +162,7 @@ public class WikiInfo {
         String queryFormat = useTextExtracts ? QUERY_PAGE : QUERY_PAGE_NOE;
         try {
             if (title == null)
-                query = JsonParser.parseString(checkAndGet(url + queryFormat + "&pageid=" + pageID))
+                query = JsonParser.parseString(checkAndGet(url + queryFormat + "&pageids=" + pageID))
                         .getAsJsonObject().getAsJsonObject("query");
             else
                 query = JsonParser.parseString(checkAndGet(url + queryFormat + "&titles=" + URLEncoder.encode(title, "UTF-8")))
@@ -195,6 +199,7 @@ public class WikiInfo {
                     return search(title, prefix);
                 throw new IOException("无法找到页面，可能不存在或页面为文件");
             }
+            pageInfo.title = title = object.get("title").getAsString();
             if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation"))
                 pageInfo.shortDescription = getDisambiguationText(title);
             else if (useTextExtracts && object.has("extract") && section == null)
@@ -217,6 +222,12 @@ public class WikiInfo {
         }
 
         return pageInfo;
+    }
+
+    public PageInfo random(String prefix) throws Exception {
+        JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_RANDOM)).getAsJsonObject();
+        return parsePageInfo(Objects.requireNonNull(
+                WebUtil.getDataInPathOrNull(data, "query.random.0.title")), 0, prefix);
     }
 
     private PageInfo search(String key, String prefix) throws IOException {
