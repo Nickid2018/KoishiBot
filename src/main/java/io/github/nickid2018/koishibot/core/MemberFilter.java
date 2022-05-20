@@ -2,14 +2,15 @@ package io.github.nickid2018.koishibot.core;
 
 import net.mamoe.mirai.contact.ContactOrBot;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MemberFilter {
 
-    private static final Map<Long, Long> USER_REQUEST_TIME = new HashMap<>();
-    private static final Map<Long, Integer> USER_REQUEST_FAIL = new HashMap<>();
-    private static final Map<Long, Long> USER_BAN_TIME = new HashMap<>();
+    private static final Map<Long, Long> USER_REQUEST_TIME = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<Long, Integer> USER_REQUEST_FAIL = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<Long, Long> USER_BAN_TIME = Collections.synchronizedMap(new HashMap<>());
 
     private static final int REQUEST_MAX_FAIL = 5;
     private static final long REQUEST_DURATION = 2000;

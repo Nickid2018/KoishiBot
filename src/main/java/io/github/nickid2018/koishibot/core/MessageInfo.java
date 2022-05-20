@@ -8,6 +8,7 @@ import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
+import net.mamoe.mirai.utils.ExternalResource;
 
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
@@ -120,5 +121,11 @@ public class MessageInfo {
         if (group == null && friend == null && stranger == null && sender != null)
             messageReceipt = sender.sendMessage(message);
         return  messageReceipt;
+    }
+
+    public Audio uploadAudio(ExternalResource resource) {
+        if (group != null)
+            return group.uploadAudio(resource);
+        return null;
     }
 }

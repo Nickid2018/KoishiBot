@@ -14,6 +14,8 @@ import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.event.events.MessageRecallEvent;
 import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,6 +24,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Predicate;
 
 public class MessageManager {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot");
 
     public static final List<MessageResolver> RESOLVERS = new ArrayList<>();
     public static final Map<String, ServiceResolver> SERVICES = new HashMap<>();
@@ -132,6 +136,8 @@ public class MessageManager {
             info.sendMessageWithQuote(chain);
         else
             info.sendMessage(chain);
+        LOGGER.error(module, t);
+        t.printStackTrace();
     }
 
     static {

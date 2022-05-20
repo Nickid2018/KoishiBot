@@ -19,8 +19,10 @@ import net.mamoe.mirai.utils.BotConfiguration;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Stream;
 
 public final class KoishiBotMain extends JavaPlugin {
 
@@ -69,21 +71,22 @@ public final class KoishiBotMain extends JavaPlugin {
         botKoishi.close();
         executor.shutdown();
         executor = null;
+        Stream.of(Objects.requireNonNull(getDataFolder().listFiles())).forEach(File::delete);
     }
 
     private void registerEvents() {
         EventChannel<BotEvent> channel = botKoishi.getEventChannel();
-        channel.exceptionHandler(create("group.recall"))
+        channel.exceptionHandler(createHandler("group.recall"))
                 .subscribe(MessageRecallEvent.GroupRecall.class, messageRecallEvent -> {
             MessageManager.onGroupRecall(messageRecallEvent);
             return ListeningStatus.LISTENING;
         });
-        channel.exceptionHandler(create("friend.recall"))
+        channel.exceptionHandler(createHandler("friend.recall"))
                 .subscribe(MessageRecallEvent.FriendRecall.class, messageRecallEvent -> {
             MessageManager.onFriendRecall(messageRecallEvent);
             return ListeningStatus.LISTENING;
         });
-        channel.exceptionHandler(create("group.message"))
+        channel.exceptionHandler(createHandler("group.message"))
                 .subscribe(GroupMessageEvent.class, messageEvent -> {
             if (MemberFilter.shouldNotResponse(messageEvent.getSender()))
                 return ListeningStatus.LISTENING;
@@ -96,7 +99,7 @@ public final class KoishiBotMain extends JavaPlugin {
                 MemberFilter.refreshRequestTime(messageEvent.getSender());
             return ListeningStatus.LISTENING;
         });
-        channel.exceptionHandler(create("friend.message"))
+        channel.exceptionHandler(createHandler("friend.message"))
                 .subscribe(FriendMessageEvent.class, messageEvent -> {
             if (MemberFilter.shouldNotResponse(messageEvent.getSender()))
                 return ListeningStatus.LISTENING;
@@ -108,7 +111,7 @@ public final class KoishiBotMain extends JavaPlugin {
                 MemberFilter.refreshRequestTime(messageEvent.getSender());
             return ListeningStatus.LISTENING;
         });
-        channel.exceptionHandler(create("stranger.message"))
+        channel.exceptionHandler(createHandler("stranger.message"))
                 .subscribe(StrangerMessageEvent.class, messageEvent -> {
             if (MemberFilter.shouldNotResponse(messageEvent.getSender()))
                 return ListeningStatus.LISTENING;
@@ -120,7 +123,7 @@ public final class KoishiBotMain extends JavaPlugin {
                 MemberFilter.refreshRequestTime(messageEvent.getSender());
             return ListeningStatus.LISTENING;
         });
-        channel.exceptionHandler(create("group.message.temp"))
+        channel.exceptionHandler(createHandler("group.message.temp"))
                 .subscribe(GroupTempMessageEvent.class, messageEvent -> {
             if (MemberFilter.shouldNotResponse(messageEvent.getSender()))
                 return ListeningStatus.LISTENING;
@@ -132,7 +135,7 @@ public final class KoishiBotMain extends JavaPlugin {
                 MemberFilter.refreshRequestTime(messageEvent.getSender());
             return ListeningStatus.LISTENING;
         });
-        channel.exceptionHandler(create("group.join"))
+        channel.exceptionHandler(createHandler("group.join"))
                 .subscribe(MemberJoinEvent.class, memberJoinEvent -> {
             if (MemberFilter.shouldNotResponse(memberJoinEvent.getMember()))
                 return ListeningStatus.LISTENING;
@@ -145,7 +148,7 @@ public final class KoishiBotMain extends JavaPlugin {
         });
     }
 
-    private Function1<Throwable, Unit> create(String name) {
+    private static Function1<Throwable, Unit> createHandler(String name) {
         return exception -> {
             ErrorRecord.enqueueError(name, exception);
             return Unit.INSTANCE;

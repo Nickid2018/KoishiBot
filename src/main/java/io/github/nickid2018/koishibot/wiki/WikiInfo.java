@@ -12,10 +12,7 @@ import org.jsoup.select.Elements;
 import java.io.*;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class WikiInfo {
 
@@ -28,6 +25,14 @@ public class WikiInfo {
     public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text&srlimit=1&srenablerewrite";
 
     public static final String EDIT_URI_STR = "<link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"";
+
+    public static final Set<String> SUPPORTED_IMAGE = WebUtil.SUPPORTED_IMAGE;
+    public static final Set<String> NEED_TRANSFORM_IMAGE = new HashSet<>(
+            Arrays.asList("webp", "ico")
+    );
+    public static final Set<String> NEED_TRANSFORM_AUDIO = new HashSet<>(
+            Arrays.asList("oga", "ogg", "flac", "mp3", "wav")
+    );
 
     private static final Map<String, WikiInfo> STORED_WIKI_INFO = new HashMap<>();
     private static final Map<WikiInfo, String> STORED_INTERWIKI_SOURCE_URL = new HashMap<>();
@@ -110,7 +115,7 @@ public class WikiInfo {
         }
     }
 
-    public PageInfo parsePageInfo(String title, int pageID, String prefix) throws IOException {
+    public PageInfo parsePageInfo(String title, int pageID, String prefix) throws Exception {
         if (title != null && title.isEmpty())
             throw new IOException("无效的wiki查询");
 
@@ -198,8 +203,16 @@ public class WikiInfo {
                 pageInfo.shortDescription = resolveText(getMarkdown(title, section, pageInfo));
             if (object.has("imageinfo")) {
                 JsonArray array = object.getAsJsonArray("imageinfo");
-                if (array.size() > 0)
-                    pageInfo.imageStream = new URL(array.get(0).getAsJsonObject().get("url").getAsString()).openStream();
+                if (array.size() > 0) {
+                    String type = array.get(0).getAsJsonObject().get("descriptionurl").getAsString();
+                    String suffix = type.substring(Math.min(type.length() - 1, type.lastIndexOf('.') + 1))
+                            .toLowerCase(Locale.ROOT);
+                    if (SUPPORTED_IMAGE.contains(suffix) || NEED_TRANSFORM_IMAGE.contains(suffix))
+                        pageInfo.imageStream = new URL(array.get(0).getAsJsonObject().get("url").getAsString()).openStream();
+                    else if (NEED_TRANSFORM_AUDIO.contains(suffix))
+                        pageInfo.audioFile = AudioTransform.transform(
+                                suffix, new URL(array.get(0).getAsJsonObject().get("url").getAsString()));
+                }
             }
         }
 

@@ -20,6 +20,9 @@ public class Settings {
     public static String YOUDAO_APP_KEY;
     public static String YOUDAO_APP_SECRET;
 
+    public static String FFMPEG_LOCATION;
+    public static String ENCODER_LOCATION;
+
     public static final Map<String, WikiInfo> SUPPORT_WIKIS = new HashMap<>();
     public static final Set<String> HIDE_WIKIS = new HashSet<>();
     public static String BASE_WIKI;
@@ -32,6 +35,7 @@ public class Settings {
         BOT_PASSWORD = settingsRoot.get("password").getAsString();
 
         loadWiki(settingsRoot);
+        loadFFmpeg(settingsRoot);
         loadAppKeyAndSecrets(settingsRoot);
     }
 
@@ -69,5 +73,11 @@ public class Settings {
         JsonObject youdao = settingsRoot.getAsJsonObject("youdao");
         YOUDAO_APP_KEY = youdao.get("app_key").getAsString();
         YOUDAO_APP_SECRET = youdao.get("app_secret").getAsString();
+    }
+
+    public static void loadFFmpeg(JsonObject settingsRoot) {
+        JsonObject audio = settingsRoot.getAsJsonObject("audio");
+        FFMPEG_LOCATION = audio.get("ffmpeg").getAsString();
+        ENCODER_LOCATION = audio.get("encoder").getAsString();
     }
 }

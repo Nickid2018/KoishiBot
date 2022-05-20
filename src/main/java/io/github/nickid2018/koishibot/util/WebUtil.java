@@ -29,11 +29,11 @@ import java.util.*;
 public class WebUtil {
 
     public static final Set<String> SUPPORTED_IMAGE = new HashSet<>(
-            Arrays.asList("jpg", "png", "bmp", "gif")
+            Arrays.asList("jpg", "jpeg", "png", "bmp", "gif")
     );
     private static final Remark REMARK;
 
-    public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException, ErrorCodeException {
+    public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException {
         CloseableHttpClient httpClient = HttpClients.createDefault();
         CloseableHttpResponse httpResponse = null;
         try {
@@ -164,6 +164,6 @@ public class WebUtil {
             public void handleNode(NodeHandler parent, Element node, DocumentConverter documentConverter) {
                 converter.walkNodes(parent, node);
             }
-        }, "a,i,em,b,strong,font,span");
+        }, "a,i,em,b,strong,font,span,code");
     }
 }

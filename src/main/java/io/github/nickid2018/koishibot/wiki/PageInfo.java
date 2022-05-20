@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.wiki;
 
+import java.io.File;
 import java.io.InputStream;
 
 public class PageInfo {
@@ -16,6 +17,7 @@ public class PageInfo {
 
     public String shortDescription;
     public InputStream imageStream;
+    public File audioFile;
 
     public boolean isSearched;
 }
