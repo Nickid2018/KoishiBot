@@ -35,6 +35,17 @@ public final class KoishiBotMain extends JavaPlugin {
 
     private KoishiBotMain() {
         super(new JvmPluginDescriptionBuilder("io.github.nickid2018.koishibot", "1.0-SNAPSHOT").build());
+        Thread CLEANER = new Thread(() -> {
+            while (true) {
+                try {
+                    Thread.sleep(7200_000);
+                    Stream.of(Objects.requireNonNull(getDataFolder().listFiles())).forEach(File::delete);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        });
+        CLEANER.setDaemon(true);
+        CLEANER.start();
     }
 
     @Override

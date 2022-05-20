@@ -94,6 +94,8 @@ public class WikiResolver extends MessageResolver {
             if (searchTitle != null)
                 data.append("(重搜索定向[[").append(searchTitle)
                         .append("]] -> [[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
+            if (page.isRandom)
+                data.append("(随机页面到[[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
             if (!Settings.HIDE_WIKIS.contains(namespace))
                 data.append(page.url).append("\n");
             data.append(page.shortDescription);
@@ -112,7 +114,6 @@ public class WikiResolver extends MessageResolver {
                 Audio audio = info.uploadAudio(resource);
                 info.sendMessageWithQuote(audio);
                 resource.close();
-                page.audioFile.delete();
             }
         }
     }

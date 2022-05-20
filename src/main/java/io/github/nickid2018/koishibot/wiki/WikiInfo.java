@@ -226,8 +226,10 @@ public class WikiInfo {
 
     public PageInfo random(String prefix) throws Exception {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_RANDOM)).getAsJsonObject();
-        return parsePageInfo(Objects.requireNonNull(
+        PageInfo info =  parsePageInfo(Objects.requireNonNull(
                 WebUtil.getDataInPathOrNull(data, "query.random.0.title")), 0, prefix);
+        info.isRandom = true;
+        return info;
     }
 
     private PageInfo search(String key, String prefix) throws IOException {

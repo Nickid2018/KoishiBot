@@ -38,7 +38,7 @@ public class MessageInfo {
     public MessageEvent event;
 
     public Message countAntiAutoFilter(Message message) {
-        if (message instanceof ForwardMessage)
+        if (message instanceof ForwardMessage | message instanceof Audio)
             return message;
         if (MESSAGE_COUNTER.getAndIncrement() % 10 == 0)
             return MessageUtils.newChain(

@@ -20,4 +20,5 @@ public class PageInfo {
     public File audioFile;
 
     public boolean isSearched;
+    public boolean isRandom;
 }
