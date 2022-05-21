@@ -96,7 +96,14 @@ public class WikiResolver extends MessageResolver {
                         .append("]] -> [[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
             if (page.isRandom)
                 data.append("(随机页面到[[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
-            if (!Settings.HIDE_WIKIS.contains(namespace))
+
+            boolean shouldHide = false;
+            for (String prefix : Settings.MIRROR.values())
+                if (page.url.contains(prefix)) {
+                    shouldHide = true;
+                    break;
+                }
+            if (!shouldHide)
                 data.append(page.url).append("\n");
             data.append(page.shortDescription);
 

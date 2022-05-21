@@ -227,6 +227,9 @@ public class WikiInfo {
             }
         }
 
+        if (pageInfo.url.startsWith("//"))
+            pageInfo.url = "https:" + pageInfo.url;
+
         return pageInfo;
     }
 
@@ -268,7 +271,7 @@ public class WikiInfo {
     }
 
     private HttpGet getWithHeader(String url) {
-        HttpGet get = new HttpGet(url);
+        HttpGet get = new HttpGet(WebUtil.mirror(url));
         for (Map.Entry<String, String> entry : additionalHeaders.entrySet())
             get.setHeader(entry.getKey(), entry.getValue());
         return get;

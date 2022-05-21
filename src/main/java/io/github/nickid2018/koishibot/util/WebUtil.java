@@ -10,9 +10,9 @@ import com.overzealous.remark.convert.AbstractNodeHandler;
 import com.overzealous.remark.convert.DocumentConverter;
 import com.overzealous.remark.convert.NodeHandler;
 import io.github.nickid2018.koishibot.KoishiBotMain;
+import io.github.nickid2018.koishibot.core.Settings;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
@@ -104,6 +104,17 @@ public class WebUtil {
                 KoishiBotMain.INSTANCE.getLogger().error("## release resource error ##" + e);
             }
         }
+    }
+
+    public static String mirror(String url) {
+        if (url.startsWith("//"))
+            url = "https:" + url;
+        for (Map.Entry<String, String> en : Settings.MIRROR.entrySet()) {
+            String prefix = en.getKey();
+            if (url.startsWith(prefix))
+                return url.replace(prefix, en.getValue());
+        }
+        return url;
     }
 
     public static String getDataInPathOrNull(JsonObject root, String path) {

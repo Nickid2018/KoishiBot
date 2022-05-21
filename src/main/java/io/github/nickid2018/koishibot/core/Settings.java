@@ -24,7 +24,7 @@ public class Settings {
     public static String ENCODER_LOCATION;
 
     public static final Map<String, WikiInfo> SUPPORT_WIKIS = new HashMap<>();
-    public static final Set<String> HIDE_WIKIS = new HashSet<>();
+    public static final Map<String, String> MIRROR = new HashMap<>();
     public static String BASE_WIKI;
 
     public static void load() throws IOException {
@@ -35,6 +35,7 @@ public class Settings {
         BOT_PASSWORD = settingsRoot.get("password").getAsString();
 
         loadWiki(settingsRoot);
+        loadMirror(settingsRoot);
         loadFFmpeg(settingsRoot);
         loadAppKeyAndSecrets(settingsRoot);
     }
@@ -45,6 +46,7 @@ public class Settings {
         JsonObject settingsRoot = JsonParser.parseString(data).getAsJsonObject();
 
         loadWiki(settingsRoot);
+        loadMirror(settingsRoot);
     }
 
     public static void loadWiki(JsonObject settingsRoot) {
@@ -63,10 +65,13 @@ public class Settings {
                     SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(wikiData.get("url").getAsString() + "?", header));
                 }
             }
-        JsonArray hideWikis = wikiRoot.getAsJsonArray("hides");
-        for (JsonElement element : hideWikis)
-            HIDE_WIKIS.add(element.getAsString());
         BASE_WIKI = wikiRoot.get("base").getAsString();
+    }
+
+    public static void loadMirror(JsonObject settingsRoot) {
+        JsonObject wikisArray = settingsRoot.getAsJsonObject("mirrors");
+        for (Map.Entry<String, JsonElement> en : wikisArray.entrySet())
+            MIRROR.put(en.getKey(), en.getValue().getAsString());
     }
 
     public static void loadAppKeyAndSecrets(JsonObject settingsRoot) {
