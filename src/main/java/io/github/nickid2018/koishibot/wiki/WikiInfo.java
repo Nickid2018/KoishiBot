@@ -165,7 +165,7 @@ public class WikiInfo {
                 query = JsonParser.parseString(checkAndGet(url + queryFormat + "&pageids=" + pageID))
                         .getAsJsonObject().getAsJsonObject("query");
             else
-                query = JsonParser.parseString(checkAndGet(url + queryFormat + "&titles=" + URLEncoder.encode(title, "UTF-8")))
+                query = JsonParser.parseString(checkAndGet(url + queryFormat + "&titles=" + WebUtil.encode(title)))
                         .getAsJsonObject().getAsJsonObject("query");
         } catch (JsonSyntaxException e) {
             throw new IOException("返回了错误的数据，可能机器人被验证码阻止");
@@ -189,23 +189,29 @@ public class WikiInfo {
             String id = entry.getKey();
             JsonObject object = entry.getValue().getAsJsonObject();
             if (object.has("special")) {
-                pageInfo.url = articleURL.replace("$1", URLEncoder.encode(title, "UTF-8"));
+                pageInfo.url = articleURL.replace("$1", WebUtil.encode(title));
                 pageInfo.shortDescription = "特殊页面";
                 return pageInfo;
             }
             pageInfo.url = script + "?curid=" + id;
             if (object.has("missing")) {
-                if (title != null)
-                    return search(title, prefix);
-                throw new IOException("无法找到页面，可能不存在或页面为文件");
+                if (!object.has("known")) {
+                    if (title != null)
+                        return search(title, prefix);
+                    throw new IOException("无法找到页面");
+                } else {
+                    pageInfo.url = articleURL.replace("$1", WebUtil.encode(title));
+                    pageInfo.shortDescription = "<页面无内容>";
+                }
+            } else {
+                pageInfo.title = title = object.get("title").getAsString();
+                if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation"))
+                    pageInfo.shortDescription = getDisambiguationText(title);
+                else if (useTextExtracts && object.has("extract") && section == null)
+                    pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
+                else
+                    pageInfo.shortDescription = resolveText(getMarkdown(title, section, pageInfo));
             }
-            pageInfo.title = title = object.get("title").getAsString();
-            if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation"))
-                pageInfo.shortDescription = getDisambiguationText(title);
-            else if (useTextExtracts && object.has("extract") && section == null)
-                pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
-            else
-                pageInfo.shortDescription = resolveText(getMarkdown(title, section, pageInfo));
             if (object.has("imageinfo")) {
                 JsonArray array = object.getAsJsonArray("imageinfo");
                 if (array.size() > 0) {
@@ -234,7 +240,7 @@ public class WikiInfo {
 
     private PageInfo search(String key, String prefix) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(
-                url + WIKI_SEARCH + "&srsearch=" + URLEncoder.encode(key, "UTF-8"))).getAsJsonObject();
+                url + WIKI_SEARCH + "&srsearch=" + WebUtil.encode(key))).getAsJsonObject();
         JsonArray search = data.getAsJsonObject("query").getAsJsonArray("search");
         PageInfo info = new PageInfo();
         info.prefix = prefix;
@@ -273,6 +279,9 @@ public class WikiInfo {
         // Blocked by CloudFlare
         if (data.contains("Attention Required! | Cloudflare"))
             throw new IOException("机器人被CloudFlare拦截");
+        // Blocked by Tencent
+        if (data.contains("腾讯T-Sec Web应用防火墙(WAF)"))
+            throw new IOException("机器人被T-Sec Web防火墙拦截");
         return data;
     }
 
@@ -327,7 +336,7 @@ public class WikiInfo {
 
     private String getMarkdown(String page, String section, PageInfo info) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page="
-                        + URLEncoder.encode(page, "UTF-8")))
+                        + WebUtil.encode(page)))
                 .getAsJsonObject();
         String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
         if (html == null)
@@ -344,7 +353,7 @@ public class WikiInfo {
             });
             String sectionData = builder.toString().trim();
             if (!sectionData.isEmpty()) {
-                info.url += "#" + URLEncoder.encode(section, "UTF-8");
+                info.url += "#" + WebUtil.encode(section);
                 return sectionData;
             }
         }
@@ -353,7 +362,7 @@ public class WikiInfo {
 
     private String getDisambiguationText(String page) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page="
-                        + URLEncoder.encode(page, "UTF-8")))
+                        + WebUtil.encode(page)))
                 .getAsJsonObject();
         String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
         if (html == null)

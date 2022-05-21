@@ -77,7 +77,7 @@ public class BugTrackerResolver extends MessageResolver {
             if (regions.length > 1 && !regions[1].isEmpty())
                 bufferSize = Math.min(30, Integer.parseInt(regions[1]));
         }
-        searchKey = URLEncoder.encode(searchKey, "UTF-8");
+        searchKey = WebUtil.encode(searchKey);
         HttpGet get = new HttpGet(MOJIRA_SEARCH_API_URL + searchKey + "&fields=key,summary&maxResults=10&startAt=" + page * bufferSize);
         JsonObject data = WebUtil.fetchDataInJson(get).getAsJsonObject();
         if (data.has("errorMessages"))

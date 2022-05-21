@@ -12,6 +12,7 @@ import com.overzealous.remark.convert.NodeHandler;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
@@ -24,6 +25,8 @@ import org.jsoup.nodes.Element;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.*;
 
 public class WebUtil {
@@ -136,6 +139,10 @@ public class WebUtil {
             return now.get(num).getAsString();
         } else
             return null;
+    }
+
+    public static String encode(String str) throws UnsupportedEncodingException {
+        return URLEncoder.encode(str, "UTF-8").replace(".", "%2E");
     }
 
     public static String getAsMarkdownClean(String str) {

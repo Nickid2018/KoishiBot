@@ -96,7 +96,7 @@ public class CurseForgeResolver extends MessageResolver {
             builder.append("(仅显示前15文件)\n");
         for (int i = versions.size() - 1, j = 0; j < 15 && i >= 0; i--, j++) {
             JsonElement element = WebUtil.fetchDataInJson(new HttpGet(MODRINTH_API_URL + "/project/" + slug
-                    + "/version?game_versions=" + URLEncoder.encode("[\"" + versions.get(i) + "\"]", "UTF-8")));
+                    + "/version?game_versions=" + WebUtil.encode("[\"" + versions.get(i) + "\"]")));
             JsonArray array = element.getAsJsonArray();
             JsonObject object = array.get(0).getAsJsonObject();
             JsonArray files = object.getAsJsonArray("files");
@@ -214,8 +214,8 @@ public class CurseForgeResolver extends MessageResolver {
         }
 
         JsonElement e = WebUtil.fetchDataInJson(new HttpGet(MODRINTH_API_URL + "/search?query="
-                + URLEncoder.encode(key, "UTF-8") + "&offset=" + offset + "&limit=" + limit
-                + (filter == null ? "" : ("&filters=" + URLEncoder.encode(filter, "UTF-8")))
+                + WebUtil.encode(key) + "&offset=" + offset + "&limit=" + limit
+                + (filter == null ? "" : ("&filters=" + WebUtil.encode(filter)))
         ));
 
         if (e == null || e instanceof JsonNull)
