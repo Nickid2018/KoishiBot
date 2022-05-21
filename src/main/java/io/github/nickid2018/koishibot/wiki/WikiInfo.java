@@ -326,7 +326,8 @@ public class WikiInfo {
     }
 
     private String getMarkdown(String page, String section, PageInfo info) throws IOException {
-        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page=" + page))
+        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page="
+                        + URLEncoder.encode(page, "UTF-8")))
                 .getAsJsonObject();
         String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
         if (html == null)
@@ -351,7 +352,8 @@ public class WikiInfo {
     }
 
     private String getDisambiguationText(String page) throws IOException {
-        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page=" + page))
+        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page="
+                        + URLEncoder.encode(page, "UTF-8")))
                 .getAsJsonObject();
         String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
         if (html == null)
