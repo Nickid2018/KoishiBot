@@ -1,6 +1,7 @@
 package io.github.nickid2018.koishibot.wiki;
 
 import com.google.gson.*;
+import io.github.nickid2018.koishibot.util.ImageRenderer;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
@@ -9,9 +10,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.*;
 
 public class WikiInfo {
@@ -150,6 +152,8 @@ public class WikiInfo {
 
         if (title != null && title.equalsIgnoreCase("~rd"))
             return random(prefix);
+        if (title != null && title.equalsIgnoreCase("~iw"))
+            return interwikiList();
 
         String section = null;
         if (title != null && title.contains("#")) {
@@ -233,7 +237,7 @@ public class WikiInfo {
         return pageInfo;
     }
 
-    public PageInfo random(String prefix) throws Exception {
+    private PageInfo random(String prefix) throws Exception {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_RANDOM)).getAsJsonObject();
         PageInfo info =  parsePageInfo(Objects.requireNonNull(
                 WebUtil.getDataInPathOrNull(data, "query.random.0.title")), 0, prefix);
@@ -251,6 +255,16 @@ public class WikiInfo {
         info.isSearched = true;
         if (search.size() != 0)
             info.title = search.get(0).getAsJsonObject().get("title").getAsString();
+        return info;
+    }
+
+    private PageInfo interwikiList() throws IOException {
+        PageInfo info = new PageInfo();
+        BufferedImage image = ImageRenderer.renderMap(interWikiMap, "跨wiki前缀", "目标",
+                ImageRenderer.Alignment.RIGHT, ImageRenderer.Alignment.LEFT);
+        ByteArrayOutputStream boas = new ByteArrayOutputStream();
+        ImageIO.write(image, "png", boas);
+        info.imageStream = new ByteArrayInputStream(boas.toByteArray());
         return info;
     }
 
@@ -338,7 +352,7 @@ public class WikiInfo {
     }
 
     private String getMarkdown(String page, String section, PageInfo info) throws IOException {
-        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page="
+        JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + QUERY_PAGE_TEXT + "&page="
                         + WebUtil.encode(page)))
                 .getAsJsonObject();
         String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
@@ -364,7 +378,7 @@ public class WikiInfo {
     }
 
     private String getDisambiguationText(String page) throws IOException {
-        JsonObject data = WebUtil.fetchDataInJson(new HttpGet(url + QUERY_PAGE_TEXT + "&page="
+        JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + QUERY_PAGE_TEXT + "&page="
                         + WebUtil.encode(page)))
                 .getAsJsonObject();
         String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
@@ -391,7 +405,7 @@ public class WikiInfo {
     private boolean getInterWikiDataFromPage(){
         try {
             String data = WebUtil.fetchDataInPlain(
-                    new HttpGet(articleURL.replace("$1", "Special:Interwiki")));
+                    getWithHeader(articleURL.replace("$1", "Special:Interwiki")));
             Document page = Jsoup.parse(data);
             Elements interWikiSection = page.getElementsByClass("mw-interwikitable-row");
             for (Element entry : interWikiSection) {

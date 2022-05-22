@@ -98,20 +98,24 @@ public class WikiResolver extends MessageResolver {
                 data.append("(随机页面到[[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
 
             boolean shouldHide = false;
-            for (String prefix : Settings.MIRROR.values())
-                if (page.url.contains(prefix)) {
-                    shouldHide = true;
-                    break;
-                }
-            if (!shouldHide)
+            if (page.url != null)
+                for (String prefix : Settings.MIRROR.values())
+                   if (page.url.contains(prefix)) {
+                        shouldHide = true;
+                        break;
+                    }
+            if (!shouldHide && page.url != null)
                 data.append(page.url).append("\n");
-            data.append(page.shortDescription);
+            if (page.shortDescription != null)
+                data.append(page.shortDescription);
 
-            MessageChain chain = MessageUtils.newChain(
-                    new QuoteReply(info.data),
-                    new PlainText(data.toString())
-            );
-            info.sendMessageWithQuote(chain);
+            String st = data.toString().trim();
+
+            if (!st.isEmpty())
+                info.sendMessageWithQuote(MessageUtils.newChain(
+                        new QuoteReply(info.data),
+                        new PlainText(st)
+                ));
 
             if (page.imageStream != null)
                 info.sendMessageWithQuote(Contact.uploadImage(

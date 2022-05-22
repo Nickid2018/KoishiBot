@@ -5,6 +5,7 @@ import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import org.apache.commons.io.IOUtils;
 
+import java.awt.*;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,6 +24,9 @@ public class Settings {
     public static String FFMPEG_LOCATION;
     public static String ENCODER_LOCATION;
 
+    public static Font IMAGE_FONT;
+    public static Font IMAGE_FONT_BOLD;
+
     public static final Map<String, WikiInfo> SUPPORT_WIKIS = new HashMap<>();
     public static final Map<String, String> MIRROR = new HashMap<>();
     public static String BASE_WIKI;
@@ -38,6 +42,7 @@ public class Settings {
         loadMirror(settingsRoot);
         loadFFmpeg(settingsRoot);
         loadAppKeyAndSecrets(settingsRoot);
+        loadImageSettings(settingsRoot);
     }
 
     public static void reload() throws IOException {
@@ -47,6 +52,9 @@ public class Settings {
 
         loadWiki(settingsRoot);
         loadMirror(settingsRoot);
+        loadFFmpeg(settingsRoot);
+        loadAppKeyAndSecrets(settingsRoot);
+        loadImageSettings(settingsRoot);
     }
 
     public static void loadWiki(JsonObject settingsRoot) {
@@ -84,5 +92,13 @@ public class Settings {
         JsonObject audio = settingsRoot.getAsJsonObject("audio");
         FFMPEG_LOCATION = audio.get("ffmpeg").getAsString();
         ENCODER_LOCATION = audio.get("encoder").getAsString();
+    }
+
+    public static void loadImageSettings(JsonObject settingsRoot) {
+        JsonObject image = settingsRoot.getAsJsonObject("image");
+        IMAGE_FONT = new Font(image.get("family").getAsString(), Font.PLAIN,
+                Integer.parseInt(image.get("size").getAsString()));
+        IMAGE_FONT_BOLD = new Font(image.get("family").getAsString(), Font.BOLD,
+                Integer.parseInt(image.get("size").getAsString()));
     }
 }
