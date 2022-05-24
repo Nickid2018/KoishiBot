@@ -14,6 +14,7 @@ import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.event.events.MessageRecallEvent;
 import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
+import org.apache.regexp.RE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,6 +154,7 @@ public class MessageManager {
         RESOLVERS.add(new CurseForgeResolver());
         RESOLVERS.add(new HelpResolver());
         RESOLVERS.add(new LaTeXResolver());
+        RESOLVERS.add(new QRCodeResolver());
 
         SERVICES.put("哔哩哔哩", new BilibiliDataResolver());
     }

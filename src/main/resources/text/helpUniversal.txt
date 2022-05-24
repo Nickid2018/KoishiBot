@@ -8,3 +8,4 @@ curseforge - CurseForge模组模块
 bilibili - Bilibili模块
 wiki - Wiki模块
 latex - LaTeX模块
+qrcode - 二维码模块

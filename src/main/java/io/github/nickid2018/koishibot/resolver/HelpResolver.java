@@ -27,6 +27,7 @@ public class HelpResolver extends MessageResolver {
         HELP_DATA.put("bilibili", new LazyLoadValue<>(loadMessage("bilibili")));
         HELP_DATA.put("wiki", new LazyLoadValue<>(loadMessage("wiki")));
         HELP_DATA.put("latex", new LazyLoadValue<>(loadMessage("latex")));
+        HELP_DATA.put("qrcode", new LazyLoadValue<>(loadMessage("qrcode")));
     }
 
     public HelpResolver() {

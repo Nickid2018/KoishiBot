@@ -19,7 +19,7 @@ dependencies {
     implementation("org.scilab.forge:jlatexmath:1.0.7")
     implementation("org.apache.xmlgraphics:batik-svggen:1.14")
     implementation("org.apache.xmlgraphics:fop:2.7")
-
+    implementation("com.google.zxing:core:3.5.0")
 }
 
 group = "io.github.nickid2018"

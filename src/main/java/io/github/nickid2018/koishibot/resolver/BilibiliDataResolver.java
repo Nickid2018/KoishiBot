@@ -143,7 +143,6 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
         stream.close();
 
         MessageChain chain = MessageUtils.newChain(
-                new QuoteReply(info.data),
                 new PlainText(builder.toString()),
                 imageSend
         );
@@ -183,7 +182,6 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
         stream.close();
 
         MessageChain chain = MessageUtils.newChain(
-                new QuoteReply(info.data),
                 new PlainText(builder.toString()),
                 imageSend
         );
@@ -220,7 +218,6 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
         stream.close();
 
         MessageChain chain = MessageUtils.newChain(
-                new QuoteReply(info.data),
                 new PlainText(builder.toString()),
                 imageSend
         );
@@ -302,7 +299,6 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
         stream.close();
 
         MessageChain chain = MessageUtils.newChain(
-                new QuoteReply(info.data),
                 new PlainText(builder.toString()),
                 imageSend
         );

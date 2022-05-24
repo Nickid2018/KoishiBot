@@ -1,0 +1,11 @@
+Koishi bot QRCODE 模块帮助
+#
+编码/解码二维码信息。
+#
+编码用法:
+~qrcode encode 文本
+解码用法:
+~qrcode decode 图片
+#
+该功能只能在群聊和私聊中触发，临时会话和陌生人对话不能生效。
+#
