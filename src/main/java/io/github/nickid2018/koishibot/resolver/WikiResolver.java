@@ -10,7 +10,9 @@ import net.mamoe.mirai.contact.Contact;
 import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.utils.ExternalResource;
 
+import java.io.File;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class WikiResolver extends MessageResolver {
@@ -120,11 +122,21 @@ public class WikiResolver extends MessageResolver {
             if (page.imageStream != null)
                 info.sendMessageWithQuote(Contact.uploadImage(
                         KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), page.imageStream));
-            if (page.audioFile != null && info.group != null) {
-                ExternalResource resource = ExternalResource.create(page.audioFile);
-                Audio audio = info.uploadAudio(resource);
-                info.sendMessageWithQuote(audio);
-                resource.close();
+            if (page.audioFiles != null && info.group != null) {
+                KoishiBotMain.INSTANCE.executor.execute(() -> {
+                    try {
+                        File[] audios = page.audioFiles.get();
+                        for (File file : audios) {
+                            Thread.sleep(60_000);
+                            ExternalResource resource = ExternalResource.create(file);
+                            Audio audio = info.uploadAudio(resource);
+                            info.sendMessage(audio);
+                            resource.close();
+                        }
+                    } catch (Exception e) {
+                        MessageManager.onError(e, "wiki.audio", info, false);
+                    }
+                });
             }
         }
     }

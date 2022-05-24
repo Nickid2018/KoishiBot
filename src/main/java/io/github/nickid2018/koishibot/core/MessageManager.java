@@ -29,6 +29,9 @@ public class MessageManager {
 
     public static final List<MessageResolver> RESOLVERS = new ArrayList<>();
     public static final Map<String, ServiceResolver> SERVICES = new HashMap<>();
+    public static final String[] ERROR_MESSAGES = new String[] {
+            "发生了错误", "bot发生了异常", "bot陷入无意识之中"
+    };
 
     public static final Queue<Pair<MessageEvent, MessageReceipt<?>>> SENT_QUOTE_QUEUE = new ConcurrentLinkedDeque<>();
 
@@ -111,6 +114,7 @@ public class MessageManager {
     public static void onError(Throwable t, String module, MessageInfo info, boolean quote) {
         ErrorRecord.enqueueError(module, t);
         MessageChain chain;
+        String choose = ERROR_MESSAGES[(int) (ERROR_MESSAGES.length * Math.random())];
         if (t instanceof ErrorCodeException) {
             int code = ((ErrorCodeException) t).code;
             try {
@@ -118,19 +122,19 @@ public class MessageManager {
                                 new URL("https://http.cat/" + code).openStream());
                 chain = MessageUtils.newChain(
                         new QuoteReply(info.data),
-                        new PlainText("调用API返回了状态码" + code),
+                        new PlainText(choose + ": 状态码" + code),
                         image
                 );
             } catch (IOException e) {
                 chain = MessageUtils.newChain(
                         new QuoteReply(info.data),
-                        new PlainText("调用API返回了状态码" + code)
+                        new PlainText(choose + ": 状态码" + code)
                 );
             }
         } else
             chain = MessageUtils.newChain(
                     new QuoteReply(info.data),
-                    new PlainText("调用API产生了错误：" + t.getMessage())
+                    new PlainText(choose +  ": " + t.getMessage())
             );
         if (quote)
             info.sendMessageWithQuote(chain);

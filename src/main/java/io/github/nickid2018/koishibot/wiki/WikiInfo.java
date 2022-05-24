@@ -1,6 +1,7 @@
 package io.github.nickid2018.koishibot.wiki;
 
 import com.google.gson.*;
+import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.util.ImageRenderer;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import io.github.nickid2018.koishibot.util.WebUtil;
@@ -224,9 +225,11 @@ public class WikiInfo {
                             .toLowerCase(Locale.ROOT);
                     if (SUPPORTED_IMAGE.contains(suffix) || NEED_TRANSFORM_IMAGE.contains(suffix))
                         pageInfo.imageStream = new URL(array.get(0).getAsJsonObject().get("url").getAsString()).openStream();
-                    else if (NEED_TRANSFORM_AUDIO.contains(suffix))
-                        pageInfo.audioFile = AudioTransform.transform(
-                                suffix, new URL(array.get(0).getAsJsonObject().get("url").getAsString()));
+                    else if (NEED_TRANSFORM_AUDIO.contains(suffix)) {
+                        pageInfo.shortDescription = "音频信息，将分割后发送";
+                        pageInfo.audioFiles = KoishiBotMain.INSTANCE.executor.submit(() -> AudioTransform.transform(
+                                suffix, new URL(array.get(0).getAsJsonObject().get("url").getAsString())));
+                    }
                 }
             }
         }
