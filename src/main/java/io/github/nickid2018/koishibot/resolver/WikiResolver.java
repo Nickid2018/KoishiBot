@@ -133,6 +133,8 @@ public class WikiResolver extends MessageResolver {
                             info.sendMessage(audio);
                             resource.close();
                         }
+                        for (File file : audios)
+                            KoishiBotMain.FILES_NOT_DELETE.remove(file);
                     } catch (Exception e) {
                         MessageManager.onError(e, "wiki.audio", info, false);
                     }

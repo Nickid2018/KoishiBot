@@ -43,6 +43,7 @@ public class AudioTransform {
         int offset = 0;
         while (length > 50) {
             File pcm = new File(DATA_FOLDER, "tmp" + NAME_RANDOM.nextLong() + ".pcm");
+            KoishiBotMain.FILES_NOT_DELETE.add(pcm);
             executeCommand(null, Settings.FFMPEG_LOCATION, "-i",
                     sourceFile.getAbsolutePath(), "-ss", offset + "", "-t", "50", "-f", "s16le", "-ar", "24000", "-ac", "1",
                     "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
@@ -51,6 +52,7 @@ public class AudioTransform {
             length -= 50;
         }
         File pcm = new File(DATA_FOLDER, "tmp" + NAME_RANDOM.nextLong() + ".pcm");
+        KoishiBotMain.FILES_NOT_DELETE.add(pcm);
         executeCommand(null, Settings.FFMPEG_LOCATION, "-i",
                 sourceFile.getAbsolutePath(), "-ss", offset + "", "-f", "s16le", "-ar", "24000", "-ac", "1",
                 "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());

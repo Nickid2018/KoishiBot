@@ -19,7 +19,9 @@ import net.mamoe.mirai.utils.BotConfiguration;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Stream;
@@ -33,13 +35,17 @@ public final class KoishiBotMain extends JavaPlugin {
     public Bot botKoishi;
     public ExecutorService executor;
 
+    public static final Set<File> FILES_NOT_DELETE = new HashSet<>();
+
     private KoishiBotMain() {
         super(new JvmPluginDescriptionBuilder("io.github.nickid2018.koishibot", "1.0-SNAPSHOT").build());
         Thread CLEANER = new Thread(() -> {
             while (true) {
                 try {
                     Thread.sleep(7200_000);
-                    Stream.of(Objects.requireNonNull(getDataFolder().listFiles())).forEach(File::delete);
+                    Stream.of(Objects.requireNonNull(getDataFolder().listFiles())).filter(
+                            file -> !FILES_NOT_DELETE.contains(file)
+                    ).forEach(File::delete);
                 } catch (InterruptedException ignored) {
                 }
             }
