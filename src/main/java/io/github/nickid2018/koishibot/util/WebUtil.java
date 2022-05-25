@@ -13,12 +13,12 @@ import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.Settings;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.nodes.Element;
 
@@ -34,10 +34,12 @@ public class WebUtil {
     public static final Set<String> SUPPORTED_IMAGE = new HashSet<>(
             Arrays.asList("jpg", "jpeg", "png", "bmp", "gif")
     );
+
     private static final Remark REMARK;
 
     public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableCookieManagement().build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
@@ -67,7 +69,8 @@ public class WebUtil {
     }
 
     public static String fetchDataInPlain(HttpUriRequest post, boolean ignoreErrorCode) throws IOException {
-        CloseableHttpClient httpClient = HttpClients.createDefault();
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableCookieManagement().build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
@@ -89,7 +92,8 @@ public class WebUtil {
     }
 
     public static String getRedirected(HttpUriRequest request) throws IOException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create().disableRedirectHandling().build();
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableRedirectHandling().disableCookieManagement().build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(request);

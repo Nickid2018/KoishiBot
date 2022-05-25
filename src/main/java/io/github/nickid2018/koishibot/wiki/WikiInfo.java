@@ -4,6 +4,7 @@ import com.google.gson.*;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.util.ImageRenderer;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
+import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
 import org.jsoup.Jsoup;
@@ -16,6 +17,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class WikiInfo {
 
@@ -29,6 +31,8 @@ public class WikiInfo {
     public static final String WIKI_RANDOM = "action=query&format=json&list=random";
 
     public static final String EDIT_URI_STR = "<link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"";
+
+    public static final Pattern USER_ANONYMOUS = Pattern.compile("User:\\d{1,3}(\\.\\d{1,3}){3}");
 
     public static final Set<String> SUPPORTED_IMAGE = WebUtil.SUPPORTED_IMAGE;
     public static final Set<String> NEED_TRANSFORM_IMAGE = new HashSet<>(
@@ -207,6 +211,9 @@ public class WikiInfo {
                 } else {
                     pageInfo.url = articleURL.replace("$1", WebUtil.encode(title));
                     pageInfo.shortDescription = "<页面无内容>";
+                    // Special:MyPage -> [User:IP]
+                    if (RegexUtil.match(USER_ANONYMOUS, pageInfo.title))
+                        pageInfo.title = "匿名用户页";
                 }
             } else {
                 pageInfo.title = title = object.get("title").getAsString();
