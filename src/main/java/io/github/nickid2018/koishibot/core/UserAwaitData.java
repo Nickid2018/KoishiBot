@@ -19,7 +19,7 @@ public class UserAwaitData {
         lock.unlock();
     }
 
-    public static boolean onMessage(MessageInfo info) {
+    public static void onMessage(MessageInfo info) {
         MessageData find = null;
         lock.lock();
         for (MessageData data : AWAIT_MAP.keySet()) {
@@ -30,13 +30,12 @@ public class UserAwaitData {
         }
         lock.unlock();
         if (find == null)
-            return false;
+            return;
         BiConsumer<MessageData, MessageInfo> dataConsumer;
         lock.lock();
         dataConsumer = AWAIT_MAP.remove(find);
         lock.unlock();
         MessageData finalFind = find;
         KoishiBotMain.INSTANCE.executor.execute(() -> dataConsumer.accept(finalFind, info));
-        return true;
     }
 }

@@ -13,7 +13,6 @@ import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.Settings;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ContentType;
@@ -21,6 +20,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,6 +37,7 @@ public class WebUtil {
     );
 
     private static final Remark REMARK;
+    private static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot-Web");
 
     public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
@@ -59,7 +61,7 @@ public class WebUtil {
                 if (httpResponse != null)
                     httpResponse.close();
             } catch (IOException e) {
-                KoishiBotMain.INSTANCE.getLogger().error("## release resource error ##" + e);
+                LOGGER.error("## release resource error ##" + e);
             }
         }
     }
@@ -86,7 +88,7 @@ public class WebUtil {
                 if (httpResponse != null)
                     httpResponse.close();
             } catch (IOException e) {
-                KoishiBotMain.INSTANCE.getLogger().error("## release resource error ##" + e);
+                LOGGER.error("## release resource error ##" + e);
             }
         }
     }
@@ -105,7 +107,7 @@ public class WebUtil {
                 if (httpResponse != null)
                     httpResponse.close();
             } catch (IOException e) {
-                KoishiBotMain.INSTANCE.getLogger().error("## release resource error ##" + e);
+                LOGGER.error("## release resource error ##" + e);
             }
         }
     }

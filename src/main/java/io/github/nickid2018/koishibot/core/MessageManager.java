@@ -14,7 +14,6 @@ import net.mamoe.mirai.event.events.MessageEvent;
 import net.mamoe.mirai.event.events.MessageRecallEvent;
 import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
-import org.apache.regexp.RE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +25,7 @@ import java.util.function.Predicate;
 
 public class MessageManager {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot");
+    public static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot-Message");
 
     public static final List<MessageResolver> RESOLVERS = new ArrayList<>();
     public static final Map<String, ServiceResolver> SERVICES = new HashMap<>();
@@ -37,8 +36,7 @@ public class MessageManager {
     public static final Queue<Pair<MessageEvent, MessageReceipt<?>>> SENT_QUOTE_QUEUE = new ConcurrentLinkedDeque<>();
 
     public static boolean resolveGroupMessage(MessageChain chain, MessageInfo info) {
-        if (UserAwaitData.onMessage(info))
-            return true;
+        UserAwaitData.onMessage(info);
         if (chain.get(1) instanceof RichMessage) {
             RichMessage message = (RichMessage) chain.get(1);
             JsonObject content = JsonParser.parseString(message.getContent()).getAsJsonObject();
@@ -71,8 +69,7 @@ public class MessageManager {
     }
 
     public static boolean resolveFriendMessage(MessageChain chain, MessageInfo info) {
-        if (UserAwaitData.onMessage(info))
-            return true;
+        UserAwaitData.onMessage(info);
         List<String> strings = new ArrayList<>();
         for (SingleMessage content : chain) {
             if (content instanceof PlainText)
@@ -88,8 +85,7 @@ public class MessageManager {
     }
 
     public static boolean resolveTempMessage(MessageChain chain, MessageInfo info, Predicate<MessageResolver> predicate) {
-        if (UserAwaitData.onMessage(info))
-            return true;
+        UserAwaitData.onMessage(info);
         List<String> strings = new ArrayList<>();
         for (SingleMessage content : chain) {
             if (content instanceof PlainText)
@@ -142,7 +138,6 @@ public class MessageManager {
         else
             info.sendMessage(chain);
         LOGGER.error(module, t);
-        t.printStackTrace();
     }
 
     static {

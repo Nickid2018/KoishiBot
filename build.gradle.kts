@@ -20,6 +20,7 @@ dependencies {
     implementation("org.apache.xmlgraphics:batik-svggen:1.14")
     implementation("org.apache.xmlgraphics:fop:2.7")
     implementation("com.google.zxing:core:3.5.0")
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.17.0")
 }
 
 group = "io.github.nickid2018"
