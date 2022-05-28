@@ -41,7 +41,8 @@ public class WebUtil {
 
     public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement().build();
+                .disableCookieManagement()
+                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0").build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
@@ -72,7 +73,8 @@ public class WebUtil {
 
     public static String fetchDataInPlain(HttpUriRequest post, boolean ignoreErrorCode) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement().build();
+                .disableCookieManagement()
+                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0").build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
@@ -95,7 +97,8 @@ public class WebUtil {
 
     public static String getRedirected(HttpUriRequest request) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableRedirectHandling().disableCookieManagement().build();
+                .disableRedirectHandling().disableCookieManagement()
+                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0").build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(request);

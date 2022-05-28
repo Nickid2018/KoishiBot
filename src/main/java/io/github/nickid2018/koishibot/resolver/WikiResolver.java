@@ -12,7 +12,6 @@ import net.mamoe.mirai.utils.ExternalResource;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class WikiResolver extends MessageResolver {

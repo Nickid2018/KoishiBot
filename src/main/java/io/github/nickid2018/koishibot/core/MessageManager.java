@@ -33,7 +33,14 @@ public class MessageManager {
             "发生了错误", "bot发生了异常", "bot陷入无意识之中"
     };
 
+    private static final Random RANDOM = new Random();
+
     public static final Queue<Pair<MessageEvent, MessageReceipt<?>>> SENT_QUOTE_QUEUE = new ConcurrentLinkedDeque<>();
+
+    public static void tryNudge(MessageInfo info) {
+        if (RANDOM.nextDouble() < 0.2)
+            info.nudge();
+    }
 
     public static boolean resolveGroupMessage(MessageChain chain, MessageInfo info) {
         UserAwaitData.onMessage(info);
@@ -111,7 +118,7 @@ public class MessageManager {
     public static void onError(Throwable t, String module, MessageInfo info, boolean quote) {
         ErrorRecord.enqueueError(module, t);
         MessageChain chain;
-        String choose = ERROR_MESSAGES[(int) (ERROR_MESSAGES.length * Math.random())];
+        String choose = ERROR_MESSAGES[RANDOM.nextInt(ERROR_MESSAGES.length)];
         if (t instanceof ErrorCodeException) {
             int code = ((ErrorCodeException) t).code;
             try {
@@ -138,6 +145,7 @@ public class MessageManager {
         else
             info.sendMessage(chain);
         LOGGER.error(module, t);
+        t.printStackTrace();
     }
 
     static {

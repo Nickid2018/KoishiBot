@@ -2,8 +2,13 @@ package io.github.nickid2018.koishibot.core;
 
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.KoishiBotMain;
+import io.github.nickid2018.koishibot.util.WebUtil;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.client.methods.HttpGet;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.awt.*;
 import java.io.FileReader;

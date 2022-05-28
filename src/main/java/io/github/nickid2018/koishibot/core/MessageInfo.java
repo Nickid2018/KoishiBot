@@ -128,4 +128,13 @@ public class MessageInfo {
             return group.uploadAudio(resource);
         return null;
     }
+
+    public void nudge() {
+        if (friend != null)
+            friend.nudge().sendTo(friend);
+        if (stranger != null)
+            stranger.nudge().sendTo(stranger);
+        if (sender != null && group != null)
+            sender.nudge().sendTo(group);
+    }
 }

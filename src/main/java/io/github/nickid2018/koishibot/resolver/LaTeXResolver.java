@@ -1,30 +1,39 @@
 package io.github.nickid2018.koishibot.resolver;
 
+import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
 import io.github.nickid2018.koishibot.core.MessageManager;
+import io.github.nickid2018.koishibot.util.WebUtil;
 import net.mamoe.mirai.contact.Contact;
-import org.scilab.forge.jlatexmath.DefaultTeXFont;
-import org.scilab.forge.jlatexmath.TeXConstants;
-import org.scilab.forge.jlatexmath.TeXFormula;
-import org.scilab.forge.jlatexmath.TeXIcon;
-import org.scilab.forge.jlatexmath.cyrillic.CyrillicRegistration;
-import org.scilab.forge.jlatexmath.greek.GreekRegistration;
+import net.mamoe.mirai.message.data.Image;
+import org.apache.batik.dom.GenericDOMImplementation;
+import org.apache.batik.svggen.SVGGeneratorContext;
+import org.apache.batik.transcoder.SVGAbstractTranscoder;
+import org.apache.batik.transcoder.Transcoder;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.JPEGTranscoder;
+import org.apache.batik.transcoder.image.PNGTranscoder;
+import org.apache.commons.io.input.ReaderInputStream;
+import org.apache.http.client.methods.HttpGet;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import org.w3c.dom.DOMImplementation;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 public class LaTeXResolver extends MessageResolver {
 
+    private final Transcoder transcoder;
+
     public LaTeXResolver() {
         super("~latex");
-        DefaultTeXFont.registerAlphabet(new CyrillicRegistration());
-        DefaultTeXFont.registerAlphabet(new GreekRegistration());
+        transcoder = new PNGTranscoder();
+        transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, 0.1f);
     }
 
     @Override
@@ -37,43 +46,30 @@ public class LaTeXResolver extends MessageResolver {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             String latex = key.trim();
             try {
-                List<BufferedImage> images = new ArrayList<>();
-                for (String line : latex.split("\n")) {
-                    if (!line.isEmpty()) {
-                        TeXFormula formula = new TeXFormula(line);
-                        TeXIcon icon = formula.createTeXIcon(TeXConstants.STYLE_DISPLAY, 40);
-                        icon.setInsets(new Insets(5, 5, 5, 5));
-
-                        BufferedImage image = new BufferedImage(
-                                icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_BGR);
-                        Graphics2D g2 = image.createGraphics();
-                        g2.setColor(Color.WHITE);
-                        g2.fillRect(0, 0, icon.getIconWidth(), icon.getIconHeight());
-                        g2.setColor(Color.BLACK);
-                        icon.paintIcon(null, g2, 0, 0);
-                        images.add(image);
-                    }
-                }
-
-                int height = images.stream().mapToInt(BufferedImage::getHeight).sum();
-                int width = images.stream().mapToInt(BufferedImage::getWidth).max().getAsInt();
-
-                BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
-                Graphics2D g2 = image.createGraphics();
-                g2.setColor(Color.WHITE);
-                g2.fillRect(0, 0, width, height);
-
-                int now = 0;
-                for (BufferedImage imageNow : images) {
-                    g2.drawImage(imageNow, 0, now, null);
-                    now += imageNow.getHeight();
-                }
-
-                ByteArrayOutputStream boas = new ByteArrayOutputStream();
-                ImageIO.write(image, "png", boas);
-
-                info.sendMessageWithQuote(Contact.uploadImage(
-                        KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), new ByteArrayInputStream(boas.toByteArray())));
+                String data = "https://zh.wikipedia.org/w/api.php?action=parse&format=json&contentmodel=wikitext&text=";
+                data += WebUtil.encode("<math chem>" + latex + "</math>");
+                data = WebUtil.mirror(data);
+                JsonObject object = WebUtil.fetchDataInJson(new HttpGet(data)).getAsJsonObject();
+                String parsed = WebUtil.getDataInPathOrNull(object, "parse.text.*");
+                if (parsed == null)
+                    throw new IOException("API未返回任何内容");
+                Document jsoup = Jsoup.parse(parsed);
+                Elements error = jsoup.getElementsByClass("error texerror");
+                if (error.size() != 0)
+                    throw new IOException(error.get(0).ownText());
+                Elements img = jsoup.getElementsByTag("img");
+                if (img.size() == 0)
+                    throw new IOException("无法找到LaTeX渲染结果");
+                String str = WebUtil.fetchDataInPlain(new HttpGet(img.get(0).attr("src")));
+                TranscoderInput input = new TranscoderInput(new ReaderInputStream(new StringReader(str), StandardCharsets.UTF_8));
+                ByteArrayOutputStream os = new ByteArrayOutputStream();
+                TranscoderOutput output = new TranscoderOutput(os);
+                transcoder.transcode(input, output);
+                os.close();
+                Image image = Contact.uploadImage(
+                        KoishiBotMain.INSTANCE.botKoishi.getAsFriend(),
+                        new ByteArrayInputStream(os.toByteArray()));
+                info.sendMessageWithQuote(image);
             } catch (Exception e) {
                 MessageManager.onError(e, "latex", info, true);
             }

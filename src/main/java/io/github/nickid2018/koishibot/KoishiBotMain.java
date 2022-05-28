@@ -112,8 +112,10 @@ public final class KoishiBotMain extends JavaPlugin {
             info.sender = messageEvent.getSender();
             info.group = messageEvent.getGroup();
             info.event = messageEvent;
-            if (MessageManager.resolveGroupMessage(messageEvent.getMessage(), info))
+            if (MessageManager.resolveGroupMessage(messageEvent.getMessage(), info)) {
                 MemberFilter.refreshRequestTime(messageEvent.getSender());
+                MessageManager.tryNudge(info);
+            }
             return ListeningStatus.LISTENING;
         });
         channel.exceptionHandler(createHandler("friend.message"))
@@ -124,8 +126,10 @@ public final class KoishiBotMain extends JavaPlugin {
             info.data = messageEvent.getMessage();
             info.friend = messageEvent.getFriend();
             info.event = messageEvent;
-            if (MessageManager.resolveFriendMessage(messageEvent.getMessage(), info))
+            if (MessageManager.resolveFriendMessage(messageEvent.getMessage(), info)) {
                 MemberFilter.refreshRequestTime(messageEvent.getSender());
+                MessageManager.tryNudge(info);
+            }
             return ListeningStatus.LISTENING;
         });
         channel.exceptionHandler(createHandler("stranger.message"))
@@ -136,8 +140,10 @@ public final class KoishiBotMain extends JavaPlugin {
             info.data = messageEvent.getMessage();
             info.stranger = messageEvent.getSender();
             info.event = messageEvent;
-            if (MessageManager.resolveStrangerMessage(messageEvent.getMessage(), info))
+            if (MessageManager.resolveStrangerMessage(messageEvent.getMessage(), info)) {
                 MemberFilter.refreshRequestTime(messageEvent.getSender());
+                MessageManager.tryNudge(info);
+            }
             return ListeningStatus.LISTENING;
         });
         channel.exceptionHandler(createHandler("group.message.temp"))
@@ -156,6 +162,7 @@ public final class KoishiBotMain extends JavaPlugin {
                 .subscribe(MemberJoinEvent.class, memberJoinEvent -> {
             if (MemberFilter.shouldNotResponse(memberJoinEvent.getMember()))
                 return ListeningStatus.LISTENING;
+            memberJoinEvent.getMember().nudge().sendTo(memberJoinEvent.getGroup());
             MessageChain chain = MessageUtils.newChain(
                     new At(memberJoinEvent.getMember().getId()),
                     new PlainText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
