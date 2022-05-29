@@ -9,7 +9,6 @@ import com.overzealous.remark.Remark;
 import com.overzealous.remark.convert.AbstractNodeHandler;
 import com.overzealous.remark.convert.DocumentConverter;
 import com.overzealous.remark.convert.NodeHandler;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.Settings;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -67,11 +66,11 @@ public class WebUtil {
         }
     }
 
-    public static String fetchDataInPlain(HttpUriRequest post) throws IOException {
-        return fetchDataInPlain(post, false);
+    public static String fetchDataInText(HttpUriRequest post) throws IOException {
+        return fetchDataInText(post, false);
     }
 
-    public static String fetchDataInPlain(HttpUriRequest post, boolean ignoreErrorCode) throws IOException {
+    public static String fetchDataInText(HttpUriRequest post, boolean ignoreErrorCode) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableCookieManagement()
                 .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0").build();

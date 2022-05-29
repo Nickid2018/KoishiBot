@@ -302,7 +302,7 @@ public class WikiInfo {
     }
 
     private String checkAndGet(String url) throws IOException {
-        String data = WebUtil.fetchDataInPlain(getWithHeader(url), true);
+        String data = WebUtil.fetchDataInText(getWithHeader(url), true);
         // Blocked by CloudFlare
         if (data.contains("Attention Required! | Cloudflare"))
             throw new IOException("机器人被CloudFlare拦截");
@@ -414,7 +414,7 @@ public class WikiInfo {
 
     private boolean getInterWikiDataFromPage(){
         try {
-            String data = WebUtil.fetchDataInPlain(
+            String data = WebUtil.fetchDataInText(
                     getWithHeader(articleURL.replace("$1", "Special:Interwiki")));
             Document page = Jsoup.parse(data);
             Elements interWikiSection = page.getElementsByClass("mw-interwikitable-row");
