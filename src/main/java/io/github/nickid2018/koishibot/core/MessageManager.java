@@ -141,7 +141,7 @@ public class MessageManager {
                     new PlainText(choose +  ": " + t.getMessage())
             );
         if (quote)
-            info.sendMessageWithQuote(chain);
+            info.sendMessageRecallable(chain);
         else
             info.sendMessage(chain);
         LOGGER.error(module, t);

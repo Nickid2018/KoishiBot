@@ -86,7 +86,7 @@ public class WikiResolver extends MessageResolver {
                         new QuoteReply(info.data),
                         new PlainText("没有搜索到有关于[[" + (namespace == null ? "" : namespace + ":") + title + "]]的页面")
                 );
-                info.sendMessageWithQuote(chain);
+                info.sendMessageRecallable(chain);
             }
         } else {
             if (page.redirected)
@@ -113,13 +113,13 @@ public class WikiResolver extends MessageResolver {
             String st = data.toString().trim();
 
             if (!st.isEmpty())
-                info.sendMessageWithQuote(MessageUtils.newChain(
+                info.sendMessageRecallable(MessageUtils.newChain(
                         new QuoteReply(info.data),
                         new PlainText(st)
                 ));
 
             if (page.imageStream != null)
-                info.sendMessageWithQuote(Contact.uploadImage(
+                info.sendMessageRecallable(Contact.uploadImage(
                         KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), page.imageStream));
             if (page.audioFiles != null && info.group != null) {
                 KoishiBotMain.INSTANCE.executor.execute(() -> {

@@ -2,7 +2,6 @@ package io.github.nickid2018.koishibot.resolver;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
 import io.github.nickid2018.koishibot.core.MessageManager;
@@ -146,7 +145,7 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
                 new PlainText(builder.toString()),
                 imageSend
         );
-        info.sendMessageWithQuote(chain);
+        info.sendMessageRecallable(chain);
     }
 
     private void doAudioDisplay(String key, MessageInfo info) throws IOException {
@@ -185,7 +184,7 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
                 new PlainText(builder.toString()),
                 imageSend
         );
-        info.sendMessageWithQuote(chain);
+        info.sendMessageRecallable(chain);
     }
 
     private void doArticleDisplay(String key, MessageInfo info) throws IOException {
@@ -221,7 +220,7 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
                 new PlainText(builder.toString()),
                 imageSend
         );
-        info.sendMessageWithQuote(chain);
+        info.sendMessageRecallable(chain);
     }
 
     private void doVideoDisplay(String key, MessageInfo info) throws IOException {
@@ -302,7 +301,7 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
                 new PlainText(builder.toString()),
                 imageSend
         );
-        info.sendMessageWithQuote(chain);
+        info.sendMessageRecallable(chain);
     }
 
     private void fromShortLink(String key, MessageInfo info) throws IOException {

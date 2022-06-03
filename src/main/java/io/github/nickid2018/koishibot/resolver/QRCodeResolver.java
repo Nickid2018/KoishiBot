@@ -71,7 +71,7 @@ public class QRCodeResolver extends MessageResolver {
                 ImageIO.write(image, "png", boas);
                 Image output = Contact.uploadImage(
                         KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), new ByteArrayInputStream(boas.toByteArray()));
-                info.sendMessageWithQuote(output);
+                info.sendMessageRecallable(output);
             } catch (Exception e) {
                 MessageManager.onError(e, "qrcode.encode", info, true);
             }
@@ -97,12 +97,12 @@ public class QRCodeResolver extends MessageResolver {
                         qrcode.getRGB(0, 0, qrcode.getWidth(), qrcode.getHeight(),
                                 null, 0, qrcode.getWidth()));
                 Result result = READER.decode(new BinaryBitmap(new HybridBinarizer(source)));
-                info.sendMessageWithQuote(MessageUtils.newChain(
+                info.sendMessageRecallable(MessageUtils.newChain(
                         new QuoteReply(info.data),
                         new PlainText(result.getText())
                 ));
             } catch (NotFoundException e) {
-                info.sendMessageWithQuote(MessageUtils.newChain(
+                info.sendMessageRecallable(MessageUtils.newChain(
                         new QuoteReply(info.data),
                         new PlainText("图片内找不到有效的二维码")
                 ));

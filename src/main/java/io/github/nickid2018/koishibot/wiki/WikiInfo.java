@@ -285,7 +285,8 @@ public class WikiInfo {
                 String from = object.get("from").getAsString();
                 if (from.equalsIgnoreCase(info.title)) {
                     String to = element.getAsJsonObject().get("to").getAsString();
-                    info.titlePast = info.title;
+                    if (info.titlePast == null)
+                        info.titlePast = info.title;
                     info.title = to;
                     info.redirected = true;
                     break;
@@ -398,15 +399,13 @@ public class WikiInfo {
         List<String> items = new ArrayList<>();
 
         Document document = Jsoup.parse(html);
-        String markdown = WebUtil.getAsMarkdownClean(html);
         Elements elements = document.getElementsByTag("a");
 
         for (Element element : elements) {
             String title = element.ownText();
             if (title.isEmpty())
                 title = element.attr("title");
-            if (markdown.contains("*  " + title + " "))
-                items.add(title);
+            items.add(title);
         }
 
         return "消歧义页面，" + page + "可以指:\n" + String.join(", ", items);

@@ -39,14 +39,20 @@ public class LaTeXResolver extends MessageResolver {
     }
 
     @Override
+    public boolean groupOnly() {
+        return false;
+    }
+
+    @Override
     public boolean resolveInternal(String key, MessageInfo info) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
-            String latex = key.trim();
+            String latex = key;
             Transcoder use = transcoder;
             if (latex.startsWith("-a") || latex.startsWith("-A")) {
                 use = alphaTranscoder;
-                latex = latex.substring(2).trim();
+                latex = latex.substring(2);
             }
+            latex = latex.trim();
             try {
                 String data = WebUtil.fetchDataInText(new HttpGet("https://math.vercel.app/?from=" + WebUtil.encode(latex)));
                 Document document = Jsoup.parse(data);
@@ -61,7 +67,7 @@ public class LaTeXResolver extends MessageResolver {
                 Image image = Contact.uploadImage(
                         KoishiBotMain.INSTANCE.botKoishi.getAsFriend(),
                         new ByteArrayInputStream(os.toByteArray()));
-                info.sendMessageWithQuote(image);
+                info.sendMessageRecallable(image);
             } catch (Exception e) {
                 MessageManager.onError(e, "latex", info, true);
             }

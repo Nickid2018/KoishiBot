@@ -34,6 +34,7 @@ public final class KoishiBotMain extends JavaPlugin {
     public File workingDir = new File(".");
     public Bot botKoishi;
     public ExecutorService executor;
+    public long startTime = System.currentTimeMillis();
 
     public static final Set<File> FILES_NOT_DELETE = new HashSet<>();
 

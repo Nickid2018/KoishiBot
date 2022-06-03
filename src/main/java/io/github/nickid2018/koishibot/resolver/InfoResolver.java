@@ -39,6 +39,10 @@ public class InfoResolver extends MessageResolver {
 
     private void printSystemData(MessageInfo info) {
         StringBuilder builder = new StringBuilder("Koishi bot 1.0-SNAPSHOT by Nickid2018\n");
+        long time = System.currentTimeMillis() - KoishiBotMain.INSTANCE.startTime;
+        builder.append("已运行时间：").append(time / 86400_000).append("天").append(time % 86400_000 / 3600_000).append("小时")
+                        .append(time % 3600_000 / 60_000).append("分").append(time % 60_000 / 1_000).append("秒")
+                        .append(time % 1_000).append("毫秒\n");
         builder.append("现在时间: ").append(String.format("%tc", new Date())).append("\n");
         builder.append("内存状况: ");
         double max = Runtime.getRuntime().maxMemory();

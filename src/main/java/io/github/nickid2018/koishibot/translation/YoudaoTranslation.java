@@ -56,7 +56,7 @@ public class YoudaoTranslation implements TranslationProvider {
         if (errorCode != 0)
             throw new IOException("API接口返回错误码" + errorCode);
         if (object.has("basic")) {
-            // Word Mode
+            // SingleChar Mode
             StringBuilder sb = new StringBuilder();
             JsonObject word = object.getAsJsonObject("basic");
             word.getAsJsonArray("explains").forEach(str -> sb.append(str.getAsString()).append("\n"));

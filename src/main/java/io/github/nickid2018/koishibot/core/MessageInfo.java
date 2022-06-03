@@ -1,5 +1,7 @@
 package io.github.nickid2018.koishibot.core;
 
+import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
+import io.github.nickid2018.koishibot.util.MutableBoolean;
 import kotlin.Pair;
 import net.mamoe.mirai.contact.Friend;
 import net.mamoe.mirai.contact.Group;
@@ -10,6 +12,8 @@ import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.utils.ExternalResource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -49,6 +53,21 @@ public class MessageInfo {
     }
 
     public void sendMessage(Message message) {
+        MutableBoolean filtered = new MutableBoolean(false);
+        if (message instanceof MessageChain) {
+            List<Message> messages = new ArrayList<>();
+            for (Message mess : (MessageChain) message) {
+                if (mess instanceof PlainText)
+                    mess = new PlainText(SensitiveWordFilter.filter(((PlainText) mess).component1(), filtered));
+                messages.add(mess);
+            }
+            messages.add(new PlainText("\n<已经过关键词过滤>"));
+            message = MessageUtils.newChain(messages);
+        }
+        if (message instanceof PlainText)
+            message = new PlainText(SensitiveWordFilter.filter(((PlainText) message).component1(), filtered));
+        if (filtered.getValue())
+            message = MessageUtils.newChain(message, new PlainText("\n<已经过关键词过滤>"));
         message = countAntiAutoFilter(message);
         SEND_LOCK.lock();
         try {
@@ -72,7 +91,7 @@ public class MessageInfo {
         }
     }
 
-    public void sendMessageWithQuote(Message message) {
+    public void sendMessageRecallable(Message message) {
         message = countAntiAutoFilter(message);
         SEND_LOCK.lock();
         try {

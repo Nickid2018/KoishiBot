@@ -2,21 +2,15 @@ package io.github.nickid2018.koishibot.core;
 
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.HttpGet;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
 import java.awt.*;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class Settings {
 
@@ -48,6 +42,7 @@ public class Settings {
         loadFFmpeg(settingsRoot);
         loadAppKeyAndSecrets(settingsRoot);
         loadImageSettings(settingsRoot);
+        loadSensitiveWordsSettings(settingsRoot);
     }
 
     public static void reload() throws IOException {
@@ -60,6 +55,7 @@ public class Settings {
         loadFFmpeg(settingsRoot);
         loadAppKeyAndSecrets(settingsRoot);
         loadImageSettings(settingsRoot);
+        loadSensitiveWordsSettings(settingsRoot);
     }
 
     public static void loadWiki(JsonObject settingsRoot) {
@@ -105,5 +101,10 @@ public class Settings {
                 Integer.parseInt(image.get("size").getAsString()));
         IMAGE_FONT_BOLD = new Font(image.get("family").getAsString(), Font.BOLD,
                 Integer.parseInt(image.get("size").getAsString()));
+    }
+
+    public static void loadSensitiveWordsSettings(JsonObject settingsRoot) throws IOException {
+        if (settingsRoot.has("sensitives"))
+            SensitiveWordFilter.loadWordFromFile(settingsRoot.get("sensitives").getAsString());
     }
 }

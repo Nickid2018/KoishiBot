@@ -63,7 +63,7 @@ public class TranslateResolver extends MessageResolver {
                     new QuoteReply(info.data),
                     new PlainText(data)
             );
-            info.sendMessageWithQuote(chain);
+            info.sendMessageRecallable(chain);
         });
         return true;
     }
