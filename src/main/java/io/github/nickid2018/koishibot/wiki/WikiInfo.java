@@ -6,11 +6,16 @@ import io.github.nickid2018.koishibot.util.ImageRenderer;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.*;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.HasFullPageScreenshot;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -50,6 +55,7 @@ public class WikiInfo {
 
     private boolean available;
     private boolean useTextExtracts;
+    private String baseURI;
     private String articleURL;
     private String script;
     private final Map<String, String> interWikiMap = new HashMap<>();
@@ -104,6 +110,7 @@ public class WikiInfo {
                 realURL = server;
             articleURL = realURL + WebUtil.getDataInPathOrNull(object, "query.general.articlepath");
             script = realURL + WebUtil.getDataInPathOrNull(object, "query.general.script");
+            baseURI = "https://" + new URL(articleURL).getHost();
 
             if (!getInterWikiDataFromPage()) {
                 JsonArray interwikiMap = object.getAsJsonObject("query").getAsJsonArray("interwikimap");
@@ -219,10 +226,13 @@ public class WikiInfo {
                 pageInfo.title = title = object.get("title").getAsString();
                 if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation"))
                     pageInfo.shortDescription = getDisambiguationText(title);
-                else if (useTextExtracts && object.has("extract") && section == null)
-                    pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
-                else
-                    pageInfo.shortDescription = resolveText(getMarkdown(title, section, pageInfo));
+                else {
+                    if (useTextExtracts && object.has("extract") && section == null)
+                        pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
+                    else
+                        pageInfo.shortDescription = resolveText(getMarkdown(title, section, pageInfo));
+                    pageInfo.infobox = InfoBoxShooter.getInfoBoxShot(pageInfo.url, baseURI);
+                }
             }
             if (object.has("imageinfo")) {
                 JsonArray array = object.getAsJsonArray("imageinfo");
@@ -297,6 +307,7 @@ public class WikiInfo {
 
     private HttpGet getWithHeader(String url) {
         HttpGet get = new HttpGet(WebUtil.mirror(url));
+        get.setHeader("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
         for (Map.Entry<String, String> entry : additionalHeaders.entrySet())
             get.setHeader(entry.getKey(), entry.getValue());
         return get;

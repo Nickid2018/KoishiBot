@@ -68,6 +68,8 @@ public class AudioTransform {
                 sourceFile.getAbsolutePath(), silk.getAbsolutePath(),
                 "-Fs_API", "24000", "-tencent");
         sourceFile.delete();
+        KoishiBotMain.FILES_NOT_DELETE.add(silk);
+        KoishiBotMain.FILES_NOT_DELETE.remove(sourceFile);
 
         return silk;
     }

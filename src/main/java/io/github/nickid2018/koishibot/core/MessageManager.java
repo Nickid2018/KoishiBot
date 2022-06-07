@@ -135,11 +135,13 @@ public class MessageManager {
                         new PlainText(choose + ": 状态码" + code)
                 );
             }
-        } else
+        } else {
+            String message = t.getMessage();
             chain = MessageUtils.newChain(
                     new QuoteReply(info.data),
-                    new PlainText(choose +  ": " + t.getMessage())
+                    new PlainText(choose + ": " + (message.length() > 100 ? t.getClass().getName() : message))
             );
+        }
         if (quote)
             info.sendMessageRecallable(chain);
         else

@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.core;
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
+import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import org.apache.commons.io.IOUtils;
 
@@ -42,6 +43,7 @@ public class Settings {
         loadFFmpeg(settingsRoot);
         loadAppKeyAndSecrets(settingsRoot);
         loadImageSettings(settingsRoot);
+        loadWebDriver(settingsRoot);
         loadSensitiveWordsSettings(settingsRoot);
     }
 
@@ -55,6 +57,7 @@ public class Settings {
         loadFFmpeg(settingsRoot);
         loadAppKeyAndSecrets(settingsRoot);
         loadImageSettings(settingsRoot);
+        loadWebDriver(settingsRoot);
         loadSensitiveWordsSettings(settingsRoot);
     }
 
@@ -106,5 +109,10 @@ public class Settings {
     public static void loadSensitiveWordsSettings(JsonObject settingsRoot) throws IOException {
         if (settingsRoot.has("sensitives"))
             SensitiveWordFilter.loadWordFromFile(settingsRoot.get("sensitives").getAsString());
+    }
+
+    public static void loadWebDriver(JsonObject settingsRoot) {
+        System.setProperty("webdriver.gecko.driver", settingsRoot.get("webdriver").getAsString());
+        InfoBoxShooter.loadWebDriver();
     }
 }

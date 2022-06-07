@@ -19,6 +19,7 @@ dependencies {
     implementation("org.apache.xmlgraphics:batik-transcoder:1.14")
     implementation("org.apache.xmlgraphics:batik-codec:1.14")
     implementation("com.google.zxing:core:3.5.0")
+    implementation("org.seleniumhq.selenium:selenium-java:4.2.1")
 }
 
 group = "io.github.nickid2018"

@@ -19,6 +19,7 @@ public class PageInfo {
     public String shortDescription;
     public InputStream imageStream;
     public Future<File[]> audioFiles;
+    public Future<File> infobox;
 
     public boolean isSearched;
     public boolean isRandom;

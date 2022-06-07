@@ -12,6 +12,7 @@ import net.mamoe.mirai.utils.ExternalResource;
 
 import java.io.File;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
 public class WikiResolver extends MessageResolver {
@@ -136,6 +137,20 @@ public class WikiResolver extends MessageResolver {
                             KoishiBotMain.FILES_NOT_DELETE.remove(file);
                     } catch (Exception e) {
                         MessageManager.onError(e, "wiki.audio", info, false);
+                    }
+                });
+            }
+            if (page.infobox != null) {
+                KoishiBotMain.INSTANCE.executor.execute(() -> {
+                    try {
+                        File file = page.infobox.get();
+                        if (file == null)
+                            return;
+                        info.sendMessageRecallable(Contact.uploadImage(
+                                KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), file));
+                        KoishiBotMain.FILES_NOT_DELETE.remove(file);
+                    } catch (Exception e) {
+                        MessageManager.onError(e, "wiki.infobox", info, false);
                     }
                 });
             }
