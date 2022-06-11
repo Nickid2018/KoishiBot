@@ -1,6 +1,7 @@
 package io.github.nickid2018.koishibot.wiki;
 
 import io.github.nickid2018.koishibot.KoishiBotMain;
+import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,6 +21,7 @@ import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,7 +47,7 @@ public class InfoBoxShooter {
 
     public static final String[] SUPPORT_INFOBOX = new String[] {
             "notaninfobox", "infoboxtable", "infoboxSpecial", "infotemplatebox", "infobox2",
-            "tpl-infobox", "portable-infobox", "infobox"
+            "tpl-infobox", "portable-infobox", "toccolours", "infobox"
     };
 
     public static Future<File> getInfoBoxShot(String url, String baseURI) {
@@ -57,6 +59,7 @@ public class InfoBoxShooter {
     private static File getInfoBoxShotInternal(String url, String baseURI) throws IOException {
         URLConnection connection = new URL(url).openConnection();
         connection.addRequestProperty("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
+        connection.addRequestProperty("User-Agent", WebUtil.chooseRandomUA());
         String htmlData = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
         Document doc = Jsoup.parse(htmlData);
 
@@ -64,8 +67,9 @@ public class InfoBoxShooter {
         String className = null;
         for (String name : SUPPORT_INFOBOX) {
             Elements elements = doc.getElementsByClass(name);
-            if (elements.size() > 0) {
-                element = elements.get(0);
+            Optional<Element> elementFind = elements.stream().filter(elementNow -> elementNow.classNames().contains(name)).findFirst();
+            if (elementFind.isPresent()) {
+                element = elementFind.get();
                 className = name;
                 break;
             }
@@ -93,9 +97,9 @@ public class InfoBoxShooter {
         doc.body().addClass("heimu_toggle_on");
         doc.head().prependChild(new Element("base").attr("href", baseURI));
         Element heimuToggle = new Element("style").text(
-                "body.heimu_toggle_on .heimu, body.heimu_toggle_on .heimu rt {\n" +
-                "  background-color: rgba(37,37,37,0.13) !important;\n" +
-                "}");
+                        "body.heimu_toggle_on .heimu, body.heimu_toggle_on .heimu rt {\n" +
+                        "  background-color: rgba(37,37,37,0.13) !important;\n" +
+                        "}");
         doc.head().appendChild(heimuToggle);
 
         File html = new File(DATA_FOLDER, "htm" + NAME_RANDOM.nextLong() + ".html");
@@ -111,10 +115,14 @@ public class InfoBoxShooter {
         File png = new File(DATA_FOLDER, "infobox" + NAME_RANDOM.nextLong() + ".png");
         KoishiBotMain.FILES_NOT_DELETE.add(png);
         BufferedImage image = ImageIO.read(srcFile);
-        WebElement element2 = driver.findElement(By.className(className));
-        BufferedImage sub = image.getSubimage(element2.getLocation().x,
-                element2.getLocation().y, element2.getSize().width, element2.getSize().height);
-        ImageIO.write(sub, "png", png);
+        try {
+            WebElement element2 = driver.findElement(By.className(className));
+            BufferedImage sub = image.getSubimage(element2.getLocation().x,
+                    element2.getLocation().y, element2.getSize().width, element2.getSize().height);
+            ImageIO.write(sub, "png", png);
+        } catch (Exception e) {
+            throw new IOException("无法渲染信息框", e);
+        }
 
         return png;
     }

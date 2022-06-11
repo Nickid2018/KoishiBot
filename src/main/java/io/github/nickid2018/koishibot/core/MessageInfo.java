@@ -61,7 +61,6 @@ public class MessageInfo {
                     mess = new PlainText(SensitiveWordFilter.filter(((PlainText) mess).component1(), filtered));
                 messages.add(mess);
             }
-            messages.add(new PlainText("\n<已经过关键词过滤>"));
             message = MessageUtils.newChain(messages);
         }
         if (message instanceof PlainText)
@@ -71,7 +70,7 @@ public class MessageInfo {
         message = countAntiAutoFilter(message);
         SEND_LOCK.lock();
         try {
-            long sleepTime = 250 - (System.currentTimeMillis() - LAST_SEND_TIME.get());
+            long sleepTime = 1000 - (System.currentTimeMillis() - LAST_SEND_TIME.get());
             if (sleepTime > 0)
                 try {
                     Thread.sleep(sleepTime);

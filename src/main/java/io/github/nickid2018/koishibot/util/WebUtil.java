@@ -35,13 +35,24 @@ public class WebUtil {
             Arrays.asList("jpg", "jpeg", "png", "bmp", "gif")
     );
 
+    public static final String[] USER_AGENTS = new String[] {
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62"
+    };
+
     private static final Remark REMARK;
     private static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot-Web");
+    private static final Random UA_RANDOM = new Random();
+
+    public static String chooseRandomUA() {
+        return USER_AGENTS[UA_RANDOM.nextInt(USER_AGENTS.length)];
+    }
 
     public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableCookieManagement()
-                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0").build();
+                .setUserAgent(chooseRandomUA()).build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
@@ -73,7 +84,7 @@ public class WebUtil {
     public static String fetchDataInText(HttpUriRequest post, boolean ignoreErrorCode) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableCookieManagement()
-                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0").build();
+                .setUserAgent(chooseRandomUA()).build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
@@ -97,7 +108,7 @@ public class WebUtil {
     public static String getRedirected(HttpUriRequest request) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableRedirectHandling().disableCookieManagement()
-                .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gecko/20100101 Firefox/99.0").build();
+                .setUserAgent(chooseRandomUA()).build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(request);

@@ -104,6 +104,7 @@ public final class SensitiveWordFilter {
             }
         }
         sort(SINGLE_CHAR_LIST);
+        System.out.printf("Sensitive Library loaded with %d words.%n", SINGLE_CHAR_LIST.size());
     }
 
     private static void sort(List<SingleChar> singleChars) {

@@ -49,7 +49,7 @@ public class YoudaoTranslation implements TranslationProvider {
             String value = en.getValue();
             paramsList.add(new BasicNameValuePair(key, value));
         }
-        httpPost.setEntity(new UrlEncodedFormEntity(paramsList));
+        httpPost.setEntity(new UrlEncodedFormEntity(paramsList, StandardCharsets.UTF_8));
 
         JsonObject object = WebUtil.fetchDataInJson(httpPost).getAsJsonObject();
         int errorCode = object.getAsJsonPrimitive("errorCode").getAsInt();
