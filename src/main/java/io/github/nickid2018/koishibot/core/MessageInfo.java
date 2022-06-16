@@ -42,12 +42,12 @@ public class MessageInfo {
     public MessageEvent event;
 
     public Message countAntiAutoFilter(Message message) {
-        if (message instanceof ForwardMessage | message instanceof Audio)
+        if (message instanceof ForwardMessage | message instanceof Audio | message instanceof Image)
             return message;
         if (MESSAGE_COUNTER.getAndIncrement() % 10 == 0)
             return MessageUtils.newChain(
                     message,
-                    new PlainText("\n" + ANTI_AUTO_FILTER[rand.nextInt(4)])
+                    new PlainText("\n" + ANTI_AUTO_FILTER[rand.nextInt(ANTI_AUTO_FILTER.length)])
             );
         return message;
     }

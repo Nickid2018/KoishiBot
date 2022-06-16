@@ -18,6 +18,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class QRCodeResolver extends MessageResolver {
 
@@ -36,12 +37,7 @@ public class QRCodeResolver extends MessageResolver {
     }
 
     @Override
-    public boolean needAt() {
-        return false;
-    }
-
-    @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         key = key.trim();
         String[] data = key.split(" ", 2);
         switch (data[0].toLowerCase(Locale.ROOT)) {

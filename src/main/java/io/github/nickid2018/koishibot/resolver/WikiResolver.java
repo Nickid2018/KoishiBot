@@ -4,6 +4,7 @@ import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
 import io.github.nickid2018.koishibot.core.MessageManager;
 import io.github.nickid2018.koishibot.core.Settings;
+import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.wiki.PageInfo;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import net.mamoe.mirai.contact.Contact;
@@ -12,8 +13,8 @@ import net.mamoe.mirai.utils.ExternalResource;
 
 import java.io.File;
 import java.util.Locale;
-import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 public class WikiResolver extends MessageResolver {
 
@@ -24,17 +25,7 @@ public class WikiResolver extends MessageResolver {
     }
 
     @Override
-    public boolean needAt() {
-        return false;
-    }
-
-    @Override
-    public boolean groupOnly() {
-        return false;
-    }
-
-    @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         key = key.substring(2, key.length() - 2);
         String finalKey = key;
         KoishiBotMain.INSTANCE.executor.execute(() -> {
@@ -133,8 +124,7 @@ public class WikiResolver extends MessageResolver {
                             info.sendMessage(audio);
                             resource.close();
                         }
-                        for (File file : audios)
-                            KoishiBotMain.FILES_NOT_DELETE.remove(file);
+                        Stream.of(audios).forEach(TempFileSystem::unlockFile);
                     } catch (Exception e) {
                         MessageManager.onError(e, "wiki.audio", info, false);
                     }
@@ -148,7 +138,7 @@ public class WikiResolver extends MessageResolver {
                             return;
                         info.sendMessageRecallable(Contact.uploadImage(
                                 KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), file));
-                        KoishiBotMain.FILES_NOT_DELETE.remove(file);
+                        TempFileSystem.unlockFile(file);
                     } catch (Exception e) {
                         MessageManager.onError(e, "wiki.infobox", info, false);
                     }

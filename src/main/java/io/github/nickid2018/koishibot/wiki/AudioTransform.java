@@ -1,25 +1,20 @@
 package io.github.nickid2018.koishibot.wiki;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.Settings;
+import io.github.nickid2018.koishibot.core.TempFileSystem;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 // CAN'T BE TESTED IN PRODUCTION ENVIRONMENT(aka IDE)!
 // PROCESS CAN'T RUN WITHOUT AN ACTUAL CONSOLE, EVEN THOUGH IDE CONSOLES!
 public class AudioTransform {
 
-    public static final Random NAME_RANDOM = new Random();
-    public static final File DATA_FOLDER = KoishiBotMain.INSTANCE.getDataFolder();
-
     public static File[] transform(String suffix, URL source) throws Exception {
-        File sourceFile = new File(DATA_FOLDER, "as" + NAME_RANDOM.nextLong() + "." + suffix);
-        sourceFile.createNewFile();
+        File sourceFile = TempFileSystem.createTmpFileAndCreate("as", suffix);
         IOUtils.copy(source, sourceFile);
         return transformAsSilk(sourceFile);
     }
@@ -42,8 +37,7 @@ public class AudioTransform {
         int length = getAudioLength(sourceFile);
         int offset = 0;
         while (length > 50) {
-            File pcm = new File(DATA_FOLDER, "tmp" + NAME_RANDOM.nextLong() + ".pcm");
-            KoishiBotMain.FILES_NOT_DELETE.add(pcm);
+            File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
             executeCommand(null, Settings.FFMPEG_LOCATION, "-i",
                     sourceFile.getAbsolutePath(), "-ss", offset + "", "-t", "50", "-f", "s16le", "-ar", "24000", "-ac", "1",
                     "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
@@ -51,25 +45,24 @@ public class AudioTransform {
             offset += 50;
             length -= 50;
         }
-        File pcm = new File(DATA_FOLDER, "tmp" + NAME_RANDOM.nextLong() + ".pcm");
-        KoishiBotMain.FILES_NOT_DELETE.add(pcm);
+        File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
         executeCommand(null, Settings.FFMPEG_LOCATION, "-i",
                 sourceFile.getAbsolutePath(), "-ss", offset + "", "-f", "s16le", "-ar", "24000", "-ac", "1",
                 "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
         silks.add(transformPCMtoSILK(pcm));
         sourceFile.delete();
+        TempFileSystem.unlockFileAndDelete(sourceFile);
 
         return silks.toArray(new File[0]);
     }
 
     public static File transformPCMtoSILK(File sourceFile) throws Exception {
-        File silk = new File(DATA_FOLDER, "slk" + NAME_RANDOM.nextLong() + ".silk");
+        File silk = TempFileSystem.createTmpFile("slk", "silk");
         executeCommand(null, Settings.ENCODER_LOCATION,
                 sourceFile.getAbsolutePath(), silk.getAbsolutePath(),
                 "-Fs_API", "24000", "-tencent");
         sourceFile.delete();
-        KoishiBotMain.FILES_NOT_DELETE.add(silk);
-        KoishiBotMain.FILES_NOT_DELETE.remove(sourceFile);
+        TempFileSystem.unlockFileAndDelete(sourceFile);
 
         return silk;
     }

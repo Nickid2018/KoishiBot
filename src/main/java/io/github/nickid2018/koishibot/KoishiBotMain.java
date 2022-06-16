@@ -32,27 +32,15 @@ public final class KoishiBotMain extends JavaPlugin {
     public static final KoishiBotMain INSTANCE = new KoishiBotMain();
 
     public File workingDir = new File(".");
+    public File tmpDir;
+
     public Bot botKoishi;
     public ExecutorService executor;
     public long startTime = System.currentTimeMillis();
 
-    public static final Set<File> FILES_NOT_DELETE = new HashSet<>();
-
     private KoishiBotMain() {
         super(new JvmPluginDescriptionBuilder("io.github.nickid2018.koishibot", "1.0-SNAPSHOT").build());
-        Thread CLEANER = new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(7200_000);
-                    Stream.of(Objects.requireNonNull(getDataFolder().listFiles())).filter(
-                            file -> !FILES_NOT_DELETE.contains(file)
-                    ).forEach(File::delete);
-                } catch (InterruptedException ignored) {
-                }
-            }
-        });
-        CLEANER.setDaemon(true);
-        CLEANER.start();
+        tmpDir = new File(getDataFolder(), "tmp");
     }
 
     @Override
@@ -89,7 +77,7 @@ public final class KoishiBotMain extends JavaPlugin {
         botKoishi.close();
         executor.shutdown();
         executor = null;
-        Stream.of(Objects.requireNonNull(getDataFolder().listFiles())).forEach(File::delete);
+        TempFileSystem.onDisable();
     }
 
     private void registerEvents() {
@@ -179,4 +167,6 @@ public final class KoishiBotMain extends JavaPlugin {
             return Unit.INSTANCE;
         };
     }
+
+
 }

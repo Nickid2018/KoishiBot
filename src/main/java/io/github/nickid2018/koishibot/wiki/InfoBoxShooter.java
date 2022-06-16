@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.wiki;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
+import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
@@ -22,15 +22,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class InfoBoxShooter {
-
-    public static final Random NAME_RANDOM = new Random();
-    public static final File DATA_FOLDER = KoishiBotMain.INSTANCE.getDataFolder();
 
     private static WebDriver driver;
     private static ExecutorService executor;
@@ -57,6 +53,10 @@ public class InfoBoxShooter {
     }
 
     private static File getInfoBoxShotInternal(String url, String baseURI) throws IOException {
+        File data = TempFileSystem.getTmpFileBuffered("infobox", url);
+        if (data != null)
+            return data;
+
         URLConnection connection = new URL(url).openConnection();
         connection.addRequestProperty("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
         connection.addRequestProperty("User-Agent", WebUtil.chooseRandomUA());
@@ -102,24 +102,23 @@ public class InfoBoxShooter {
                         "}");
         doc.head().appendChild(heimuToggle);
 
-        File html = new File(DATA_FOLDER, "htm" + NAME_RANDOM.nextLong() + ".html");
-        KoishiBotMain.FILES_NOT_DELETE.add(html);
+        File html = TempFileSystem.createTmpFileAndCreate("htm", "html");
         try (Writer writer = new FileWriter(html)) {
             IOUtils.write(doc.html(), writer);
         }
 
         driver.get(html.getAbsolutePath());
         File srcFile = ((HasFullPageScreenshot) driver).getFullPageScreenshotAs(OutputType.FILE);
-        KoishiBotMain.FILES_NOT_DELETE.remove(html);
+        TempFileSystem.unlockFileAndDelete(html);
 
-        File png = new File(DATA_FOLDER, "infobox" + NAME_RANDOM.nextLong() + ".png");
-        KoishiBotMain.FILES_NOT_DELETE.add(png);
+        File png = TempFileSystem.createTmpFileBuffered("infobox", url, "infobox", "png", false);
         BufferedImage image = ImageIO.read(srcFile);
         try {
             WebElement element2 = driver.findElement(By.className(className));
             BufferedImage sub = image.getSubimage(element2.getLocation().x,
                     element2.getLocation().y, element2.getSize().width, element2.getSize().height);
             ImageIO.write(sub, "png", png);
+            srcFile.delete();
         } catch (Exception e) {
             throw new IOException("无法渲染信息框", e);
         }

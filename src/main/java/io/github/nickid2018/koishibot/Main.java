@@ -9,6 +9,5 @@ public class Main {
     public static void main(String[] args) {
         MiraiConsoleTerminalLoader.INSTANCE.startAsDaemon(new MiraiConsoleImplementationTerminal());
         PluginManager.INSTANCE.enablePlugin(KoishiBotMain.INSTANCE);
-
     }
 }

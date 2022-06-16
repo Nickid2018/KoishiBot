@@ -3,7 +3,6 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
 import io.github.nickid2018.koishibot.core.MessageManager;
@@ -18,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.regex.Pattern;
 
 public class BugTrackerResolver extends MessageResolver {
@@ -36,17 +34,7 @@ public class BugTrackerResolver extends MessageResolver {
     }
 
     @Override
-    public boolean needAt() {
-        return false;
-    }
-
-    @Override
-    public boolean groupOnly() {
-        return false;
-    }
-
-    @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         String resolve = key.substring(5, key.length() - 1);
         boolean isDisplay = RegexUtil.match(BUG_NAME_PATTERN, resolve);
         boolean isSearch = RegexUtil.match(BUG_SEARCH_PATTERN, resolve);

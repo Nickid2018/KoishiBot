@@ -8,10 +8,10 @@ import java.util.regex.Pattern;
 
 public abstract class MessageResolver {
 
-    private final Pattern regex;
+    private final Pattern[] regex;
     private final String prefix;
 
-    public MessageResolver(Pattern pattern) {
+    public MessageResolver(Pattern... pattern) {
         regex = pattern;
         prefix = null;
     }
@@ -22,11 +22,7 @@ public abstract class MessageResolver {
     }
 
     public boolean needAt() {
-        return true;
-    }
-
-    public boolean groupOnly() {
-        return true;
+        return false;
     }
 
     public boolean groupTempChat() {
@@ -40,14 +36,16 @@ public abstract class MessageResolver {
     public boolean resolve(String segment, MessageInfo info) {
         segment = segment.trim();
         if (prefix != null && segment.toLowerCase(Locale.ROOT).startsWith(prefix))
-            return resolveInternal(segment.substring(prefix.length()), info);
+            return resolveInternal(segment.substring(prefix.length()), info, null);
         else if (regex != null) {
-            Matcher matcher = regex.matcher(segment);
-            if (matcher.find())
-                return resolveInternal(segment.substring(matcher.start(), matcher.end()), info);
+            for (Pattern pattern : regex) {
+                Matcher matcher = pattern.matcher(segment);
+                if (matcher.find())
+                    return resolveInternal(segment.substring(matcher.start(), matcher.end()), info, pattern);
+            }
         }
         return false;
     }
 
-    public abstract boolean resolveInternal(String key, MessageInfo info);
+    public abstract boolean resolveInternal(String key, MessageInfo info, Pattern pattern);
 }

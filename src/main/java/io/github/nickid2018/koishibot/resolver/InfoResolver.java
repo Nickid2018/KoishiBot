@@ -8,6 +8,7 @@ import net.mamoe.mirai.message.data.PlainText;
 
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class InfoResolver extends MessageResolver {
 
@@ -16,12 +17,12 @@ public class InfoResolver extends MessageResolver {
     }
 
     @Override
-    public boolean groupOnly() {
-        return false;
+    public boolean needAt() {
+        return true;
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         key = key.trim().toLowerCase(Locale.ROOT);
         if (key.isEmpty())
             printSystemData(info);

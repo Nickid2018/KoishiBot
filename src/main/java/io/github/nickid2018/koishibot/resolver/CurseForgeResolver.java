@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.MessageInfo;
 import io.github.nickid2018.koishibot.core.MessageManager;
@@ -19,7 +18,6 @@ import org.apache.http.client.methods.HttpGet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,40 +28,27 @@ import java.util.stream.Collectors;
 public class CurseForgeResolver extends MessageResolver {
 
     public static final Pattern MOD_PATTERN = Pattern.compile("<mod:.+?>");
-    public static final Pattern MOD_SEARCH_PATTERN = Pattern.compile("search:.+");
-    public static final Pattern MOD_FILES_PATTERN = Pattern.compile("files:.+");
+    public static final Pattern MOD_SEARCH_PATTERN = Pattern.compile("<mod:search:.+?>");
+    public static final Pattern MOD_FILES_PATTERN = Pattern.compile("<mod:files:.+?>");
     public static final Pattern MINECRAFT_VERSION = Pattern.compile("1\\.\\d{1,2}(\\.\\d)?");
     public static final Pattern SEARCH_PAGE_PATTERN = Pattern.compile("\\d*(,\\d+)?:.+");
 
     public static final String MODRINTH_API_URL = "https://api.modrinth.com/v2";
 
     public CurseForgeResolver() {
-        super(MOD_PATTERN);
+        super(MOD_SEARCH_PATTERN, MOD_FILES_PATTERN, MOD_PATTERN);
     }
 
     @Override
-    public boolean needAt() {
-        return false;
-    }
-
-    @Override
-    public boolean groupOnly() {
-        return false;
-    }
-
-    @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
-        String resolve = key.substring(5, key.length() - 1);
-        boolean search = RegexUtil.match(MOD_SEARCH_PATTERN, resolve);
-        boolean files = RegexUtil.match(MOD_FILES_PATTERN, resolve);
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             try {
-                if (search)
-                    displaySearch(resolve.substring(7), info);
-                else if (files)
-                    displayFiles(resolve.substring(6), info);
+                if (pattern == MOD_SEARCH_PATTERN)
+                    displaySearch(key.substring(12, key.length() - 1), info);
+                else if (pattern == MOD_FILES_PATTERN)
+                    displayFiles(key.substring(11, key.length() - 1), info);
                 else
-                    displayMod(resolve, info);
+                    displayMod(key.substring(5, key.length() - 1), info);
             } catch (Exception e) {
                 MessageManager.onError(e, "curseforge", info, false);
             }

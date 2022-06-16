@@ -31,6 +31,8 @@ public class Settings {
     public static final Map<String, String> MIRROR = new HashMap<>();
     public static String BASE_WIKI;
 
+    public static String GITHUB_TOKEN;
+
     public static void load() throws IOException {
         String data = IOUtils.toString(new FileReader(KoishiBotMain.INSTANCE.resolveConfigFile("botKoishi.json")));
         JsonObject settingsRoot = JsonParser.parseString(data).getAsJsonObject();
@@ -114,5 +116,11 @@ public class Settings {
     public static void loadWebDriver(JsonObject settingsRoot) {
         System.setProperty("webdriver.gecko.driver", settingsRoot.get("webdriver").getAsString());
         InfoBoxShooter.loadWebDriver();
+    }
+
+    public static void loadGitHub(JsonObject settingsRoot) {
+        JsonElement element = settingsRoot.get("github_token");
+        if (element.isJsonPrimitive())
+            GITHUB_TOKEN = element.getAsString();
     }
 }

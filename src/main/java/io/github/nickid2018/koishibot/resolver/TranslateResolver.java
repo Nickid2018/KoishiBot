@@ -21,17 +21,7 @@ public class TranslateResolver extends MessageResolver {
     }
 
     @Override
-    public boolean groupOnly() {
-        return false;
-    }
-
-    @Override
-    public boolean needAt() {
-        return false;
-    }
-
-    @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             if (info.event.getSender().getId() == 694000037 || info.event.getSender().getId() == 2435219469L) {
                 info.sendMessage(MessageUtils.newChain(

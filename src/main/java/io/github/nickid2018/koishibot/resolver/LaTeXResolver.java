@@ -18,6 +18,7 @@ import org.jsoup.select.Elements;
 import java.awt.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Pattern;
 
 public class LaTeXResolver extends MessageResolver {
 
@@ -34,17 +35,7 @@ public class LaTeXResolver extends MessageResolver {
     }
 
     @Override
-    public boolean needAt() {
-        return false;
-    }
-
-    @Override
-    public boolean groupOnly() {
-        return false;
-    }
-
-    @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             String latex = key;
             Transcoder use = transcoder;

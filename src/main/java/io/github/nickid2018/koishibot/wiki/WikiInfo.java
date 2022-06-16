@@ -6,16 +6,11 @@ import io.github.nickid2018.koishibot.util.ImageRenderer;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpGet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.*;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.HasFullPageScreenshot;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

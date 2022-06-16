@@ -31,11 +31,6 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
     public static final Pattern B_EP_EPISODE_PATTERN = Pattern.compile("[eE][pP][1-9]\\d{0,7}");
     public static final Pattern B_SS_EPISODE_PATTERN = Pattern.compile("[sS]{2}[1-9]\\d{0,7}");
     public static final Pattern B_SHORT_LINK_PATTERN = Pattern.compile("https://b23\\.tv/[0-9a-zA-Z]+");
-    public static final Pattern B_VIDEO_PATTERN = Pattern.compile(
-            "(" + B_AV_VIDEO_PATTERN.pattern() + ")|(" + B_BV_VIDEO_PATTERN.pattern() +
-                    ")|(" + B_CV_ARTICLE_PATTERN.pattern() + ")|(" + B_AU_AUDIO_PATTERN.pattern() + ")|(" +
-                        B_EP_EPISODE_PATTERN.pattern() + ")|(" + B_SS_EPISODE_PATTERN.pattern() + ")|(" +
-                        B_SHORT_LINK_PATTERN.pattern() + ")");
 
     public static final String BILIBILI_VIDEO_API = "https://api.bilibili.com/x/web-interface/";
     public static final String BILIBILI_ARTICLE_API = "https://api.bilibili.com/x/article/";
@@ -45,27 +40,26 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
     public static final String[] EPISODE_TYPE = {null, "番剧", "电影", "纪录片", "国创", "电视剧", null, "综艺"};
 
     public BilibiliDataResolver() {
-        super(B_VIDEO_PATTERN);
+        super(B_AV_VIDEO_PATTERN, B_BV_VIDEO_PATTERN, B_CV_ARTICLE_PATTERN, B_AU_AUDIO_PATTERN,
+                B_EP_EPISODE_PATTERN, B_SS_EPISODE_PATTERN, B_SHORT_LINK_PATTERN);
     }
 
     @Override
-    public boolean needAt() {
-        return false;
-    }
-
-    @Override
-    public boolean groupOnly() {
-        return false;
-    }
-
-    @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             try {
-                if (RegexUtil.match(B_SHORT_LINK_PATTERN, key))
+                if (pattern == B_SHORT_LINK_PATTERN)
                     fromShortLink(key, info);
+                else if (pattern == B_CV_ARTICLE_PATTERN)
+                    doArticleDisplay(key, info);
+                else if (pattern == B_SS_EPISODE_PATTERN)
+                    doEpisodeDisplay(key, info, true);
+                else if (pattern == B_EP_EPISODE_PATTERN)
+                    doEpisodeDisplay(key, info, false);
+                else if (pattern == B_AU_AUDIO_PATTERN)
+                    doAudioDisplay(key, info);
                 else
-                    choose(key, info);
+                    doVideoDisplay(key, info);
             } catch (Exception e) {
                 MessageManager.onError(e, "bilibili", info, true);
             }

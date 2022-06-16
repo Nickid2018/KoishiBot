@@ -13,6 +13,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 public class HelpResolver extends MessageResolver {
 
@@ -35,17 +36,17 @@ public class HelpResolver extends MessageResolver {
     }
 
     @Override
-    public boolean groupOnly() {
-        return false;
-    }
-
-    @Override
     public boolean groupTempChat() {
         return true;
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info) {
+    public boolean needAt() {
+        return true;
+    }
+
+    @Override
+    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
         key = key.trim();
         if (key.isEmpty() || !HELP_DATA.containsKey(key)) {
             MessageChain chain = MessageUtils.newChain(new PlainText(UNIVERSAL_HELP.get()));

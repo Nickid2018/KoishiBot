@@ -83,8 +83,7 @@ public class MessageManager {
                 strings.add(((PlainText) content).component1());
         }
         MutableBoolean bool = new MutableBoolean(false);
-        RESOLVERS.stream().filter(messageResolver -> !messageResolver.groupOnly())
-                .forEach(messageResolver -> strings.forEach(string -> {
+        RESOLVERS.forEach(messageResolver -> strings.forEach(string -> {
                     if (!bool.getValue() && messageResolver.resolve(string, info))
                         bool.setValue(true);
                 }));
@@ -137,6 +136,10 @@ public class MessageManager {
             }
         } else {
             String message = t.getMessage();
+            for (Map.Entry<String, String> url : Settings.MIRROR.entrySet()) {
+                if (message.contains(url.getValue()))
+                    message = message.replace(url.getValue(), url.getKey());
+            }
             chain = MessageUtils.newChain(
                     new QuoteReply(info.data),
                     new PlainText(choose + ": " + (message.length() > 100 ? t.getClass().getName() : message))
