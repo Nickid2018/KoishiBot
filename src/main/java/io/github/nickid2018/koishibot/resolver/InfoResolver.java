@@ -2,9 +2,9 @@ package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import net.mamoe.mirai.message.data.Message;
-import net.mamoe.mirai.message.data.PlainText;
+import io.github.nickid2018.koishibot.message.api.AbstractMessage;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
 
 import java.util.Date;
 import java.util.Locale;
@@ -22,23 +22,23 @@ public class InfoResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         key = key.trim().toLowerCase(Locale.ROOT);
         if (key.isEmpty())
-            printSystemData(info);
+            printSystemData(context, environment);
         else {
-            Message message = null;
+            AbstractMessage message = null;
             switch (key) {
                 case "error":
-                    message = getError();
+                    message = getError(environment);
                     break;
             }
-            info.sendMessage(message);
+            environment.getMessageSender().sendMessage(context, message);
         }
         return true;
     }
 
-    private void printSystemData(MessageInfo info) {
+    private void printSystemData(MessageContext context, Environment environment) {
         StringBuilder builder = new StringBuilder("Koishi bot 1.0-SNAPSHOT by Nickid2018\n");
         long time = System.currentTimeMillis() - KoishiBotMain.INSTANCE.startTime;
         builder.append("已运行时间：").append(time / 86400_000).append("天").append(time % 86400_000 / 3600_000).append("小时")
@@ -54,13 +54,14 @@ public class InfoResolver extends MessageResolver {
         builder.append("占比").append(String.format("%.2f", (total - free) / max * 100)).append("%\n");
         builder.append("系统信息: ").append(System.getProperty("os.name")).append("\n");
         builder.append("项目已在Github上开源: https://github.com/Nickid2018/KoishiBot (AGPL v3)");
-        KoishiBotMain.INSTANCE.executor.execute(() -> info.sendMessage(new PlainText(builder)));
+        KoishiBotMain.INSTANCE.executor.execute(
+                () -> environment.getMessageSender().sendMessage(context, environment.newText(builder.toString())));
     }
 
-    private Message getError() {
-        Message message = ErrorRecord.formatAsForwardMessage();
+    private AbstractMessage getError(Environment environment) {
+        AbstractMessage message = ErrorRecord.formatAsForwardMessage(environment);
         if (message == null)
-            message = new PlainText("无错误日志");
+            message = environment.newText("无错误日志");
         return message;
     }
 }

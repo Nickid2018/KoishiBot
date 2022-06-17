@@ -1,17 +1,14 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import io.github.nickid2018.koishibot.core.MessageManager;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
+import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.wiki.PageInfo;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
-import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.message.data.*;
-import net.mamoe.mirai.utils.ExternalResource;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -25,60 +22,61 @@ public class WikiResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         key = key.substring(2, key.length() - 2);
         String finalKey = key;
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             String[] splits = finalKey.split(":", 2);
             try {
                 if (splits.length == 1 || !Settings.SUPPORT_WIKIS.containsKey(splits[0].toLowerCase(Locale.ROOT)))
-                    requestWikiPage(Settings.SUPPORT_WIKIS.get(Settings.BASE_WIKI), null, finalKey, info, null);
+                    requestWikiPage(Settings.SUPPORT_WIKIS.get(Settings.BASE_WIKI), null,
+                            finalKey, context, null, environment);
                 else
                     requestWikiPage(Settings.SUPPORT_WIKIS.get(splits[0].toLowerCase(Locale.ROOT)), splits[0].toLowerCase(Locale.ROOT),
-                            splits[1], info, null);
+                            splits[1], context, null, environment);
             } catch (Exception e) {
-                MessageManager.onError(e, "wiki", info, true);
+                environment.getMessageSender().onError(e, "wiki", context, true);
             }
         });
         return true;
     }
 
-    private static void requestWikiPage(WikiInfo wiki, String namespace, String title, MessageInfo info, String searchTitle)
+    private static void requestWikiPage(
+            WikiInfo wiki, String namespace, String title, MessageContext context, String searchTitle, Environment environment)
             throws Exception {
         PageInfo page = wiki.parsePageInfo(title, 0, namespace);
         StringBuilder data = new StringBuilder();
         if (page.isSearched) {
             if (page.title != null) {
-                MessageChain chain = MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText("[[" + (namespace == null ? "" : namespace + ":") + title + "]]不存在，" +
+                ChainMessage chain = environment.newChain(
+                        environment.newQuote(context.getMessage()),
+                        environment.newText("[[" + (namespace == null ? "" : namespace + ":") + title + "]]不存在，" +
                                 "你要查看的是否为[[" + (page.prefix == null ? "" : page.prefix + ":") + page.title + "]](打y确认)")
                 );
-                info.sendMessageAwait(chain, (sourceData, newInfo) -> {
+                environment.getMessageSender().sendMessageAwait(context, chain, next -> {
                     try {
-                        sourceData.receipt.recall();
+                        chain.recall();
                         boolean accept = false;
-                        for (SingleMessage content : newInfo.data) {
-                            if (!(content instanceof PlainText))
+                        for (AbstractMessage message : next.getMessages()) {
+                            if (!(message instanceof TextMessage))
                                 continue;
-                            if (((PlainText) content).component1().equalsIgnoreCase("y")) {
+                            if (((TextMessage) message).getText().equalsIgnoreCase("y")) {
                                 accept = true;
                                 break;
                             }
                         }
                         if (accept)
-                            requestWikiPage(page.info, page.prefix, page.title, info,
-                                    (namespace == null ? "" : namespace + ":") + title);
+                            requestWikiPage(page.info, page.prefix, page.title, context,
+                                    (namespace == null ? "" : namespace + ":") + title, environment);
                     } catch (Exception e) {
-                        MessageManager.onError(e, "wiki.re_search", info, true);
+                        environment.getMessageSender().onError(e, "wiki.re_search", context, true);
                     }
                 });
             } else {
-                MessageChain chain = MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText("没有搜索到有关于[[" + (namespace == null ? "" : namespace + ":") + title + "]]的页面")
-                );
-                info.sendMessageRecallable(chain);
+                environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                        environment.newQuote(context.getMessage()),
+                        environment.newText("没有搜索到有关于[[" + (namespace == null ? "" : namespace + ":") + title + "]]的页面")
+                ));
             }
         } else {
             if (page.redirected)
@@ -105,28 +103,24 @@ public class WikiResolver extends MessageResolver {
             String st = data.toString().trim();
 
             if (!st.isEmpty())
-                info.sendMessageRecallable(MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText(st)
-                ));
-
+                environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                      environment.newQuote(context.getMessage()),
+                       environment.newText(st)
+               ));
             if (page.imageStream != null)
-                info.sendMessageRecallable(Contact.uploadImage(
-                        KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), page.imageStream));
-            if (page.audioFiles != null && info.group != null) {
+                environment.getMessageSender().sendMessageRecallable(context, environment.newImage(page.imageStream));
+            if (page.audioFiles != null && context.getGroup() != null) {
                 KoishiBotMain.INSTANCE.executor.execute(() -> {
                     try {
                         File[] audios = page.audioFiles.get();
                         for (File file : audios) {
                             Thread.sleep(60_000);
-                            ExternalResource resource = ExternalResource.create(file);
-                            Audio audio = info.uploadAudio(resource);
-                            info.sendMessage(audio);
-                            resource.close();
+                            environment.getMessageSender().sendMessage(
+                                    context, environment.newAudio(new FileInputStream(file)));
                         }
                         Stream.of(audios).forEach(TempFileSystem::unlockFile);
                     } catch (Exception e) {
-                        MessageManager.onError(e, "wiki.audio", info, false);
+                        environment.getMessageSender().onError(e, "wiki.audio", context, false);
                     }
                 });
             }
@@ -136,11 +130,11 @@ public class WikiResolver extends MessageResolver {
                         File file = page.infobox.get();
                         if (file == null)
                             return;
-                        info.sendMessageRecallable(Contact.uploadImage(
-                                KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), file));
+                        environment.getMessageSender().sendMessageRecallable(
+                                context, environment.newImage(new FileInputStream(file)));
                         TempFileSystem.unlockFile(file);
                     } catch (Exception e) {
-                        MessageManager.onError(e, "wiki.infobox", info, false);
+                        environment.getMessageSender().onError(e, "wiki.infobox", context, false);
                     }
                 });
             }

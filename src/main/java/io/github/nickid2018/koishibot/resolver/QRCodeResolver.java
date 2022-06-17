@@ -5,16 +5,15 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import io.github.nickid2018.koishibot.core.MessageManager;
-import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.message.data.*;
+import io.github.nickid2018.koishibot.message.api.AbstractMessage;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.ImageMessage;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -37,22 +36,22 @@ public class QRCodeResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         key = key.trim();
         String[] data = key.split(" ", 2);
         switch (data[0].toLowerCase(Locale.ROOT)) {
             case "encode":
                 if (data.length != 2)
                     return false;
-                encode(data[1], info);
+                encode(data[1], context, environment);
                 return true;
             case "decode":
-                return decode(info);
+                return decode(context, environment);
         }
         return false;
     }
 
-    private void encode(String message, MessageInfo info) {
+    private void encode(String message, MessageContext context, Environment environment) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             try {
                 BitMatrix matrix = WRITER.encode(message, BarcodeFormat.QR_CODE, 200, 200, HINTS);
@@ -65,45 +64,43 @@ public class QRCodeResolver extends MessageResolver {
                         else
                             image.setRGB(x, y, 0xFFFFFFFF);
                 ImageIO.write(image, "png", boas);
-                Image output = Contact.uploadImage(
-                        KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), new ByteArrayInputStream(boas.toByteArray()));
-                info.sendMessageRecallable(output);
+                environment.getMessageSender().sendMessageRecallable(context,
+                        environment.newImage(new ByteArrayInputStream(boas.toByteArray())));
             } catch (Exception e) {
-                MessageManager.onError(e, "qrcode.encode", info, true);
+                environment.getMessageSender().onError(e, "qrcode.encode", context, true);
             }
         });
     }
 
-    private boolean decode(MessageInfo info) {
-        Image image = null;
-        for (Message message : info.data) {
-            if (message instanceof Image) {
-                image = (Image) message;
+    private boolean decode(MessageContext context, Environment environment) {
+        ImageMessage image = null;
+        for (AbstractMessage message : context.getMessage().getMessages()) {
+            if (message instanceof ImageMessage) {
+                image = (ImageMessage) message;
                 break;
             }
         }
         if (image == null)
             return false;
-        Image finalImage = image;
+        ImageMessage finalImage = image;
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             try {
-                String url = Image.queryUrl(finalImage);
-                BufferedImage qrcode = ImageIO.read(new URL(url));
+                BufferedImage qrcode = ImageIO.read(finalImage.getImage());
                 RGBLuminanceSource source = new RGBLuminanceSource(qrcode.getWidth(), qrcode.getHeight(),
                         qrcode.getRGB(0, 0, qrcode.getWidth(), qrcode.getHeight(),
                                 null, 0, qrcode.getWidth()));
                 Result result = READER.decode(new BinaryBitmap(new HybridBinarizer(source)));
-                info.sendMessageRecallable(MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText(result.getText())
+                environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                        environment.newQuote(context.getMessage()),
+                        environment.newText(result.getText())
                 ));
             } catch (NotFoundException e) {
-                info.sendMessageRecallable(MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText("图片内找不到有效的二维码")
+                environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                        environment.newQuote(context.getMessage()),
+                        environment.newText("图片内找不到有效的二维码")
                 ));
             } catch (Exception e) {
-                MessageManager.onError(e, "qrcode.decode", info, true);
+                environment.getMessageSender().onError(e, "qrcode.decode", context, true);
             }
         });
         return true;

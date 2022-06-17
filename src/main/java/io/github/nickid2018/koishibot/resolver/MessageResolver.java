@@ -1,6 +1,7 @@
 package io.github.nickid2018.koishibot.resolver;
 
-import io.github.nickid2018.koishibot.core.MessageInfo;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
 
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -33,19 +34,19 @@ public abstract class MessageResolver {
         return false;
     }
 
-    public boolean resolve(String segment, MessageInfo info) {
+    public boolean resolve(String segment, MessageContext contact, Environment environment) {
         segment = segment.trim();
         if (prefix != null && segment.toLowerCase(Locale.ROOT).startsWith(prefix))
-            return resolveInternal(segment.substring(prefix.length()), info, null);
+            return resolveInternal(segment.substring(prefix.length()), contact, null, environment);
         else if (regex != null) {
             for (Pattern pattern : regex) {
                 Matcher matcher = pattern.matcher(segment);
                 if (matcher.find())
-                    return resolveInternal(segment.substring(matcher.start(), matcher.end()), info, pattern);
+                    return resolveInternal(segment.substring(matcher.start(), matcher.end()), contact, pattern, environment);
             }
         }
         return false;
     }
 
-    public abstract boolean resolveInternal(String key, MessageInfo info, Pattern pattern);
+    public abstract boolean resolveInternal(String key, MessageContext contact, Pattern pattern, Environment environment);
 }

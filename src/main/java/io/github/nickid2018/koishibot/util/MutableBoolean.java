@@ -15,4 +15,8 @@ public class MutableBoolean {
     public void setValue(boolean val) {
         value = val;
     }
+
+    public void or(boolean val) {
+        value |= val;
+    }
 }

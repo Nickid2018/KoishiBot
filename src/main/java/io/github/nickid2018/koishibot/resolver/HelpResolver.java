@@ -1,11 +1,9 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.Constants;
-import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import io.github.nickid2018.koishibot.core.Settings;
+import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.util.LazyLoadValue;
-import net.mamoe.mirai.message.data.*;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
@@ -46,26 +44,30 @@ public class HelpResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         key = key.trim();
-        if (key.isEmpty() || !HELP_DATA.containsKey(key)) {
-            MessageChain chain = MessageUtils.newChain(new PlainText(UNIVERSAL_HELP.get()));
-            info.sendMessage(chain);
-        } else {
+        if (key.isEmpty() || !HELP_DATA.containsKey(key))
+            environment.getMessageSender().sendMessage(context, environment.newText(UNIVERSAL_HELP.get()));
+        else {
             BufferedReader reader = new BufferedReader(new StringReader(HELP_DATA.get(key).get()));
-            ForwardMessageBuilder builder = new ForwardMessageBuilder(
-                    Objects.requireNonNull(KoishiBotMain.INSTANCE.botKoishi.getFriend(2833231379L)));
+            ForwardMessage forwards = environment.newForwards();
+            ContactInfo contact = environment.getUser(environment.getBotId(), false);
             StringBuilder message = new StringBuilder();
+            List<MessageEntry> messageEntries = new ArrayList<>();
             reader.lines().forEach(line -> {
                 if (line.equals("#")) {
-                    PlainText text = new PlainText(message.toString().trim());
+                    messageEntries.add(environment.newMessageEntry(
+                            environment.getBotId(),
+                            "Koishi bot",
+                            environment.newText(message.toString().trim()),
+                            Constants.TIME_OF_514
+                    ));
                     message.delete(0, message.length());
-                    builder.add(Settings.BOT_QQ, "Koishi bot", text, Constants.TIME_OF_514);
                 } else
                     message.append(line).append("\n");
             });
-            ForwardMessage forwardMessage = builder.build();
-            info.sendMessage(forwardMessage);
+            forwards.fill(contact, messageEntries.toArray(new MessageEntry[0]));
+            environment.getMessageSender().sendMessage(context, forwards);
         }
         return true;
     }

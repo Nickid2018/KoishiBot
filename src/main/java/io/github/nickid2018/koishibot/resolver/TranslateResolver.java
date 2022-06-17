@@ -2,10 +2,10 @@ package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.translation.TranslationProvider;
 import io.github.nickid2018.koishibot.translation.YoudaoTranslation;
-import net.mamoe.mirai.message.data.*;
 
 import java.util.regex.Pattern;
 
@@ -21,15 +21,8 @@ public class TranslateResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
-            if (info.event.getSender().getId() == 694000037 || info.event.getSender().getId() == 2435219469L) {
-                info.sendMessage(MessageUtils.newChain(
-                        new QuoteReply(info.data),
-                        new PlainText("我要把你挂在地灵殿门口做装饰")
-                ));
-                return;
-            }
             String[] splits = key.split(":", 3);
             String from = null, to = null;
             if (!splits[1].isEmpty()) {
@@ -49,11 +42,10 @@ public class TranslateResolver extends MessageResolver {
                 data = "无法处理翻译：" + e.getMessage();
                 ErrorRecord.enqueueError("translation", e);
             }
-            MessageChain chain = MessageUtils.newChain(
-                    new QuoteReply(info.data),
-                    new PlainText(data)
-            );
-            info.sendMessageRecallable(chain);
+            environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                    environment.newQuote(context.getMessage()),
+                    environment.newText(data)
+            ));
         });
         return true;
     }

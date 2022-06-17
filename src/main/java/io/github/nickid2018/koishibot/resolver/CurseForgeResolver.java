@@ -5,14 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import io.github.nickid2018.koishibot.core.MessageManager;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import net.mamoe.mirai.message.data.MessageChain;
-import net.mamoe.mirai.message.data.MessageUtils;
-import net.mamoe.mirai.message.data.PlainText;
-import net.mamoe.mirai.message.data.QuoteReply;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedReader;
@@ -40,23 +36,23 @@ public class CurseForgeResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             try {
                 if (pattern == MOD_SEARCH_PATTERN)
-                    displaySearch(key.substring(12, key.length() - 1), info);
+                    displaySearch(key.substring(12, key.length() - 1), context, environment);
                 else if (pattern == MOD_FILES_PATTERN)
-                    displayFiles(key.substring(11, key.length() - 1), info);
+                    displayFiles(key.substring(11, key.length() - 1), context, environment);
                 else
-                    displayMod(key.substring(5, key.length() - 1), info);
+                    displayMod(key.substring(5, key.length() - 1), context, environment);
             } catch (Exception e) {
-                MessageManager.onError(e, "curseforge", info, false);
+                environment.getMessageSender().onError(e, "curseforge", context, false);
             }
         });
         return true;
     }
 
-    private static void displayFiles(String key, MessageInfo info) throws IOException {
+    private static void displayFiles(String key, MessageContext context, Environment environment) throws IOException {
         JsonArray addons = search(key, 1, 0);
         if (addons.size() == 0)
             throw new IOException("未查找到此模组，请矫正拼写");
@@ -89,14 +85,13 @@ public class CurseForgeResolver extends MessageResolver {
             builder.append(versions.get(i)).append(": ").append(lastFile.get("url").getAsString()).append("\n");
         }
 
-        MessageChain chain = MessageUtils.newChain(
-                new QuoteReply(info.data),
-                new PlainText(builder.toString().trim())
-        );
-        info.sendMessage(chain);
+        environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                environment.newQuote(context.getMessage()),
+                environment.newText(builder.toString().trim())
+        ));
     }
 
-    private static void displaySearch(String key, MessageInfo info) throws IOException {
+    private static void displaySearch(String key, MessageContext context, Environment environment) throws IOException {
         int page = 0;
         int pageSize = 10;
         if (RegexUtil.match(SEARCH_PAGE_PATTERN, key)) {
@@ -126,14 +121,14 @@ public class CurseForgeResolver extends MessageResolver {
                 summary = summary.substring(0, 60) + "...";
             builder.append("[").append(name).append("]").append(summary).append("\n");
         }
-        MessageChain chain = MessageUtils.newChain(
-                new QuoteReply(info.data),
-                new PlainText(builder.toString().trim())
-        );
-        info.sendMessage(chain);
+
+        environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                environment.newQuote(context.getMessage()),
+                environment.newText(builder.toString().trim())
+        ));
     }
 
-    private static void displayMod(String id, MessageInfo info) throws IOException {
+    private static void displayMod(String id, MessageContext context, Environment environment) throws IOException {
         // Guess the first mod
         JsonArray addons = search(id, 1, 0);
         if (addons.size() == 0)
@@ -183,11 +178,10 @@ public class CurseForgeResolver extends MessageResolver {
         if (line != null)
             builder.append("(原文过长截断，完整信息请访问主条目URL)");
 
-        MessageChain chain = MessageUtils.newChain(
-                new QuoteReply(info.data),
-                new PlainText(builder)
-        );
-        info.sendMessage(chain);
+        environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                environment.newQuote(context.getMessage()),
+                environment.newText(builder.toString().trim())
+        ));
     }
 
     private static JsonArray search(String key, int limit, int offset) throws IOException {

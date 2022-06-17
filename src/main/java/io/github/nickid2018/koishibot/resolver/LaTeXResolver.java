@@ -1,11 +1,9 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import io.github.nickid2018.koishibot.core.MessageManager;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.message.data.Image;
 import org.apache.batik.transcoder.*;
 import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
@@ -35,7 +33,7 @@ public class LaTeXResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             String latex = key;
             Transcoder use = transcoder;
@@ -55,12 +53,10 @@ public class LaTeXResolver extends MessageResolver {
                 TranscoderOutput output = new TranscoderOutput(os);
                 use.transcode(input, output);
                 os.close();
-                Image image = Contact.uploadImage(
-                        KoishiBotMain.INSTANCE.botKoishi.getAsFriend(),
-                        new ByteArrayInputStream(os.toByteArray()));
-                info.sendMessageRecallable(image);
+                environment.getMessageSender().sendMessageRecallable(context,
+                        environment.newImage(new ByteArrayInputStream(os.toByteArray())));
             } catch (Exception e) {
-                MessageManager.onError(e, "latex", info, true);
+                environment.getMessageSender().onError(e, "latex", context, true);
             }
         });
         return true;

@@ -3,12 +3,11 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import io.github.nickid2018.koishibot.core.MessageManager;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.ImageMessage;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.message.data.*;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedReader;
@@ -45,42 +44,42 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext contact, Pattern pattern, Environment environment) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             try {
                 if (pattern == B_SHORT_LINK_PATTERN)
-                    fromShortLink(key, info);
+                    fromShortLink(key, contact, environment);
                 else if (pattern == B_CV_ARTICLE_PATTERN)
-                    doArticleDisplay(key, info);
+                    doArticleDisplay(key, contact, environment);
                 else if (pattern == B_SS_EPISODE_PATTERN)
-                    doEpisodeDisplay(key, info, true);
+                    doEpisodeDisplay(key, contact, true, environment);
                 else if (pattern == B_EP_EPISODE_PATTERN)
-                    doEpisodeDisplay(key, info, false);
+                    doEpisodeDisplay(key, contact, false, environment);
                 else if (pattern == B_AU_AUDIO_PATTERN)
-                    doAudioDisplay(key, info);
+                    doAudioDisplay(key, contact, environment);
                 else
-                    doVideoDisplay(key, info);
+                    doVideoDisplay(key, contact, environment);
             } catch (Exception e) {
-                MessageManager.onError(e, "bilibili", info, true);
+                environment.getMessageSender().onError(e, "bilibili", contact, true);
             }
         });
         return true;
     }
 
-    private void choose(String key, MessageInfo info) throws IOException {
+    private void choose(String key, MessageContext contact, Environment environment) throws IOException {
         if (RegexUtil.match(B_CV_ARTICLE_PATTERN, key))
-            doArticleDisplay(key, info);
+            doArticleDisplay(key, contact, environment);
         else if (RegexUtil.match(B_SS_EPISODE_PATTERN, key))
-            doEpisodeDisplay(key, info, true);
+            doEpisodeDisplay(key, contact, true, environment);
         else if (RegexUtil.match(B_EP_EPISODE_PATTERN, key))
-            doEpisodeDisplay(key, info, false);
+            doEpisodeDisplay(key, contact, false, environment);
         else if (RegexUtil.match(B_AU_AUDIO_PATTERN, key))
-            doAudioDisplay(key, info);
+            doAudioDisplay(key, contact, environment);
         else
-            doVideoDisplay(key, info);
+            doVideoDisplay(key, contact, environment);
     }
 
-    private void doEpisodeDisplay(String key, MessageInfo info, boolean isSSID) throws IOException {
+    private void doEpisodeDisplay(String key, MessageContext contact, boolean isSSID, Environment environment) throws IOException {
         JsonObject articleData = WebUtil.fetchDataInJson(new HttpGet(
                 BILIBILI_EPISODE_API + (isSSID ? "?season_id=" : "?ep_id=") + key.substring(2))).getAsJsonObject();
         int code = articleData.get("code").getAsInt();
@@ -130,19 +129,18 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
         if (line != null)
             builder.append("(简介过长截断)");
 
-        InputStream stream = new URL(data.get("cover").getAsString()).openStream();
-        Image imageSend = Contact.uploadImage(
-                KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), stream);
-        stream.close();
+        ImageMessage image = environment.newImage();
+        try (InputStream stream = new URL(data.get("cover").getAsString()).openStream()) {
+            image.fillImage(stream);
+        }
 
-        MessageChain chain = MessageUtils.newChain(
-                new PlainText(builder.toString()),
-                imageSend
-        );
-        info.sendMessageRecallable(chain);
+        environment.getMessageSender().sendMessageRecallable(contact, environment.newChain(
+                environment.newText(builder.toString()),
+                image
+        ));
     }
 
-    private void doAudioDisplay(String key, MessageInfo info) throws IOException {
+    private void doAudioDisplay(String key, MessageContext contact, Environment environment) throws IOException {
         JsonObject articleData = WebUtil.fetchDataInJson(new HttpGet(
                 BILIBILI_AUDIO_API + "info?sid=" + key.substring(2))).getAsJsonObject();
         int code = articleData.get("code").getAsInt();
@@ -169,19 +167,18 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
                 builder.append("关联视频: ").append(bvidS).append("\n");
         }
 
-        InputStream stream = new URL(data.get("cover").getAsString()).openStream();
-        Image imageSend = Contact.uploadImage(
-                KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), stream);
-        stream.close();
+        ImageMessage image = environment.newImage();
+        try (InputStream stream = new URL(data.get("cover").getAsString()).openStream()) {
+            image.fillImage(stream);
+        }
 
-        MessageChain chain = MessageUtils.newChain(
-                new PlainText(builder.toString()),
-                imageSend
-        );
-        info.sendMessageRecallable(chain);
+        environment.getMessageSender().sendMessageRecallable(contact, environment.newChain(
+                environment.newText(builder.toString()),
+                image
+        ));
     }
 
-    private void doArticleDisplay(String key, MessageInfo info) throws IOException {
+    private void doArticleDisplay(String key, MessageContext contact, Environment environment) throws IOException {
         JsonObject articleData = WebUtil.fetchDataInJson(new HttpGet(
                 BILIBILI_ARTICLE_API + "viewinfo?id=" + key.substring(2))).getAsJsonObject();
         int code = articleData.get("code").getAsInt();
@@ -205,19 +202,18 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
 
         builder.append("主条目URL: https://www.bilibili.com/read/").append(key);
 
-        InputStream stream = new URL(data.getAsJsonArray("origin_image_urls").get(0).getAsString()).openStream();
-        Image imageSend = Contact.uploadImage(
-                KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), stream);
-        stream.close();
+        ImageMessage image = environment.newImage();
+        try (InputStream stream = new URL(data.getAsJsonArray("origin_image_urls").get(0).getAsString()).openStream()) {
+            image.fillImage(stream);
+        }
 
-        MessageChain chain = MessageUtils.newChain(
-                new PlainText(builder.toString()),
-                imageSend
-        );
-        info.sendMessageRecallable(chain);
+        environment.getMessageSender().sendMessageRecallable(contact, environment.newChain(
+                environment.newText(builder.toString()),
+                image
+        ));
     }
 
-    private void doVideoDisplay(String key, MessageInfo info) throws IOException {
+    private void doVideoDisplay(String key, MessageContext contact, Environment environment) throws IOException {
         JsonObject videoData;
         boolean useAVID = false;
         if (RegexUtil.match(B_AV_VIDEO_PATTERN, key)) {
@@ -286,25 +282,24 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
         if (line != null)
             builder.append("(简介过长截断)");
 
-        InputStream stream = new URL(data.get("pic").getAsString()).openStream();
-        Image imageSend = Contact.uploadImage(
-                KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), stream);
-        stream.close();
+        ImageMessage image = environment.newImage();
+        try (InputStream stream = new URL(data.get("pic").getAsString()).openStream()) {
+            image.fillImage(stream);
+        }
 
-        MessageChain chain = MessageUtils.newChain(
-                new PlainText(builder.toString()),
-                imageSend
-        );
-        info.sendMessageRecallable(chain);
+        environment.getMessageSender().sendMessageRecallable(contact, environment.newChain(
+                environment.newText(builder.toString()),
+                image
+        ));
     }
 
-    private void fromShortLink(String key, MessageInfo info) throws IOException {
+    private void fromShortLink(String key, MessageContext contact, Environment environment) throws IOException {
         String location = WebUtil.getRedirected(new HttpGet(key));
         if (location == null)
             return;
         String id = location.split("\\?")[0];
         id = id.substring(id.lastIndexOf('/') + 1);
-        choose(id, info);
+        choose(id, contact, environment);
     }
 
     private static String formatTime(int time) {
@@ -316,17 +311,18 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
     }
 
     @Override
-    public void resolveService(JsonObject content, MessageInfo info) {
+    public void resolveService(JsonObject content, MessageContext context) {
+        // --- TEMP DISABLED
         KoishiBotMain.INSTANCE.executor.execute(() -> {
-            try {
+//            try {
                 String url = WebUtil.getDataInPathOrNull(content, "meta.detail_1.qqdocurl");
                 if (url == null)
                     return;
                 url = url.split("\\?")[0];
-                fromShortLink(url, info);
-            } catch (IOException e) {
-                MessageManager.onError(e, "bilibili.service", info, false);
-            }
+//                fromShortLink(url, info);
+//            } catch (IOException e) {
+//                MessageManager.onError(e, "bilibili.service", info, false);
+//            }
         });
     }
 }

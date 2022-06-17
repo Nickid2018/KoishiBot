@@ -1,6 +1,6 @@
-package io.github.nickid2018.koishibot.core;
+package io.github.nickid2018.koishibot.message;
 
-import net.mamoe.mirai.contact.ContactOrBot;
+import io.github.nickid2018.koishibot.message.api.UserInfo;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,19 +8,15 @@ import java.util.Map;
 
 public class MemberFilter {
 
-    private static final Map<Long, Long> USER_REQUEST_TIME = Collections.synchronizedMap(new HashMap<>());
-    private static final Map<Long, Integer> USER_REQUEST_FAIL = Collections.synchronizedMap(new HashMap<>());
-    private static final Map<Long, Long> USER_BAN_TIME = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<UserInfo, Long> USER_REQUEST_TIME = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<UserInfo, Integer> USER_REQUEST_FAIL = Collections.synchronizedMap(new HashMap<>());
+    private static final Map<UserInfo, Long> USER_BAN_TIME = Collections.synchronizedMap(new HashMap<>());
 
     private static final int REQUEST_MAX_FAIL = 5;
     private static final long REQUEST_DURATION = 2000;
     private static final long FIRST_BAN = 3600_000;
 
-    public static boolean shouldNotResponse(ContactOrBot member) {
-        return shouldNotResponse(member.getId());
-    }
-
-    public static boolean shouldNotResponse(long member) {
+    public static boolean shouldNotResponse(UserInfo member) {
         long nowTime = System.currentTimeMillis();
         if (USER_BAN_TIME.containsKey(member) && USER_BAN_TIME.get(member) >= nowTime)
             return true;
@@ -38,16 +34,12 @@ public class MemberFilter {
         return false;
     }
 
-    public static void refreshRequestTime(ContactOrBot member) {
-        refreshRequestTime(member.getId());
-    }
-
-    public static void refreshRequestTime(long member) {
+    public static void refreshRequestTime(UserInfo member) {
         USER_REQUEST_TIME.put(member, System.currentTimeMillis());
     }
 
-    static {
-        USER_BAN_TIME.put(2854196306L, Long.MAX_VALUE); // QQ小冰
-        USER_BAN_TIME.put(2854196310L, Long.MAX_VALUE); // QQ管家
-    }
+//    static {
+//        USER_BAN_TIME.put(2854196306L, Long.MAX_VALUE); // QQ小冰
+//        USER_BAN_TIME.put(2854196310L, Long.MAX_VALUE); // QQ管家
+//    }
 }

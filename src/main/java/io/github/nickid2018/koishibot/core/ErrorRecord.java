@@ -2,10 +2,11 @@ package io.github.nickid2018.koishibot.core;
 
 import io.github.nickid2018.koishibot.Constants;
 import io.github.nickid2018.koishibot.KoishiBotMain;
+import io.github.nickid2018.koishibot.message.api.ContactInfo;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.ForwardMessage;
+import io.github.nickid2018.koishibot.message.api.MessageEntry;
 import kotlin.Triple;
-import net.mamoe.mirai.message.data.ForwardMessage;
-import net.mamoe.mirai.message.data.ForwardMessageBuilder;
-import net.mamoe.mirai.message.data.PlainText;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -20,20 +21,27 @@ public class ErrorRecord {
             ERROR_QUEUE.poll();
     }
 
-    public static ForwardMessage formatAsForwardMessage() {
+    public static ForwardMessage formatAsForwardMessage(Environment environment) {
         List<Triple<Long, String, Throwable>> copied = new ArrayList<>(ERROR_QUEUE);
         if (copied.size() == 0)
             return null;
-        ForwardMessageBuilder fmb = new ForwardMessageBuilder(
-                Objects.requireNonNull(KoishiBotMain.INSTANCE.botKoishi.getFriend(2833231379L)));
+        ForwardMessage forwards = environment.newForwards();
+        ContactInfo contact = environment.getUser(environment.getBotId(), false);
+        List<MessageEntry> entries = new ArrayList<>();
         for (Triple<Long, String, Throwable> entry : copied) {
             StringBuilder builder = new StringBuilder();
             builder.append("错误时间: ").append(String.format("%tc", new Date(entry.getFirst()))).append("\n");
             builder.append("错误模块: ").append(entry.getSecond()).append("\n");
             builder.append("错误描述: ").append(entry.getThird().getMessage()).append("\n");
             builder.append("栈顶层: ").append(entry.getThird().getStackTrace()[0]);
-            fmb.add(Settings.BOT_QQ, "Koishi bot", new PlainText(builder), Constants.TIME_OF_514);
+            entries.add(environment.newMessageEntry(
+                    environment.getBotId(),
+                    "Koishi bot",
+                    environment.newText(builder.toString().trim()),
+                    Constants.TIME_OF_514
+            ));
         }
-        return fmb.build();
+        forwards.fill(contact, entries.toArray(new MessageEntry[0]));
+        return forwards;
     }
 }

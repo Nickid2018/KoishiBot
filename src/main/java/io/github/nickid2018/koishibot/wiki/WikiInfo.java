@@ -213,7 +213,7 @@ public class WikiInfo {
                 } else {
                     pageInfo.url = articleURL.replace("$1", WebUtil.encode(title));
                     pageInfo.shortDescription = "<页面无内容>";
-                    // Special:MyPage -> [User:IP]
+                    // Special:MyPage -> [MessageContext:IP]
                     if (RegexUtil.match(USER_ANONYMOUS, pageInfo.title))
                         pageInfo.title = "匿名用户页";
                 }

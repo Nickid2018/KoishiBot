@@ -4,12 +4,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.core.MessageInfo;
-import io.github.nickid2018.koishibot.core.MessageManager;
+import io.github.nickid2018.koishibot.message.api.ChainMessage;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.ImageMessage;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import net.mamoe.mirai.contact.Contact;
-import net.mamoe.mirai.message.data.*;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.BufferedReader;
@@ -34,7 +34,7 @@ public class BugTrackerResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageInfo info, Pattern pattern) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         String resolve = key.substring(5, key.length() - 1);
         boolean isDisplay = RegexUtil.match(BUG_NAME_PATTERN, resolve);
         boolean isSearch = RegexUtil.match(BUG_SEARCH_PATTERN, resolve);
@@ -43,17 +43,17 @@ public class BugTrackerResolver extends MessageResolver {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             try {
                 if (isDisplay)
-                    doBugDisplay(resolve, info);
+                    doBugDisplay(resolve, context, environment);
                 if (isSearch)
-                    doBugSearch(resolve.substring(7), info);
+                    doBugSearch(resolve.substring(7), context, environment);
             } catch (Exception e) {
-                MessageManager.onError(e, "bugtracker", info, false);
+                environment.getMessageSender().onError(e, "bugtracker", context, false);
             }
         });
         return true;
     }
 
-    private static void doBugSearch(String searchKey, MessageInfo info) throws IOException {
+    private static void doBugSearch(String searchKey, MessageContext context, Environment environment) throws IOException {
         int bufferSize = 10;
         int page = 0;
         if (RegexUtil.match(BUG_SEARCH_PAGE_PATTERN, searchKey)) {
@@ -89,14 +89,13 @@ public class BugTrackerResolver extends MessageResolver {
             }
         } else
             builder.append("未搜索到任何结果");
-        MessageChain chain = MessageUtils.newChain(
-                new QuoteReply(info.data),
-                new PlainText(builder.toString().trim())
-        );
-        info.sendMessage(chain);
+        environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
+                environment.newQuote(context.getMessage()),
+                environment.newText(builder.toString().trim())
+        ));
     }
 
-    private static void doBugDisplay(String id, MessageInfo info) throws IOException {
+    private static void doBugDisplay(String id, MessageContext context, Environment environment) throws IOException {
         HttpGet get = new HttpGet(MOJIRA_API_URL + id);
         JsonObject data = WebUtil.fetchDataInJson(get).getAsJsonObject();
         if (data.has("errorMessage"))
@@ -193,23 +192,22 @@ public class BugTrackerResolver extends MessageResolver {
             }
         }
 
-        MessageChain chain;
+        ChainMessage chain;
         if (image != null) {
-            InputStream stream = new URL(image).openStream();
-            Image imageSend = Contact.uploadImage(
-                    KoishiBotMain.INSTANCE.botKoishi.getAsFriend(), stream);
-            stream.close();
-            chain = MessageUtils.newChain(
-                    new QuoteReply(info.data),
-                    new PlainText(builder),
+            ImageMessage imageSend = environment.newImage();
+            try (InputStream stream = new URL(image).openStream()) {
+                imageSend.fillImage(stream);
+            }
+            chain = environment.newChain(
+                    environment.newQuote(context.getMessage()),
+                    environment.newText(builder.toString()),
                     imageSend
             );
         } else
-            chain = MessageUtils.newChain(
-                    new QuoteReply(info.data),
-                    new PlainText(builder)
+            chain = environment.newChain(
+                    environment.newQuote(context.getMessage()),
+                    environment.newText(builder.toString())
             );
-
-        info.sendMessage(chain);
+        environment.getMessageSender().sendMessage(context, chain);
     }
 }
