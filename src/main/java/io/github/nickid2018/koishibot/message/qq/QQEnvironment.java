@@ -81,6 +81,11 @@ public class QQEnvironment implements Environment {
     }
 
     @Override
+    public boolean forwardMessageSupported() {
+        return true;
+    }
+
+    @Override
     public MessageSender getMessageSender() {
         return sender;
     }

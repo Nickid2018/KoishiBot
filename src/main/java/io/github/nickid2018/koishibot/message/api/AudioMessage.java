@@ -6,5 +6,5 @@ import java.net.URL;
 
 public interface AudioMessage extends AbstractMessage {
 
-    AudioMessage fillAudio(InputStream source) throws IOException;
+    AudioMessage fillAudio(GroupInfo group, InputStream source) throws IOException;
 }

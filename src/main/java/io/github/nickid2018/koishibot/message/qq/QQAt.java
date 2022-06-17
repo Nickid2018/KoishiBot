@@ -27,7 +27,7 @@ public class QQAt extends QQMessage implements AtMessage {
 
     @Override
     public UserInfo getUser(GroupInfo group) {
-        return new QQUser(((QQGroup) group).getGroup().get(at.component1()), false, true);
+        return new QQUser(((QQGroup) group).getGroup().get(at.getTarget()), false, true);
     }
 
     @Override

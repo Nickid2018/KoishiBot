@@ -31,6 +31,8 @@ public interface Environment {
 
     MessageEventPublisher getEvents();
 
+    boolean forwardMessageSupported();
+
     default AtMessage newAt(UserInfo user) {
         return newAt().fill(user);
     }
@@ -43,8 +45,8 @@ public interface Environment {
         return newText().fillText(text);
     }
 
-    default AudioMessage newAudio(InputStream source) throws IOException {
-        return newAudio().fillAudio(source);
+    default AudioMessage newAudio(GroupInfo group, InputStream source) throws IOException {
+        return newAudio().fillAudio(group, source);
     }
 
     default ImageMessage newImage(InputStream source) throws IOException {

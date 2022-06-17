@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.message.qq;
 
 import io.github.nickid2018.koishibot.message.api.AudioMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import net.mamoe.mirai.message.data.Audio;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.utils.ExternalResource;
@@ -23,9 +24,9 @@ public class QQAudio extends QQMessage implements AudioMessage {
     }
 
     @Override
-    public AudioMessage fillAudio(InputStream source) throws IOException {
+    public AudioMessage fillAudio(GroupInfo info, InputStream source) throws IOException {
         try (ExternalResource resource = ExternalResource.create(source)) {
-            audio = environment.getBot().getAsFriend().uploadAudio(resource);
+            audio = ((QQGroup) info).getGroup().uploadAudio(resource);
         }
         return this;
     }

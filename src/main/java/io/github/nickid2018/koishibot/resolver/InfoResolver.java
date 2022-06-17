@@ -59,7 +59,11 @@ public class InfoResolver extends MessageResolver {
     }
 
     private AbstractMessage getError(Environment environment) {
-        AbstractMessage message = ErrorRecord.formatAsForwardMessage(environment);
+        AbstractMessage message;
+        if (environment.forwardMessageSupported())
+            message = ErrorRecord.formatAsForwardMessage(environment);
+        else
+            message = environment.newText("环境不支持转发消息");
         if (message == null)
             message = environment.newText("无错误日志");
         return message;

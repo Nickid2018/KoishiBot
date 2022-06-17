@@ -2,7 +2,6 @@ package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.Constants;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.util.LazyLoadValue;
 import org.apache.commons.io.IOUtils;
 
@@ -49,25 +48,28 @@ public class HelpResolver extends MessageResolver {
         if (key.isEmpty() || !HELP_DATA.containsKey(key))
             environment.getMessageSender().sendMessage(context, environment.newText(UNIVERSAL_HELP.get()));
         else {
-            BufferedReader reader = new BufferedReader(new StringReader(HELP_DATA.get(key).get()));
-            ForwardMessage forwards = environment.newForwards();
-            ContactInfo contact = environment.getUser(environment.getBotId(), false);
-            StringBuilder message = new StringBuilder();
-            List<MessageEntry> messageEntries = new ArrayList<>();
-            reader.lines().forEach(line -> {
-                if (line.equals("#")) {
-                    messageEntries.add(environment.newMessageEntry(
-                            environment.getBotId(),
-                            "Koishi bot",
-                            environment.newText(message.toString().trim()),
-                            Constants.TIME_OF_514
-                    ));
-                    message.delete(0, message.length());
-                } else
-                    message.append(line).append("\n");
-            });
-            forwards.fill(contact, messageEntries.toArray(new MessageEntry[0]));
-            environment.getMessageSender().sendMessage(context, forwards);
+            if (environment.forwardMessageSupported()) {
+                BufferedReader reader = new BufferedReader(new StringReader(HELP_DATA.get(key).get()));
+                ForwardMessage forwards = environment.newForwards();
+                ContactInfo contact = environment.getUser(environment.getBotId(), false);
+                StringBuilder message = new StringBuilder();
+                List<MessageEntry> messageEntries = new ArrayList<>();
+                reader.lines().forEach(line -> {
+                    if (line.equals("#")) {
+                        messageEntries.add(environment.newMessageEntry(
+                                environment.getBotId(),
+                                "Koishi bot",
+                                environment.newText(message.toString().trim()),
+                                Constants.TIME_OF_514
+                        ));
+                        message.delete(0, message.length());
+                    } else
+                        message.append(line).append("\n");
+                });
+                forwards.fill(contact, messageEntries.toArray(new MessageEntry[0]));
+                environment.getMessageSender().sendMessage(context, forwards);
+            } else
+                environment.getMessageSender().sendMessage(context, environment.newText("环境不支持转发信息"));
         }
         return true;
     }

@@ -34,7 +34,7 @@ public class QQQuote extends QQMessage implements QuoteMessage {
 
     @Override
     public UserInfo getReplyTo() {
-        return environment.getUser("qq.user" + quoteReply.component1().getFromId(), false);
+        return environment.getUser("qq.user" + quoteReply.component1().getFromId(), true);
     }
 
     @Override

@@ -104,9 +104,8 @@ public class WikiResolver extends MessageResolver {
 
             if (!st.isEmpty())
                 environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                      environment.newQuote(context.getMessage()),
-                       environment.newText(st)
-               ));
+                      environment.newQuote(context.getMessage()), environment.newText(st)
+                ));
             if (page.imageStream != null)
                 environment.getMessageSender().sendMessageRecallable(context, environment.newImage(page.imageStream));
             if (page.audioFiles != null && context.getGroup() != null) {
@@ -116,7 +115,7 @@ public class WikiResolver extends MessageResolver {
                         for (File file : audios) {
                             Thread.sleep(60_000);
                             environment.getMessageSender().sendMessage(
-                                    context, environment.newAudio(new FileInputStream(file)));
+                                    context, environment.newAudio(context.getGroup(), new FileInputStream(file)));
                         }
                         Stream.of(audios).forEach(TempFileSystem::unlockFile);
                     } catch (Exception e) {

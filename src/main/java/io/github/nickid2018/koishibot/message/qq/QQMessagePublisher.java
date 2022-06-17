@@ -102,6 +102,7 @@ public class QQMessagePublisher implements MessageEventPublisher {
     private static Function1<Throwable, Unit> createHandler(String name) {
         return exception -> {
             ErrorRecord.enqueueError(name, exception);
+            exception.printStackTrace();
             return Unit.INSTANCE;
         };
     }
