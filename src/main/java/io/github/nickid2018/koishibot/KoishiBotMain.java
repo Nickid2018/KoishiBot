@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot;
 import io.github.nickid2018.koishibot.core.*;
 import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
+import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import net.mamoe.mirai.Bot;
@@ -84,5 +85,6 @@ public final class KoishiBotMain extends JavaPlugin {
         executor.shutdown();
         executor = null;
         TempFileSystem.onDisable();
+        InfoBoxShooter.close();
     }
 }

@@ -122,7 +122,7 @@ public class Settings {
 
     public static void loadGitHub(JsonObject settingsRoot) {
         JsonElement element = settingsRoot.get("github_token");
-        if (element.isJsonPrimitive())
+        if (element != null && element.isJsonPrimitive())
             GITHUB_TOKEN = element.getAsString();
         else
             GITHUB_TOKEN = "";
