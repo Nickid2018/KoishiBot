@@ -20,7 +20,7 @@ public class GroupDataReader<E> {
     private final Supplier<E> empty;
     protected final File folder;
 
-    protected final Map<Long, E> data = new HashMap<>();
+    protected final Map<String, E> data = new HashMap<>();
 
     public GroupDataReader(String name, FunctionE<InputStream, E> reader,
                            BiConsumerE<OutputStream, E> writer, Supplier<E> empty) {
@@ -31,7 +31,7 @@ public class GroupDataReader<E> {
        folder = new File(KoishiBotMain.INSTANCE.getDataFolder(), name);
     }
 
-    public E getData(long group) {
+    public E getData(String group) {
         return data.computeIfAbsent(group, g -> {
             File file = new File(folder, g + "");
             if (!file.exists())
@@ -45,12 +45,12 @@ public class GroupDataReader<E> {
         });
     }
 
-    public void putData(long group, E data) throws Exception {
+    public void putData(String group, E data) throws Exception {
         this.data.put(group, data);
         writer.accept(new FileOutputStream(new File(folder, group + "")), data);
     }
 
-    public void updateData(long group, Function<E, E> changer) throws Exception {
+    public void updateData(String group, Function<E, E> changer) throws Exception {
         putData(group, changer.apply(getData(group)));
     }
 
@@ -58,7 +58,7 @@ public class GroupDataReader<E> {
         return folder;
     }
 
-    public Set<Long> getGroups() {
+    public Set<String> getGroups() {
         return new HashSet<>(data.keySet());
     }
 }

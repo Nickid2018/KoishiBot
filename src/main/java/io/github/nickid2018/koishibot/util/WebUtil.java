@@ -54,6 +54,10 @@ public class WebUtil {
     }
 
     public static JsonElement fetchDataInJson(HttpUriRequest post, String UA) throws IOException {
+        return fetchDataInJson(post, UA, true);
+    }
+
+    public static JsonElement fetchDataInJson(HttpUriRequest post, String UA, boolean check) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableCookieManagement()
                 .setUserAgent(UA).build();
@@ -63,10 +67,12 @@ public class WebUtil {
             int status = httpResponse.getStatusLine().getStatusCode();
             if (status / 100 != 2)
                 throw new ErrorCodeException(status);
-            Header[] headers = httpResponse.getHeaders("Content-Type");
-            if (headers.length > 0 && headers[0] != null && !headers[0].getValue()
-                    .startsWith(ContentType.APPLICATION_JSON.getMimeType()))
-                throw new IOException("Return a non-JSON Content.");
+            if (check) {
+                Header[] headers = httpResponse.getHeaders("Content-Type");
+                if (headers.length > 0 && headers[0] != null && !headers[0].getValue()
+                        .startsWith(ContentType.APPLICATION_JSON.getMimeType()))
+                    throw new IOException("Return a non-JSON Content.");
+            }
             HttpEntity httpEntity = httpResponse.getEntity();
             String json = EntityUtils.toString(httpEntity, "UTF-8");
             EntityUtils.consume(httpEntity);

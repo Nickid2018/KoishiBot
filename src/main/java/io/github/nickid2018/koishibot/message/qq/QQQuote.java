@@ -7,6 +7,9 @@ import io.github.nickid2018.koishibot.message.api.UserInfo;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.QuoteReply;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 public class QQQuote extends QQMessage implements QuoteMessage {
 
@@ -32,9 +35,16 @@ public class QQQuote extends QQMessage implements QuoteMessage {
         return this;
     }
 
+    @Nullable
     @Override
     public UserInfo getReplyTo() {
-        return environment.getUser("qq.user" + quoteReply.component1().getFromId(), true);
+        return environment.getUser("qq.user" + quoteReply.getSource().getFromId(), true);
+    }
+
+    @NotNull
+    @Override
+    public String getReplyToID() {
+        return "qq.user" + quoteReply.getSource().getFromId();
     }
 
     @Override

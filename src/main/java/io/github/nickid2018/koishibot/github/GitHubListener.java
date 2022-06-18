@@ -17,20 +17,20 @@ public class GitHubListener {
 
     public static final String GITHUB_API = "https://api.github.com";
 
-    private final GroupDataReader<Set<String>> groupData;
-    private final Map<String, String> pushData;
+    private final GroupDataReader<Map<String, String>> groupData;
+    private final Map<String, Repository> pushData;
     private final File repo;
 
     @SuppressWarnings("unchecked")
     public GitHubListener() throws IOException, ClassNotFoundException {
         groupData = new GroupDataReader<>("github",
-                reader -> (Set<String>) new ObjectInputStream(reader).readObject(),
+                reader -> (Map<String, String>) new ObjectInputStream(reader).readObject(),
                 (writer, data) -> new ObjectOutputStream(writer).writeObject(data),
-                HashSet::new);
+                HashMap::new);
         repo = new File(groupData.getFolder(), "repo.dat");
         if (repo.exists())
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(repo))) {
-                pushData = (Map<String, String>) ois.readObject();
+                pushData = (Map<String, Repository>) ois.readObject();
             }
         else {
             pushData = new HashMap<>();
@@ -84,13 +84,15 @@ public class GitHubListener {
         } else return false;
     }
 
-    public static void authenticate(HttpUriRequest request) {
-        request.addHeader("Authorization", "token " + Settings.GITHUB_TOKEN);
+    public static HttpUriRequest authenticate(HttpUriRequest request) {
+        if (Settings.GITHUB_TOKEN != null && !Settings.GITHUB_TOKEN.isEmpty())
+            request.addHeader("Authorization", "token " + Settings.GITHUB_TOKEN);
+        return request;
     }
 
-    public static void acceptJSON(HttpUriRequest request) {
-        authenticate(request);
+    public static HttpUriRequest acceptJSON(HttpUriRequest request) {
         request.addHeader("Accept", "application/vnd.github.v3+json");
+        return authenticate(request);
     }
 
     public static JsonObject queryRepo(String key) throws IOException {
@@ -99,10 +101,10 @@ public class GitHubListener {
             throw new IOException("无效的仓库");
         try {
             return WebUtil.fetchDataInJson(
-                    new HttpGet(GITHUB_API + "/repos/" + data[0] + "/" + data[1])).getAsJsonObject();
+                    acceptJSON(new HttpGet(GITHUB_API + "/repos/" + data[0] + "/" + data[1]))).getAsJsonObject();
         } catch (ErrorCodeException e) {
             if (e.code == 404)
-                throw new IOException("仓库不存在");
+                throw new IOException("仓库不存在或未公开");
             else throw e;
         }
     }

@@ -1,6 +1,7 @@
 package io.github.nickid2018.koishibot.message;
 
 import io.github.nickid2018.koishibot.KoishiBotMain;
+import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
@@ -8,6 +9,7 @@ import io.github.nickid2018.koishibot.message.api.UserInfo;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class UserAwaitData {
@@ -16,19 +18,21 @@ public class UserAwaitData {
 
         public GroupInfo group;
         public UserInfo user;
+        public AbstractMessage sent;
 
-        public MessageData(GroupInfo group, UserInfo user) {
+        public MessageData(GroupInfo group, UserInfo user, AbstractMessage sent) {
             this.group = group;
             this.user = user;
+            this.sent = sent;
         }
     }
 
-    public static final Map<MessageData, Consumer<ChainMessage>> AWAIT_MAP = new HashMap<>();
+    public static final Map<MessageData, BiConsumer<AbstractMessage, ChainMessage>> AWAIT_MAP = new HashMap<>();
     private static final ReentrantLock lock = new ReentrantLock();
 
-    public static void add(GroupInfo group, UserInfo user, Consumer<ChainMessage> consumer) {
+    public static void add(GroupInfo group, UserInfo user, AbstractMessage sent, BiConsumer<AbstractMessage, ChainMessage> consumer) {
         lock.lock();
-        AWAIT_MAP.put(new MessageData(group, user), consumer);
+        AWAIT_MAP.put(new MessageData(group, user, sent), consumer);
         lock.unlock();
     }
 
@@ -50,11 +54,12 @@ public class UserAwaitData {
         lock.unlock();
         if (find == null)
             return;
-        Consumer<ChainMessage> dataConsumer;
+        BiConsumer<AbstractMessage, ChainMessage> dataConsumer;
         lock.lock();
         dataConsumer = AWAIT_MAP.remove(find);
         lock.unlock();
-        KoishiBotMain.INSTANCE.executor.execute(() -> dataConsumer.accept(reply));
+        MessageData finalFind = find;
+        KoishiBotMain.INSTANCE.executor.execute(() -> dataConsumer.accept(finalFind.sent, reply));
     }
 }
 

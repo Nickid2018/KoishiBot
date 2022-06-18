@@ -53,9 +53,9 @@ public class WikiResolver extends MessageResolver {
                         environment.newText("[[" + (namespace == null ? "" : namespace + ":") + title + "]]不存在，" +
                                 "你要查看的是否为[[" + (page.prefix == null ? "" : page.prefix + ":") + page.title + "]](打y确认)")
                 );
-                environment.getMessageSender().sendMessageAwait(context, chain, next -> {
+                environment.getMessageSender().sendMessageAwait(context, chain, (source, next) -> {
                     try {
-                        chain.recall();
+                        source.recall();
                         boolean accept = false;
                         for (AbstractMessage message : next.getMessages()) {
                             if (!(message instanceof TextMessage))
@@ -91,7 +91,7 @@ public class WikiResolver extends MessageResolver {
             boolean shouldHide = false;
             if (page.url != null)
                 for (String prefix : Settings.MIRROR.values())
-                   if (page.url.contains(prefix)) {
+                   if (page.url.contains(prefix) && !prefix.contains("moegirl")) {
                         shouldHide = true;
                         break;
                     }

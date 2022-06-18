@@ -7,7 +7,7 @@ import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
-import kotlin.Triple;
+import kotlin.Pair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 public class MessageSender {
 
@@ -31,7 +31,7 @@ public class MessageSender {
     private final AtomicLong messageCounter = new AtomicLong(0);
     private final ReentrantLock sendLock = new ReentrantLock();
     private final AtomicLong lastSentTime = new AtomicLong(System.currentTimeMillis());
-    private final Queue<Triple<MessageContext, Long, AbstractMessage>> sentQueue = new ConcurrentLinkedDeque<>();
+    private final Queue<Pair<MessageContext, Long>> sentQueue = new ConcurrentLinkedDeque<>();
 
     private final Environment environment;
     private final boolean needAntiFilter;
@@ -85,9 +85,8 @@ public class MessageSender {
         send(contact, message, true);
     }
 
-    public void sendMessageAwait(MessageContext contact, AbstractMessage message, Consumer<ChainMessage> consumer) {
-        send(contact, message, true);
-        UserAwaitData.add(contact.getGroup(), contact.getUser(), consumer);
+    public void sendMessageAwait(MessageContext contact, AbstractMessage message, BiConsumer<AbstractMessage, ChainMessage> consumer) {
+        UserAwaitData.add(contact.getGroup(), contact.getUser(), send(contact, message, true), consumer);
     }
 
     public void onError(Throwable t, String module, MessageContext context, boolean quote) {
@@ -127,11 +126,11 @@ public class MessageSender {
         t.printStackTrace();
     }
 
-    private void send(MessageContext contact, AbstractMessage message, boolean recall) {
+    public AbstractMessage send(MessageContext contact, AbstractMessage message, boolean recall) {
+        message = useSensitiveFilter(message);
+        message = countAntiAutoFilter(message);
         sendLock.lock();
         try {
-            message = useSensitiveFilter(message);
-            message = countAntiAutoFilter(message);
             long sleepTime = 250 - (System.currentTimeMillis() - lastSentTime.get());
             if (sleepTime > 0)
                 try {
@@ -140,26 +139,29 @@ public class MessageSender {
                 }
             contact.getSendDest().send(message);
             if (recall)
-                sentQueue.offer(new Triple<>(contact, message.getSentTime(), message));
-            while (sentQueue.size() > 100 ||
-                    (!sentQueue.isEmpty() && System.currentTimeMillis() - sentQueue.peek().component2() >= 1800_000))
+                sentQueue.offer(new Pair<>(contact, message.getSentTime()));
+            while (sentQueue.size() > 100)
                 sentQueue.poll();
             lastSentTime.set(System.currentTimeMillis());
         } finally {
             sendLock.unlock();
         }
+        return message;
     }
 
     public void onRecall(GroupInfo groupInfo, UserInfo user, long time) {
         sendLock.lock();
         try {
-            for (Triple<MessageContext, Long, AbstractMessage> entry : sentQueue) {
-                if (groupInfo.equals(entry.component1().getGroup()) &&
-                        user.equals(entry.component1().getUser()) && time == entry.component2()) {
-                    entry.component3().recall();
-                    break;
-                }
+            for (Pair<MessageContext, Long> entry : sentQueue) {
+                GroupInfo nowGroup = entry.component1().getGroup();
+                UserInfo nowUser = entry.component1().getUser();
+                if ((groupInfo == null && nowGroup == null) ||
+                        (groupInfo != null && nowGroup != null && groupInfo.equals(nowGroup)) &&
+                        user.equals(nowUser) && time == entry.component2())
+                    entry.component1().getMessage().recall();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             sendLock.unlock();
         }

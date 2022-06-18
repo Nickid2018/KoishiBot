@@ -72,10 +72,10 @@ public class MessageManager {
             if (content instanceof TextMessage)
                 strings.add(((TextMessage) content).getText());
             if (content instanceof AtMessage)
-                if (((AtMessage) content).getUser(group).getUserId().equals(environment.getBotId()))
+                if (((AtMessage) content).getId().equals(environment.getBotId()))
                     att = true;
             if (content instanceof QuoteMessage)
-                if (((QuoteMessage) content).getReplyTo().getUserId().equals(environment.getBotId()))
+                if (((QuoteMessage) content).getReplyToID().equals(environment.getBotId()))
                     replyMe = true;
         }
         MutableBoolean bool = new MutableBoolean(false);

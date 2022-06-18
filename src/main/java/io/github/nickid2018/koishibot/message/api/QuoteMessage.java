@@ -1,10 +1,17 @@
 package io.github.nickid2018.koishibot.message.api;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 public interface QuoteMessage extends AbstractMessage {
 
     QuoteMessage fill(AbstractMessage message);
 
+    @Nullable
     UserInfo getReplyTo();
+
+    @Nonnull
+    String getReplyToID();
 
     default void send(GroupInfo group) {
         format().send(group);

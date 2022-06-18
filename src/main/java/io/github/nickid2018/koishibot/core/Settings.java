@@ -47,6 +47,7 @@ public class Settings {
         loadImageSettings(settingsRoot);
         loadWebDriver(settingsRoot);
         loadSensitiveWordsSettings(settingsRoot);
+        loadGitHub(settingsRoot);
     }
 
     public static void reload() throws IOException {
@@ -61,6 +62,7 @@ public class Settings {
         loadImageSettings(settingsRoot);
         loadWebDriver(settingsRoot);
         loadSensitiveWordsSettings(settingsRoot);
+        loadGitHub(settingsRoot);
     }
 
     public static void loadWiki(JsonObject settingsRoot) {
@@ -122,5 +124,7 @@ public class Settings {
         JsonElement element = settingsRoot.get("github_token");
         if (element.isJsonPrimitive())
             GITHUB_TOKEN = element.getAsString();
+        else
+            GITHUB_TOKEN = "";
     }
 }

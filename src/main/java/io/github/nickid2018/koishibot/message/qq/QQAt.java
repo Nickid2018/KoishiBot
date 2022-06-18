@@ -5,6 +5,9 @@ import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Message;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 public class QQAt extends QQMessage implements AtMessage {
 
@@ -25,9 +28,16 @@ public class QQAt extends QQMessage implements AtMessage {
         return this;
     }
 
+    @Nullable
     @Override
     public UserInfo getUser(GroupInfo group) {
         return new QQUser(((QQGroup) group).getGroup().get(at.getTarget()), false, true);
+    }
+
+    @NotNull
+    @Override
+    public String getId() {
+        return "qq.user" + at.getTarget();
     }
 
     @Override
