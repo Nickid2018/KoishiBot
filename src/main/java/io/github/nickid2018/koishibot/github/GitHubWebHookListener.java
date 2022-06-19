@@ -137,11 +137,11 @@ public class GitHubWebHookListener {
             builder.append("提交: ");
             String message = commit.get("message").getAsString().split("\n")[0];
             builder.append(message).append("\n");
-            builder.append("  提交人: ").append(WebUtil.getDataInPathOrNull(commit, "committer.name"));
-            builder.append("  时间: ").append(commit.get("timestamp"));
+            builder.append("  提交人: ").append(WebUtil.getDataInPathOrNull(commit, "committer.name")).append("\n");
+            builder.append("  时间: ").append(commit.get("timestamp")).append("\n");
             builder.append("  添加").append(commit.get("added").getAsJsonArray().size())
                     .append("文件, 删除").append(commit.get("removed").getAsJsonArray().size())
-                    .append("文件, 修改").append(commit.get("modified").getAsJsonArray().size()).append("\n");
+                    .append("文件, 修改").append(commit.get("modified").getAsJsonArray().size()).append("文件。\n");
         }
         return builder.toString().trim();
     }
