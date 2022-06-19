@@ -15,6 +15,9 @@ import java.util.*;
 
 public class GitHubListener {
 
+    public static void clinit(){
+    }
+
     public static final GitHubListener LISTENER;
 
     static {

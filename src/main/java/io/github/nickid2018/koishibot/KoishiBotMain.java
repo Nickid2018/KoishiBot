@@ -4,6 +4,7 @@ import io.github.nickid2018.koishibot.core.BotKoishiCommand;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
+import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
@@ -66,10 +67,7 @@ public final class KoishiBotMain extends JavaPlugin {
         ).build());
         environment = new QQEnvironment(botKoishi);
         manager = new MessageManager(environment);
-        try {
-            Class.forName("io.github.nickid2018.koishibot.github.GitHubListener");
-        } catch (ClassNotFoundException ignored) {
-        }
+        GitHubListener.clinit();
     }
 
     @Override
