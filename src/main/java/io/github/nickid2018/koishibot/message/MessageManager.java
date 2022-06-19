@@ -26,6 +26,7 @@ public class MessageManager {
         RESOLVERS.add(new CurseForgeResolver());
         RESOLVERS.add(new TranslateResolver());
         RESOLVERS.add(new GitHubWebHookResolver());
+        RESOLVERS.add(new GitHubResolver());
     }
 
     public MessageManager(Environment environment) {

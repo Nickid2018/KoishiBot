@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.core;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.util.BiConsumerE;
 import io.github.nickid2018.koishibot.util.FunctionE;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 import java.io.*;
 import java.util.HashMap;
@@ -33,9 +34,19 @@ public class GroupDataReader<E> {
            folder.mkdir();
     }
 
+    public void loadAll() {
+        File[] files = folder.listFiles((FileFilter) new SuffixFileFilter("gpd"));
+        if (files == null)
+            return;
+        for (File file : files) {
+            String name = file.getName();
+            getData(name.substring(0, name.lastIndexOf('.')));
+        }
+    }
+
     public E getData(String group) {
         return data.computeIfAbsent(group, g -> {
-            File file = new File(folder, g + "");
+            File file = new File(folder, g + ".gpd");
             if (!file.exists())
                 return empty.get();
             try (InputStream is = new FileInputStream(file)) {
@@ -49,7 +60,7 @@ public class GroupDataReader<E> {
 
     public void putData(String group, E data) throws Exception {
         this.data.put(group, data);
-        File file = new File(folder, group + "");
+        File file = new File(folder, group + ".gpd");
         if (!file.exists())
             file.createNewFile();
         writer.accept(new FileOutputStream(file), data);

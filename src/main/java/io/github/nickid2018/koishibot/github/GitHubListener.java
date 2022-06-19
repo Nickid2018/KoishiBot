@@ -30,18 +30,19 @@ public class GitHubListener {
 
     public static final String GITHUB_API = "https://api.github.com";
 
-    final GroupDataReader<Map<String, String>> groupData;
+    final GroupDataReader<Set<String>> groupData;
     final Map<String, Repository> pushData;
     final File repo;
     final File webhook;
     final GitHubWebHookListener webHookListener;
 
     @SuppressWarnings("unchecked")
-    public GitHubListener() throws IOException, ClassNotFoundException {
+    public GitHubListener() throws Exception {
         groupData = new GroupDataReader<>("github",
-                reader -> (Map<String, String>) new ObjectInputStream(reader).readObject(),
+                reader -> (Set<String>) new ObjectInputStream(reader).readObject(),
                 (writer, data) -> new ObjectOutputStream(writer).writeObject(data),
-                HashMap::new);
+                HashSet::new);
+        groupData.loadAll();
         repo = new File(groupData.getFolder(), "repo.dat");
         webhook = new File(groupData.getFolder(), "webhook.dat");
         webHookListener = new GitHubWebHookListener(this);
@@ -98,14 +99,31 @@ public class GitHubListener {
     }
 
     public boolean refreshRepo(String key) throws Exception {
-        JsonObject object = queryRepo(key);
-        String date = object.get("pushed_at").getAsString();
-        if (!date.equals(pushData.get(key))) {
-            groupData.getGroups().forEach(group -> {
+//        JsonObject object = queryRepo(key);
+//        String date = object.get("pushed_at").getAsString();
+//        if (!date.equals(pushData.get(key))) {
+//            groupData.getGroups().forEach(group -> {
+//
+//            });
+//            return true;
+//        } else return false;
+        return false;
+    }
 
-            });
-            return true;
-        } else return false;
+    public void addRepo(String group, String repo) throws Exception {
+        if (!pushData.containsKey(repo) && !webHookListener.webHooks.containsKey(repo))
+            throw new IOException("仓库源不存在，请使用github repo进行添加");
+        groupData.updateData(group, set -> {
+            set.add(repo);
+            return set;
+        });
+    }
+
+    public void removeRepo(String group, String repo) throws Exception {
+        groupData.updateData(group, set -> {
+            set.remove(repo);
+            return set;
+        });
     }
 
     public static HttpUriRequest acceptJSON(HttpUriRequest request, String token) {

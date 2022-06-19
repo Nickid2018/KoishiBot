@@ -1,14 +1,16 @@
 package io.github.nickid2018.koishibot.core;
 
 import io.github.nickid2018.koishibot.Constants;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.message.api.MessageEntry;
 import kotlin.Triple;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ErrorRecord {
@@ -16,6 +18,7 @@ public class ErrorRecord {
     public static final Queue<Triple<Long, String, Throwable>> ERROR_QUEUE = new ConcurrentLinkedDeque<>();
 
     public static synchronized void enqueueError(String module, Throwable t) {
+        t.printStackTrace();
         ERROR_QUEUE.offer(new Triple<>(System.currentTimeMillis(), module, t));
         if (ERROR_QUEUE.size() > 30)
             ERROR_QUEUE.poll();

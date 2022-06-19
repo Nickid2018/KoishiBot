@@ -122,10 +122,9 @@ public class MessageSender {
             );
         }
         send(context, chain, recall);
-        t.printStackTrace();
     }
 
-    public AbstractMessage send(MessageContext contact, AbstractMessage message, boolean recall) {
+    public AbstractMessage send(MessageContext context, AbstractMessage message, boolean recall) {
         message = useSensitiveFilter(message);
         message = countAntiAutoFilter(message);
         sendLock.lock();
@@ -136,9 +135,9 @@ public class MessageSender {
                     Thread.sleep(sleepTime);
                 } catch (InterruptedException ignored) {
                 }
-            contact.getSendDest().send(message);
+            context.getSendDest().send(message);
             if (recall)
-                sentQueue.offer(new Pair<>(contact, message));
+                sentQueue.offer(new Pair<>(context, message));
             while (sentQueue.size() > 100)
                 sentQueue.poll();
             lastSentTime.set(System.currentTimeMillis());
