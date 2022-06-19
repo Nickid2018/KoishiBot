@@ -66,6 +66,10 @@ public final class KoishiBotMain extends JavaPlugin {
         ).build());
         environment = new QQEnvironment(botKoishi);
         manager = new MessageManager(environment);
+        try {
+            Class.forName("io.github.nickid2018.koishibot.github.GitHubListener");
+        } catch (ClassNotFoundException ignored) {
+        }
     }
 
     @Override
