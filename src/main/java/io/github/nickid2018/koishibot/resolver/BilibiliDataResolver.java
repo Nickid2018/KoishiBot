@@ -44,23 +44,23 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext contact, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             try {
                 if (pattern == B_SHORT_LINK_PATTERN)
-                    fromShortLink(key, contact, environment);
+                    fromShortLink(key, context, environment);
                 else if (pattern == B_CV_ARTICLE_PATTERN)
-                    doArticleDisplay(key, contact, environment);
+                    doArticleDisplay(key, context, environment);
                 else if (pattern == B_SS_EPISODE_PATTERN)
-                    doEpisodeDisplay(key, contact, true, environment);
+                    doEpisodeDisplay(key, context, true, environment);
                 else if (pattern == B_EP_EPISODE_PATTERN)
-                    doEpisodeDisplay(key, contact, false, environment);
+                    doEpisodeDisplay(key, context, false, environment);
                 else if (pattern == B_AU_AUDIO_PATTERN)
-                    doAudioDisplay(key, contact, environment);
+                    doAudioDisplay(key, context, environment);
                 else
-                    doVideoDisplay(key, contact, environment);
+                    doVideoDisplay(key, context, environment);
             } catch (Exception e) {
-                environment.getMessageSender().onError(e, "bilibili", contact, true);
+                environment.getMessageSender().onError(e, "bilibili", context, true);
             }
         });
         return true;

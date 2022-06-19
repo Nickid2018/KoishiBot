@@ -15,11 +15,26 @@ import java.util.*;
 
 public class GitHubListener {
 
+    public static final GitHubListener LISTENER;
+
+    static {
+        GitHubListener tmp;
+        try {
+            tmp = new GitHubListener();
+        } catch (Exception e) {
+            e.printStackTrace();
+            tmp = null;
+        }
+        LISTENER = tmp;
+    }
+
     public static final String GITHUB_API = "https://api.github.com";
 
-    private final GroupDataReader<Map<String, String>> groupData;
-    private final Map<String, Repository> pushData;
-    private final File repo;
+    final GroupDataReader<Map<String, String>> groupData;
+    final Map<String, Repository> pushData;
+    final File repo;
+    final File webhook;
+    final GitHubWebHookListener webHookListener;
 
     @SuppressWarnings("unchecked")
     public GitHubListener() throws IOException, ClassNotFoundException {
@@ -28,14 +43,19 @@ public class GitHubListener {
                 (writer, data) -> new ObjectOutputStream(writer).writeObject(data),
                 HashMap::new);
         repo = new File(groupData.getFolder(), "repo.dat");
+        webhook = new File(groupData.getFolder(), "webhook.dat");
+        webHookListener = new GitHubWebHookListener(this);
+
         if (repo.exists())
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(repo))) {
                 pushData = (Map<String, Repository>) ois.readObject();
             }
         else {
             pushData = new HashMap<>();
+            repo.createNewFile();
             savePushes();
         }
+
         Thread thread = new Thread(this::queryRepoUpdate);
         thread.setDaemon(true);
         thread.start();
@@ -45,6 +65,10 @@ public class GitHubListener {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(repo))) {
             oos.writeObject(pushData);
         }
+    }
+
+    public GitHubWebHookListener getWebHookListener() {
+        return webHookListener;
     }
 
     private void queryRepoUpdate() {
@@ -82,6 +106,12 @@ public class GitHubListener {
             });
             return true;
         } else return false;
+    }
+
+    public static HttpUriRequest acceptJSON(HttpUriRequest request, String token) {
+        request.addHeader("Authorization", "token " + token);
+        request.addHeader("Accept", "application/vnd.github.v3+json");
+        return request;
     }
 
     public static HttpUriRequest authenticate(HttpUriRequest request) {

@@ -4,7 +4,6 @@ import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import kotlin.Pair;
@@ -31,7 +30,7 @@ public class MessageSender {
     private final AtomicLong messageCounter = new AtomicLong(0);
     private final ReentrantLock sendLock = new ReentrantLock();
     private final AtomicLong lastSentTime = new AtomicLong(System.currentTimeMillis());
-    private final Queue<Pair<MessageContext, Long>> sentQueue = new ConcurrentLinkedDeque<>();
+    private final Queue<Pair<MessageContext, AbstractMessage>> sentQueue = new ConcurrentLinkedDeque<>();
 
     private final Environment environment;
     private final boolean needAntiFilter;
@@ -89,7 +88,7 @@ public class MessageSender {
         UserAwaitData.add(contact.getGroup(), contact.getUser(), send(contact, message, true), consumer);
     }
 
-    public void onError(Throwable t, String module, MessageContext context, boolean quote) {
+    public void onError(Throwable t, String module, MessageContext context, boolean recall) {
         ErrorRecord.enqueueError(module, t);
         ChainMessage chain;
         String choose = ERROR_MESSAGES[random.nextInt(ERROR_MESSAGES.length)];
@@ -122,7 +121,7 @@ public class MessageSender {
                     environment.newText(choose + ": " + (message.length() > 100 ? t.getClass().getName() : message))
             );
         }
-        send(context, chain, quote);
+        send(context, chain, recall);
         t.printStackTrace();
     }
 
@@ -139,7 +138,7 @@ public class MessageSender {
                 }
             contact.getSendDest().send(message);
             if (recall)
-                sentQueue.offer(new Pair<>(contact, message.getSentTime()));
+                sentQueue.offer(new Pair<>(contact, message));
             while (sentQueue.size() > 100)
                 sentQueue.poll();
             lastSentTime.set(System.currentTimeMillis());
@@ -152,13 +151,13 @@ public class MessageSender {
     public void onRecall(GroupInfo groupInfo, UserInfo user, long time) {
         sendLock.lock();
         try {
-            for (Pair<MessageContext, Long> entry : sentQueue) {
+            for (Pair<MessageContext, AbstractMessage> entry : sentQueue) {
                 GroupInfo nowGroup = entry.component1().getGroup();
                 UserInfo nowUser = entry.component1().getUser();
                 if ((groupInfo == null && nowGroup == null) ||
                         (groupInfo != null && nowGroup != null && groupInfo.equals(nowGroup)) &&
-                        user.equals(nowUser) && time == entry.component2())
-                    entry.component1().getMessage().recall();
+                        user.equals(nowUser) && time == entry.component1().getMessage().getSentTime())
+                    entry.component2().recall();
             }
         } catch (Exception e) {
             e.printStackTrace();

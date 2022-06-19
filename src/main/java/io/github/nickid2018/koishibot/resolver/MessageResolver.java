@@ -22,6 +22,10 @@ public abstract class MessageResolver {
         this.prefix = prefix.toLowerCase(Locale.ROOT);
     }
 
+    public boolean groupEnabled() {
+        return true;
+    }
+
     public boolean needAt() {
         return false;
     }
@@ -34,19 +38,19 @@ public abstract class MessageResolver {
         return false;
     }
 
-    public boolean resolve(String segment, MessageContext contact, Environment environment) {
+    public boolean resolve(String segment, MessageContext context, Environment environment) {
         segment = segment.trim();
         if (prefix != null && segment.toLowerCase(Locale.ROOT).startsWith(prefix))
-            return resolveInternal(segment.substring(prefix.length()), contact, null, environment);
+            return resolveInternal(segment.substring(prefix.length()), context, null, environment);
         else if (regex != null) {
             for (Pattern pattern : regex) {
                 Matcher matcher = pattern.matcher(segment);
                 if (matcher.find())
-                    return resolveInternal(segment.substring(matcher.start(), matcher.end()), contact, pattern, environment);
+                    return resolveInternal(segment.substring(matcher.start(), matcher.end()), context, pattern, environment);
             }
         }
         return false;
     }
 
-    public abstract boolean resolveInternal(String key, MessageContext contact, Pattern pattern, Environment environment);
+    public abstract boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment);
 }

@@ -29,6 +29,8 @@ public class GroupDataReader<E> {
        this.writer = writer;
        this.empty = empty;
        folder = new File(KoishiBotMain.INSTANCE.getDataFolder(), name);
+       if (!folder.isDirectory())
+           folder.mkdir();
     }
 
     public E getData(String group) {
@@ -47,7 +49,10 @@ public class GroupDataReader<E> {
 
     public void putData(String group, E data) throws Exception {
         this.data.put(group, data);
-        writer.accept(new FileOutputStream(new File(folder, group + "")), data);
+        File file = new File(folder, group + "");
+        if (!file.exists())
+            file.createNewFile();
+        writer.accept(new FileOutputStream(file), data);
     }
 
     public void updateData(String group, Function<E, E> changer) throws Exception {

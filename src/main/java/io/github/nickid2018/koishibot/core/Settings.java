@@ -18,6 +18,8 @@ public class Settings {
     public static long BOT_QQ;
     public static String BOT_PASSWORD;
 
+    public static String LOCAL_IP;
+
     public static String YOUDAO_APP_KEY;
     public static String YOUDAO_APP_SECRET;
 
@@ -39,6 +41,7 @@ public class Settings {
 
         BOT_QQ = settingsRoot.get("qq").getAsLong();
         BOT_PASSWORD = settingsRoot.get("password").getAsString();
+        LOCAL_IP = settingsRoot.get("local_ip").getAsString();
 
         loadWiki(settingsRoot);
         loadMirror(settingsRoot);

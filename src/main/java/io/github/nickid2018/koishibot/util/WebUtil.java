@@ -87,6 +87,26 @@ public class WebUtil {
         }
     }
 
+    public static void sendReturnNoContent(HttpUriRequest post) throws IOException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableCookieManagement()
+                .setUserAgent(chooseRandomUA()).build();
+        CloseableHttpResponse httpResponse = null;
+        try {
+            httpResponse = httpClient.execute(post);
+            int status = httpResponse.getStatusLine().getStatusCode();
+            if (status != 204)
+                throw new ErrorCodeException(status);
+        } finally {
+            try {
+                if (httpResponse != null)
+                    httpResponse.close();
+            } catch (IOException e) {
+                LOGGER.error("## release resource error ##" + e);
+            }
+        }
+    }
+
     public static String fetchDataInText(HttpUriRequest post) throws IOException {
         return fetchDataInText(post, false);
     }

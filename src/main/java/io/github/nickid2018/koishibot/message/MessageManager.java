@@ -25,6 +25,7 @@ public class MessageManager {
         RESOLVERS.add(new BugTrackerResolver());
         RESOLVERS.add(new CurseForgeResolver());
         RESOLVERS.add(new TranslateResolver());
+        RESOLVERS.add(new GitHubWebHookResolver());
     }
 
     public MessageManager(Environment environment) {
@@ -45,7 +46,7 @@ public class MessageManager {
 
     private void onGroupMessage(Triple<GroupInfo, UserInfo, ChainMessage> messageTriple) {
         dealMessage(messageTriple.component1(), messageTriple.component2(), messageTriple.component3(),
-                s -> true, true);
+                MessageResolver::groupEnabled, true);
     }
 
     private void onFriendMessage(UserInfo user, ChainMessage message) {
