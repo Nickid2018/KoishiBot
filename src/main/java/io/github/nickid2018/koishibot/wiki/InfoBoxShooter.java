@@ -32,7 +32,6 @@ public class InfoBoxShooter {
     private static ExecutorService executor;
 
     public static void loadWebDriver() {
-        close();
         FirefoxOptions firefoxOptions = new FirefoxOptions();
         firefoxOptions.addArguments("--headless");
         firefoxOptions.addArguments("--no-sandbox");

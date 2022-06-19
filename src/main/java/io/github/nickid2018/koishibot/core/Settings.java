@@ -116,8 +116,11 @@ public class Settings {
     }
 
     public static void loadWebDriver(JsonObject settingsRoot) {
-        System.setProperty("webdriver.gecko.driver", settingsRoot.get("webdriver").getAsString());
-        InfoBoxShooter.loadWebDriver();
+        InfoBoxShooter.close();
+        if (settingsRoot.has("webdriver")) {
+            System.setProperty("webdriver.gecko.driver", settingsRoot.get("webdriver").getAsString());
+            InfoBoxShooter.loadWebDriver();
+        }
     }
 
     public static void loadGitHub(JsonObject settingsRoot) {
