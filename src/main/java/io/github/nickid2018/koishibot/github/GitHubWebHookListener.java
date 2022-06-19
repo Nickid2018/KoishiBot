@@ -102,17 +102,12 @@ public class GitHubWebHookListener {
         httpExchange.sendResponseHeaders(204, 0);
         System.out.println(data);
         JsonObject json = JsonParser.parseString(data).getAsJsonObject();
-        String action = json.get("action").getAsString();
         String repo = WebUtil.getDataInPathOrNull(json, "repository.full_name");
         String send = null;
-        switch (action) {
-            case "push":
-                send = push(json, repo);
-                break;
-            case "fork":
-                send = fork(json, repo);
-                break;
-        }
+        if (json.has("pusher"))
+            send = push(json, repo);
+        else if (json.has("forkee"))
+            send = fork(json, repo);
         if (send != null) {
             // TMP USE!
             String finalSend = send;
@@ -133,7 +128,6 @@ public class GitHubWebHookListener {
         builder.append("本次推送的提交信息:\n");
         List<JsonObject> commits = new ArrayList<>();
         object.get("commits").getAsJsonArray().forEach(e -> commits.add(e.getAsJsonObject()));
-        commits.add(object.get("head_commit").getAsJsonObject());
         if (commits.size() > 3) {
             builder.append("(共").append(commits.size()).append("次提交，仅显示最后三次)\n");
             while (commits.size() > 3)
