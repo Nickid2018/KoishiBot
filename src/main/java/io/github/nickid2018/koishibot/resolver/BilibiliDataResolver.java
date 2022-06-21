@@ -316,7 +316,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             if (environment instanceof QQEnvironment) {
                 try {
-                    String url = WebUtil.getDataInPathOrNull(content, "meta.detail_1.qqdocurl");
+                    String url = WebUtil.getDataInPathOrNull(content, "meta.news.jumpUrl");
                     if (url == null)
                         return;
                     url = url.split("\\?")[0];

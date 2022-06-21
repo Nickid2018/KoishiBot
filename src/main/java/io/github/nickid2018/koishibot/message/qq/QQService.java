@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.github.nickid2018.koishibot.message.api.ServiceMessage;
 import io.github.nickid2018.koishibot.util.Either;
+import io.github.nickid2018.koishibot.util.WebUtil;
 import net.mamoe.mirai.message.data.LightApp;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.RichMessage;
@@ -36,7 +37,7 @@ public class QQService extends QQMessage implements ServiceMessage {
     public String getName() {
         Either<JsonObject, String> data = getData();
         if (data.isLeft())
-            return data.getLeft().get("desc").getAsString();
+            return WebUtil.getDataInPathOrNull(data.getLeft(), "meta.news.tag");
         return "<Unknown>";
     }
 
