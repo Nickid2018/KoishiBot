@@ -36,8 +36,12 @@ public class QQService extends QQMessage implements ServiceMessage {
     @Override
     public String getName() {
         Either<JsonObject, String> data = getData();
-        if (data.isLeft())
-            return WebUtil.getDataInPathOrNull(data.getLeft(), "meta.news.tag");
+        if (data.isLeft()) {
+            String name =  WebUtil.getDataInPathOrNull(data.getLeft(), "meta.news.tag");
+            if (name == null)
+                name = WebUtil.getDataInPathOrNull(data.getLeft(), "desc");
+            return name == null ? "<Unknown>" : name;
+        }
         return "<Unknown>";
     }
 
