@@ -44,7 +44,7 @@ public class ErrorRecord {
                     Constants.TIME_OF_514
             ));
         }
-        forwards.fill(contact, entries.toArray(new MessageEntry[0]));
+        forwards.fillForwards(contact, entries.toArray(new MessageEntry[0]));
         return forwards;
     }
 }

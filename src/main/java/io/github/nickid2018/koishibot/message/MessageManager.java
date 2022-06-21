@@ -1,12 +1,16 @@
 package io.github.nickid2018.koishibot.message;
 
+import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.resolver.*;
+import io.github.nickid2018.koishibot.util.Either;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import kotlin.Triple;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 public class MessageManager {
@@ -14,6 +18,7 @@ public class MessageManager {
     private final Environment environment;
 
     public static final List<MessageResolver> RESOLVERS = new ArrayList<>();
+    public static final Map<String, JSONServiceResolver> JSON_SERVICE_MAP = new HashMap<>();
 
     static {
         RESOLVERS.add(new HelpResolver());
@@ -27,6 +32,8 @@ public class MessageManager {
         RESOLVERS.add(new TranslateResolver());
         RESOLVERS.add(new GitHubWebHookResolver());
         RESOLVERS.add(new GitHubResolver());
+
+        JSON_SERVICE_MAP.put("哔哩哔哩", new BilibiliDataResolver());
     }
 
     public MessageManager(Environment environment) {
@@ -64,12 +71,23 @@ public class MessageManager {
 
     private void dealMessage(GroupInfo group, UserInfo user, ChainMessage message,
                              Predicate<MessageResolver> predicate, boolean inGroup) {
-        if (MemberFilter.shouldNotResponse(user))
+        MessageContext context = new MessageContext(group, user, message);
+
+        MutableBoolean ban = new MutableBoolean(false);
+        if (MemberFilter.shouldNotResponse(user, ban)) {
+            if (ban.getValue())
+                environment.getMessageSender().sendMessage(context, environment.newChain(
+                        environment.newAt(user), environment.newText(" 被自动封禁一小时，原因: 过于频繁的操作")
+                ));
             return;
+        }
         UserAwaitData.onMessage(group, user, message);
+
         List<String> strings = new ArrayList<>();
+        ServiceMessage service = null;
         boolean att = false;
         boolean replyMe = false;
+
         for (AbstractMessage content : message.getMessages()) {
             if (content instanceof TextMessage)
                 strings.add(((TextMessage) content).getText());
@@ -79,32 +97,44 @@ public class MessageManager {
             if (content instanceof QuoteMessage)
                 if (((QuoteMessage) content).getReplyToID().equals(environment.getBotId()))
                     replyMe = true;
+            if (content instanceof ServiceMessage)
+                service = (ServiceMessage) content;
         }
+
         MutableBoolean bool = new MutableBoolean(false);
-        boolean finalAtt = att;
-        MessageContext contact = new MessageContext(group, user, message);
-        RESOLVERS.stream().filter(predicate.and(s -> !inGroup || !s.needAt() || finalAtt))
-                .forEach(messageResolver -> strings.forEach(string -> {
-                    if (!bool.getValue() && messageResolver.resolve(string, contact, environment))
-                        bool.setValue(true);
-                }));
-        if (!bool.getValue() && att && inGroup && !replyMe) {
-            environment.getMessageSender().sendMessage(contact, environment.newChain(
-                    environment.newQuote(message),
-                    environment.newText("不要乱@人，会被514打电话的。")
-            ));
+        if (service == null) {
+            boolean finalAtt = att;
+            RESOLVERS.stream().filter(predicate.and(s -> !inGroup || !s.needAt() || finalAtt))
+                    .forEach(messageResolver -> strings.forEach(string -> {
+                        if (!bool.getValue() && messageResolver.resolve(string, context, environment))
+                            bool.setValue(true);
+                    }));
+            if (!bool.getValue() && att && inGroup && !replyMe) {
+                environment.getMessageSender().sendMessage(context, environment.newChain(
+                        environment.newQuote(message),
+                        environment.newText("不要乱@人，会被514打电话的。")
+                ));
+            }
+        } else {
+            bool.setValue(true);
+            String name = service.getName();
+            Either<JsonObject, String> data = service.getData();
+            if (data.isLeft() && JSON_SERVICE_MAP.containsKey(name))
+                JSON_SERVICE_MAP.get(name).resolveService(data.getLeft(), context, environment);
         }
+
         if (bool.getValue() || (inGroup && att)) {
             MemberFilter.refreshRequestTime(user);
-            user.nudge(inGroup ? group : user);
+            if (Math.random() < 0.2)
+                user.nudge(inGroup ? group : user);
         }
     }
 
     private void onMemberAdd(GroupInfo group, UserInfo user) {
-        if (MemberFilter.shouldNotResponse(user))
+        if (MemberFilter.shouldNotResponse(user, new MutableBoolean(false)))
             return;
         user.nudge(group);
-        environment.getMessageSender().sendMessage(new MessageContext(group, null, null), environment.newChain().fill(
+        environment.getMessageSender().sendMessage(new MessageContext(group, null, null), environment.newChain().fillChain(
                 environment.newAt(user),
                 environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
         ));

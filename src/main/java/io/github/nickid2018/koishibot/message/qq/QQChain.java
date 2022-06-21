@@ -23,7 +23,7 @@ public class QQChain extends QQMessage implements ChainMessage {
     }
 
     @Override
-    public ChainMessage fill(AbstractMessage... messages) {
+    public ChainMessage fillChain(AbstractMessage... messages) {
         chain = MessageUtils.newChain(
                 Stream.of(messages).map(m -> ((QQMessage) m).getQQMessage()).toArray(Message[]::new)
         );

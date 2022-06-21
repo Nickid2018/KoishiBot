@@ -18,7 +18,7 @@ public class QQMessageEntry implements MessageEntry {
     }
 
     @Override
-    public MessageEntry fill(String id, String name, AbstractMessage message, int time) {
+    public MessageEntry fillMessageEntry(String id, String name, AbstractMessage message, int time) {
         this.id = Long.parseLong(id.substring(7));
         this.name = name;
         this.message = ((QQMessage) message).getQQMessage();

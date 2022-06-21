@@ -1,6 +1,9 @@
 package io.github.nickid2018.koishibot.message.api;
 
+import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.MessageSender;
+import io.github.nickid2018.koishibot.util.Either;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +26,8 @@ public interface Environment {
 
     QuoteMessage newQuote();
 
+    ServiceMessage newService();
+
     UserInfo getUser(String id, boolean isStranger);
 
     GroupInfo getGroup(String id);
@@ -31,14 +36,18 @@ public interface Environment {
 
     MessageEventPublisher getEvents();
 
+    MessageSender getMessageSender();
+
+    MessageManager getManager();
+
     boolean forwardMessageSupported();
 
     default AtMessage newAt(UserInfo user) {
-        return newAt().fill(user);
+        return newAt().fillAt(user);
     }
 
     default ChainMessage newChain(AbstractMessage... messages) {
-        return newChain().fill(messages);
+        return newChain().fillChain(messages);
     }
 
     default TextMessage newText(String text) {
@@ -54,16 +63,18 @@ public interface Environment {
     }
 
     default ForwardMessage newForwards(ContactInfo group, MessageEntry... entries) {
-        return newForwards().fill(group, entries);
+        return newForwards().fillForwards(group, entries);
     }
 
     default MessageEntry newMessageEntry(String id, String name, AbstractMessage message, int time) {
-        return newMessageEntry().fill(id, name, message, time);
+        return newMessageEntry().fillMessageEntry(id, name, message, time);
     }
 
     default QuoteMessage newQuote(AbstractMessage message) {
         return newQuote().fill(message);
     }
 
-    MessageSender getMessageSender();
+    default ServiceMessage newService(String name, Either<JsonObject, String> data) {
+        return newService().fillService(name, data);
+    }
 }

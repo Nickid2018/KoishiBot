@@ -23,7 +23,7 @@ public class QQAt extends QQMessage implements AtMessage {
     }
 
     @Override
-    public AtMessage fill(UserInfo contact) {
+    public AtMessage fillAt(UserInfo contact) {
         at = new At(((QQUser) contact).getUser().getId());
         return this;
     }

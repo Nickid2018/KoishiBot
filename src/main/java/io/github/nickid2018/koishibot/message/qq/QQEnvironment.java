@@ -1,8 +1,10 @@
 package io.github.nickid2018.koishibot.message.qq;
 
+import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.MessageSender;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;
+import io.github.nickid2018.koishibot.message.api.ServiceMessage;
 import io.github.nickid2018.koishibot.message.api.UnsupportedMessage;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.message.data.*;
@@ -12,11 +14,13 @@ public class QQEnvironment implements Environment {
     private final Bot bot;
     private final QQMessagePublisher publisher;
     private final MessageSender sender;
+    private final MessageManager manager;
 
     public QQEnvironment(Bot bot) {
         this.bot = bot;
         publisher = new QQMessagePublisher(this);
         sender = new MessageSender(this, true);
+        manager = new MessageManager(this);
     }
 
     @Override
@@ -60,6 +64,11 @@ public class QQEnvironment implements Environment {
     }
 
     @Override
+    public ServiceMessage newService() {
+        return new QQService(this);
+    }
+
+    @Override
     public UserInfo getUser(String id, boolean isStranger) {
         return new QQUser(isStranger ? bot.getStranger(Long.parseLong(id.substring(7))) :
                 bot.getFriend(Long.parseLong(id.substring(7))), isStranger, false);
@@ -81,13 +90,18 @@ public class QQEnvironment implements Environment {
     }
 
     @Override
-    public boolean forwardMessageSupported() {
-        return true;
+    public MessageSender getMessageSender() {
+        return sender;
     }
 
     @Override
-    public MessageSender getMessageSender() {
-        return sender;
+    public MessageManager getManager() {
+        return manager;
+    }
+
+    @Override
+    public boolean forwardMessageSupported() {
+        return true;
     }
 
     public Bot getBot() {
@@ -109,6 +123,8 @@ public class QQEnvironment implements Environment {
             return new QQQuote(this, (QuoteReply) message);
         else if (message instanceof net.mamoe.mirai.message.data.ForwardMessage)
             return new QQForward(this, (net.mamoe.mirai.message.data.ForwardMessage) message);
+        else if (message instanceof RichMessage)
+            return new QQService(this, (RichMessage) message);
         else
             return new UnsupportedMessage(this);
     }

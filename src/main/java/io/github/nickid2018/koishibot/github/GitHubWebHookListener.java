@@ -5,11 +5,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
+import io.github.nickid2018.koishibot.message.Environments;
+import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -109,11 +109,14 @@ public class GitHubWebHookListener {
         else if (json.has("forkee"))
             send = fork(json, repo);
         if (send != null) {
-            // TMP USE!
             String finalSend = send;
             listener.groupData.getGroups().stream().filter(s -> listener.groupData.getData(s).contains(repo))
                     .forEach(group -> {
-                        QQEnvironment environment = KoishiBotMain.INSTANCE.environment;
+                        Optional<Environment> environmentOp =
+                                Environments.getEnvironments().stream().filter(e -> e.getGroup(group) != null).findFirst();
+                        if (!environmentOp.isPresent())
+                            return;
+                        Environment environment = environmentOp.get();
                         MessageContext context = new MessageContext(environment.getGroup(group), null, null);
                         environment.getMessageSender().sendMessage(context, environment.newText(finalSend));
                     });
@@ -138,7 +141,7 @@ public class GitHubWebHookListener {
             String message = commit.get("message").getAsString().split("\n")[0];
             builder.append(message).append("\n");
             builder.append("  提交人: ").append(WebUtil.getDataInPathOrNull(commit, "committer.name")).append("\n");
-            builder.append("  时间: ").append(commit.get("timestamp")).append("\n");
+            builder.append("  时间: ").append(commit.get("timestamp").getAsString()).append("\n");
             builder.append("  添加").append(commit.get("added").getAsJsonArray().size())
                     .append("文件, 删除").append(commit.get("removed").getAsJsonArray().size())
                     .append("文件, 修改").append(commit.get("modified").getAsJsonArray().size()).append("文件。\n");

@@ -6,6 +6,7 @@ import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
@@ -20,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class BilibiliDataResolver extends MessageResolver implements ServiceResolver {
+public class BilibiliDataResolver extends MessageResolver implements JSONServiceResolver {
 
     public static final Pattern B_AV_VIDEO_PATTERN = Pattern.compile("[aA][vV][1-9]\\d{0,9}");
     public static final Pattern B_BV_VIDEO_PATTERN = Pattern.compile(
@@ -311,18 +312,19 @@ public class BilibiliDataResolver extends MessageResolver implements ServiceReso
     }
 
     @Override
-    public void resolveService(JsonObject content, MessageContext context) {
-        // --- TEMP DISABLED
+    public void resolveService(JsonObject content, MessageContext context, Environment environment) {
         KoishiBotMain.INSTANCE.executor.execute(() -> {
-//            try {
-                String url = WebUtil.getDataInPathOrNull(content, "meta.detail_1.qqdocurl");
-                if (url == null)
-                    return;
-                url = url.split("\\?")[0];
-//                fromShortLink(url, info);
-//            } catch (IOException e) {
-//                MessageManager.onError(e, "bilibili.service", info, false);
-//            }
+            if (environment instanceof QQEnvironment) {
+                try {
+                    String url = WebUtil.getDataInPathOrNull(content, "meta.detail_1.qqdocurl");
+                    if (url == null)
+                        return;
+                    url = url.split("\\?")[0];
+                    fromShortLink(url, context, environment);
+                } catch (IOException e) {
+                    environment.getMessageSender().onError(e, "bilibili.service", context, false);
+                }
+            }
         });
     }
 }

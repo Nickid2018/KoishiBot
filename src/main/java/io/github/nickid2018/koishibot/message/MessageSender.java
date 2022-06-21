@@ -46,7 +46,7 @@ public class MessageSender {
         if (message instanceof ForwardMessage || message instanceof AudioMessage || message instanceof ImageMessage)
             return message;
         if (messageCounter.getAndIncrement() % 10 == 0)
-            return environment.newChain().fill(
+            return environment.newChain().fillChain(
                     message,
                     environment.newText().fillText("\n" + ANTI_AUTO_FILTER[random.nextInt(ANTI_AUTO_FILTER.length)])
             );
@@ -63,13 +63,13 @@ public class MessageSender {
                             SensitiveWordFilter.filter(((TextMessage) mess).getText(), filtered));
                 messages.add(mess);
             }
-            message = environment.newChain().fill(messages.toArray(new AbstractMessage[0]));
+            message = environment.newChain().fillChain(messages.toArray(new AbstractMessage[0]));
         }
         if (message instanceof TextMessage)
             message = environment.newText().fillText(
                     SensitiveWordFilter.filter(((TextMessage) message).getText(), filtered));
         if (filtered.getValue())
-            message = environment.newChain().fill(
+            message = environment.newChain().fillChain(
                     message,
                     environment.newText().fillText("\n<已经过关键词过滤>")
             );

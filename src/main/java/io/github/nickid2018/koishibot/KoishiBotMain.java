@@ -5,7 +5,8 @@ import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.github.GitHubListener;
-import io.github.nickid2018.koishibot.message.MessageManager;
+import io.github.nickid2018.koishibot.message.Environments;
+import io.github.nickid2018.koishibot.message.MemberFilter;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
 import net.mamoe.mirai.Bot;
@@ -34,7 +35,6 @@ public final class KoishiBotMain extends JavaPlugin {
     public long startTime = System.currentTimeMillis();
 
     public QQEnvironment environment;
-    public MessageManager manager;
 
     private KoishiBotMain() {
         super(new JvmPluginDescriptionBuilder("io.github.nickid2018.koishibot", "1.0-SNAPSHOT").build());
@@ -66,7 +66,8 @@ public final class KoishiBotMain extends JavaPlugin {
                 (th, t) -> ErrorRecord.enqueueError("concurrent", t)
         ).build());
         environment = new QQEnvironment(botKoishi);
-        manager = new MessageManager(environment);
+        Environments.putEnvironment("qq", environment);
+        MemberFilter.init();
         GitHubListener.clinit();
     }
 

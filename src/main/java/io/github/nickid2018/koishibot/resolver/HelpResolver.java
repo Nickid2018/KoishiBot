@@ -66,7 +66,7 @@ public class HelpResolver extends MessageResolver {
                     } else
                         message.append(line).append("\n");
                 });
-                forwards.fill(contact, messageEntries.toArray(new MessageEntry[0]));
+                forwards.fillForwards(contact, messageEntries.toArray(new MessageEntry[0]));
                 environment.getMessageSender().sendMessage(context, forwards);
             } else
                 environment.getMessageSender().sendMessage(context, environment.newText("环境不支持转发信息"));
