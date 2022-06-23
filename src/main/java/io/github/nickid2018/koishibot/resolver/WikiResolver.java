@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.resolver;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
@@ -10,12 +11,16 @@ import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class WikiResolver extends MessageResolver {
 
     public static final Pattern WIKI_PATTERN = Pattern.compile("\\[\\[.+?]]");
+    public static final ExecutorService EXECUTOR =
+            Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).build());
 
     public WikiResolver() {
         super(WIKI_PATTERN);
@@ -109,7 +114,7 @@ public class WikiResolver extends MessageResolver {
             if (page.imageStream != null)
                 environment.getMessageSender().sendMessageRecallable(context, environment.newImage(page.imageStream));
             if (page.audioFiles != null && context.getGroup() != null) {
-                KoishiBotMain.INSTANCE.executor.execute(() -> {
+                EXECUTOR.execute(() -> {
                     try {
                         File[] audios = page.audioFiles.get();
                         for (File file : audios) {
