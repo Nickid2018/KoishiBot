@@ -150,14 +150,19 @@ public class MessageSender {
     public void onRecall(GroupInfo groupInfo, UserInfo user, long time) {
         sendLock.lock();
         try {
+            List<Pair<MessageContext, AbstractMessage>> messagesToRecall = new ArrayList<>();
             for (Pair<MessageContext, AbstractMessage> entry : sentQueue) {
                 GroupInfo nowGroup = entry.component1().getGroup();
                 UserInfo nowUser = entry.component1().getUser();
-                if ((groupInfo == null && nowGroup == null) ||
-                        (groupInfo != null && nowGroup != null && groupInfo.equals(nowGroup)) &&
+                if (((groupInfo == null && nowGroup == null)
+                        || (groupInfo != null && nowGroup != null && groupInfo.equals(nowGroup))) &&
                         user.equals(nowUser) && time == entry.component1().getSentTime())
-                    entry.component2().recall();
+                    messagesToRecall.add(entry);
             }
+            messagesToRecall.forEach(en -> {
+                sentQueue.remove(en);
+                en.component2().recall();
+            });
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

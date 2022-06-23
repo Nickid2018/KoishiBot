@@ -30,7 +30,7 @@ public class QQMessagePublisher implements MessageEventPublisher {
                     GroupInfo group = new QQGroup(messageEvent.getGroup());
                     UserInfo user = new QQUser(messageEvent.getSender(), false, true);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
-                    consumer.accept(new Triple<>(group, user, message), message.getSentTime());
+                    consumer.accept(new Triple<>(group, user, message), (long) messageEvent.getTime());
                     return ListeningStatus.LISTENING;
                 });
     }
@@ -41,7 +41,7 @@ public class QQMessagePublisher implements MessageEventPublisher {
                 .subscribe(FriendMessageEvent.class, messageEvent -> {
                     UserInfo user = new QQUser(messageEvent.getSender(), false, false);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
-                    consumer.accept(new Pair<>(user, message), message.getSentTime());
+                    consumer.accept(new Pair<>(user, message), (long) messageEvent.getTime());
                     return ListeningStatus.LISTENING;
                 });
     }
@@ -52,7 +52,7 @@ public class QQMessagePublisher implements MessageEventPublisher {
                 .subscribe(GroupTempMessageEvent.class, messageEvent -> {
                     UserInfo user = new QQUser(messageEvent.getSender(), true, true);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
-                    consumer.accept(new Pair<>(user, message), message.getSentTime());
+                    consumer.accept(new Pair<>(user, message), (long) messageEvent.getTime());
                     return ListeningStatus.LISTENING;
                 });
     }
@@ -63,7 +63,7 @@ public class QQMessagePublisher implements MessageEventPublisher {
                 .subscribe(StrangerMessageEvent.class, messageEvent -> {
                     UserInfo user = new QQUser(messageEvent.getSender(), true, false);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
-                    consumer.accept(new Pair<>(user, message), message.getSentTime());
+                    consumer.accept(new Pair<>(user, message), (long) messageEvent.getTime());
                     return ListeningStatus.LISTENING;
                 });
     }
