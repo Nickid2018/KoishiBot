@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.message.qq;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.message.api.*;
+import kotlin.Pair;
 import kotlin.Triple;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
@@ -23,46 +24,46 @@ public class QQMessagePublisher implements MessageEventPublisher {
     }
 
     @Override
-    public void subscribeGroupMessage(Consumer<Triple<GroupInfo, UserInfo, ChainMessage>> consumer) {
+    public void subscribeGroupMessage(BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> consumer) {
         eventChannel.exceptionHandler(createHandler("qq.group.message"))
                 .subscribe(GroupMessageEvent.class, messageEvent -> {
                     GroupInfo group = new QQGroup(messageEvent.getGroup());
                     UserInfo user = new QQUser(messageEvent.getSender(), false, true);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
-                    consumer.accept(new Triple<>(group, user, message));
+                    consumer.accept(new Triple<>(group, user, message), message.getSentTime());
                     return ListeningStatus.LISTENING;
                 });
     }
 
     @Override
-    public void subscribeFriendMessage(BiConsumer<UserInfo, ChainMessage> consumer) {
+    public void subscribeFriendMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer) {
         eventChannel.exceptionHandler(createHandler("qq.friend.message"))
                 .subscribe(FriendMessageEvent.class, messageEvent -> {
                     UserInfo user = new QQUser(messageEvent.getSender(), false, false);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
-                    consumer.accept(user, message);
+                    consumer.accept(new Pair<>(user, message), message.getSentTime());
                     return ListeningStatus.LISTENING;
                 });
     }
 
     @Override
-    public void subscribeGroupTempMessage(BiConsumer<UserInfo, ChainMessage> consumer) {
+    public void subscribeGroupTempMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer) {
         eventChannel.exceptionHandler(createHandler("qq.temp.message"))
                 .subscribe(GroupTempMessageEvent.class, messageEvent -> {
                     UserInfo user = new QQUser(messageEvent.getSender(), true, true);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
-                    consumer.accept(user, message);
+                    consumer.accept(new Pair<>(user, message), message.getSentTime());
                     return ListeningStatus.LISTENING;
                 });
     }
 
     @Override
-    public void subscribeStrangerMessage(BiConsumer<UserInfo, ChainMessage> consumer) {
+    public void subscribeStrangerMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer) {
         eventChannel.exceptionHandler(createHandler("qq.stranger.message"))
                 .subscribe(StrangerMessageEvent.class, messageEvent -> {
                     UserInfo user = new QQUser(messageEvent.getSender(), true, false);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
-                    consumer.accept(user, message);
+                    consumer.accept(new Pair<>(user, message), message.getSentTime());
                     return ListeningStatus.LISTENING;
                 });
     }

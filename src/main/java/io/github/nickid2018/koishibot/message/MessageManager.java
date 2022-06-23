@@ -5,6 +5,7 @@ import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.resolver.*;
 import io.github.nickid2018.koishibot.util.Either;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
+import kotlin.Pair;
 import kotlin.Triple;
 
 import java.util.ArrayList;
@@ -52,26 +53,28 @@ public class MessageManager {
         return environment;
     }
 
-    private void onGroupMessage(Triple<GroupInfo, UserInfo, ChainMessage> messageTriple) {
+    private void onGroupMessage(Triple<GroupInfo, UserInfo, ChainMessage> messageTriple, long sentTime) {
         dealMessage(messageTriple.component1(), messageTriple.component2(), messageTriple.component3(),
-                MessageResolver::groupEnabled, true);
+                MessageResolver::groupEnabled, true, sentTime);
     }
 
-    private void onFriendMessage(UserInfo user, ChainMessage message) {
-        dealMessage(null, user, message, s -> true, false);
+    private void onFriendMessage(Pair<UserInfo, ChainMessage> message, long sentTime) {
+        dealMessage(null, message.component1(), message.component2(), s -> true, false, sentTime);
     }
 
-    private void onTempMessage(UserInfo user, ChainMessage message) {
-        dealMessage(null, user, message, MessageResolver::groupTempChat, false);
+    private void onTempMessage(Pair<UserInfo, ChainMessage> message, long sentTime) {
+        dealMessage(null, message.component1(), message.component2(),
+                MessageResolver::groupTempChat, false, sentTime);
     }
 
-    private void onStrangerMessage(UserInfo user, ChainMessage message) {
-        dealMessage(null, user, message, MessageResolver::strangerChat, false);
+    private void onStrangerMessage(Pair<UserInfo, ChainMessage> message, long sentTime) {
+        dealMessage(null, message.component1(), message.component2(),
+                MessageResolver::strangerChat, false, sentTime);
     }
 
     private void dealMessage(GroupInfo group, UserInfo user, ChainMessage message,
-                             Predicate<MessageResolver> predicate, boolean inGroup) {
-        MessageContext context = new MessageContext(group, user, message);
+                             Predicate<MessageResolver> predicate, boolean inGroup, long sentTime) {
+        MessageContext context = new MessageContext(group, user, message, sentTime);
 
         MutableBoolean ban = new MutableBoolean(false);
         if (MemberFilter.shouldNotResponse(user, ban)) {
@@ -134,7 +137,8 @@ public class MessageManager {
         if (MemberFilter.shouldNotResponse(user, new MutableBoolean(false)))
             return;
         user.nudge(group);
-        environment.getMessageSender().sendMessage(new MessageContext(group, null, null), environment.newChain().fillChain(
+        environment.getMessageSender().sendMessage(
+                new MessageContext(group, null, null, -1), environment.newChain().fillChain(
                 environment.newAt(user),
                 environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
         ));

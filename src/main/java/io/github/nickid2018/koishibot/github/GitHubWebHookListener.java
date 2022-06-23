@@ -117,7 +117,7 @@ public class GitHubWebHookListener {
                         if (!environmentOp.isPresent())
                             return;
                         Environment environment = environmentOp.get();
-                        MessageContext context = new MessageContext(environment.getGroup(group), null, null);
+                        MessageContext context = new MessageContext(environment.getGroup(group), null, null, -1);
                         environment.getMessageSender().sendMessage(context, environment.newText(finalSend));
                     });
         }

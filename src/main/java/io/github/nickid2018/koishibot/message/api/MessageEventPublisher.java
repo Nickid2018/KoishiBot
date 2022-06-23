@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.message.api;
 
+import kotlin.Pair;
 import kotlin.Triple;
 
 import java.util.function.BiConsumer;
@@ -7,13 +8,13 @@ import java.util.function.Consumer;
 
 public interface MessageEventPublisher {
 
-    void subscribeGroupMessage(Consumer<Triple<GroupInfo, UserInfo, ChainMessage>> consumer);
+    void subscribeGroupMessage(BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> consumer);
 
-    void subscribeFriendMessage(BiConsumer<UserInfo, ChainMessage> consumer);
+    void subscribeFriendMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer);
 
-    void subscribeGroupTempMessage(BiConsumer<UserInfo, ChainMessage> consumer);
+    void subscribeGroupTempMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer);
 
-    void subscribeStrangerMessage(BiConsumer<UserInfo, ChainMessage> consumer);
+    void subscribeStrangerMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer);
 
     void subscribeNewMemberAdd(BiConsumer<GroupInfo, UserInfo> consumer);
 

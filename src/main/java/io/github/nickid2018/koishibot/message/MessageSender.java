@@ -155,7 +155,7 @@ public class MessageSender {
                 UserInfo nowUser = entry.component1().getUser();
                 if ((groupInfo == null && nowGroup == null) ||
                         (groupInfo != null && nowGroup != null && groupInfo.equals(nowGroup)) &&
-                        user.equals(nowUser) && time == entry.component1().getMessage().getSentTime())
+                        user.equals(nowUser) && time == entry.component1().getSentTime())
                     entry.component2().recall();
             }
         } catch (Exception e) {

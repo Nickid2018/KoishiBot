@@ -5,11 +5,13 @@ public class MessageContext {
     private final GroupInfo group;
     private final UserInfo user;
     private final ChainMessage message;
+    private final long sentTime;
 
-    public MessageContext(GroupInfo group, UserInfo user, ChainMessage message) {
+    public MessageContext(GroupInfo group, UserInfo user, ChainMessage message, long sentTime) {
         this.group = group;
         this.user = user;
         this.message = message;
+        this.sentTime = sentTime;
     }
 
     public ContactInfo getSendDest() {
@@ -26,5 +28,9 @@ public class MessageContext {
 
     public ChainMessage getMessage() {
         return message;
+    }
+
+    public long getSentTime() {
+        return sentTime;
     }
 }
