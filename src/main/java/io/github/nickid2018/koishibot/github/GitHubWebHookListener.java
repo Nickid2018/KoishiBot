@@ -105,9 +105,9 @@ public class GitHubWebHookListener {
         String repo = WebUtil.getDataInPathOrNull(json, "repository.full_name");
         String send = null;
         if (json.has("pusher"))
-            send = push(json, repo);
+            send = "[Webhook]" + push(json, repo);
         else if (json.has("forkee"))
-            send = fork(json, repo);
+            send = "[Webhook]" + fork(json, repo);
         if (send != null) {
             String finalSend = send;
             listener.groupData.getGroups().stream().filter(s -> listener.groupData.getData(s).contains(repo))
