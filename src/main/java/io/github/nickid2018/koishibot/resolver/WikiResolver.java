@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 public class WikiResolver extends MessageResolver {
 
-    public static final Pattern WIKI_PATTERN = Pattern.compile("\\[\\[.+?]]");
+    public static final Pattern WIKI_PATTERN = Pattern.compile("\\[\\[.+?]{2,3}+");
     public static final ExecutorService EXECUTOR =
             Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).build());
 

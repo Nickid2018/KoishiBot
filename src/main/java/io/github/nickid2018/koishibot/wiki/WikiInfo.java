@@ -148,7 +148,11 @@ public class WikiInfo {
         if (prefix != null && prefix.split(":").length > 5)
             throw new IOException("请求跳转wiki次数过多");
 
-        if (title != null && title.contains(":")){
+        boolean forceNoInterwiki = title != null && title.startsWith("[") && title.endsWith("]");
+        if (forceNoInterwiki)
+            title = title.substring(1, title.length() - 1);
+
+        if (title != null && !forceNoInterwiki && title.contains(":")){
             String namespace = title.split(":")[0];
             if (interWikiMap.containsKey(namespace)) {
                 WikiInfo skip = STORED_WIKI_INFO.get(interWikiMap.get(namespace));
