@@ -7,15 +7,19 @@ import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.MutableBoolean;
 import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.webhook.WebHookManager;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class GitHubListener {
 
-    public static void clinit(){
+    public static void clinit() {
     }
 
     public static final GitHubListener LISTENER;
@@ -48,7 +52,8 @@ public class GitHubListener {
         groupData.loadAll();
         repo = new File(groupData.getFolder(), "repo.dat");
         webhook = new File(groupData.getFolder(), "webhook.dat");
-        webHookListener = new GitHubWebHookListener(this);
+
+        WebHookManager.addHandle("/github", webHookListener = new GitHubWebHookListener(this));
 
         if (repo.exists())
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(repo))) {

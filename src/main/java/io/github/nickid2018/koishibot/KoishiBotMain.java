@@ -8,6 +8,7 @@ import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.MemberFilter;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
+import io.github.nickid2018.koishibot.webhook.WebHookManager;
 import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
@@ -80,5 +81,6 @@ public final class KoishiBotMain extends JavaPlugin {
         executor = null;
         TempFileSystem.onDisable();
         InfoBoxShooter.close();
+        WebHookManager.stop();
     }
 }

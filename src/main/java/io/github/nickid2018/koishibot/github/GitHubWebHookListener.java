@@ -4,26 +4,22 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpServer;
-import io.github.nickid2018.koishibot.core.ErrorRecord;
+import com.sun.net.httpserver.HttpHandler;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
 import java.io.*;
-import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.Executors;
 
-public class GitHubWebHookListener {
+public class GitHubWebHookListener implements HttpHandler {
 
     public static final List<String> WEBHOOK_PERMISSION = Arrays.asList(
             "fork", "issue_comment", "issues", "pull_request",
@@ -32,7 +28,6 @@ public class GitHubWebHookListener {
     );
 
     final GitHubListener listener;
-    final HttpServer httpServer;
     final Map<String, Integer> webHooks;
 
     @SuppressWarnings("unchecked")
@@ -47,14 +42,6 @@ public class GitHubWebHookListener {
             listener.webhook.createNewFile();
             saveHooks();
         }
-
-        httpServer = HttpServer.create(new InetSocketAddress(14514), 0);
-        httpServer.setExecutor(Executors.newCachedThreadPool(
-                new BasicThreadFactory.Builder().daemon(true).uncaughtExceptionHandler(
-                        (th, t) -> ErrorRecord.enqueueError("concurrent.webhook", t)
-                ).build()));
-        httpServer.createContext("/github", this::handle);
-        httpServer.start();
     }
 
     public void addHook(String repo, String token) throws IOException {
@@ -97,7 +84,8 @@ public class GitHubWebHookListener {
         }
     }
 
-    private void handle(HttpExchange httpExchange) throws IOException {
+    @Override
+    public void handle(HttpExchange httpExchange) throws IOException {
         String data = IOUtils.toString(httpExchange.getRequestBody(), StandardCharsets.UTF_8);
         httpExchange.sendResponseHeaders(204, 0);
         System.out.println(data);
