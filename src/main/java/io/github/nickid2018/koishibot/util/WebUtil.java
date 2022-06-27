@@ -1,9 +1,6 @@
 package io.github.nickid2018.koishibot.util;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import com.overzealous.remark.Options;
 import com.overzealous.remark.Remark;
 import com.overzealous.remark.convert.AbstractNodeHandler;
@@ -186,19 +183,20 @@ public class WebUtil {
                 return null;
         }
         String name = paths[paths.length - 1];
+        JsonElement get = null;
         if (last instanceof JsonObject) {
             JsonObject now = (JsonObject) last;
             if (!now.has(name))
                 return null;
-            return now.get(name).getAsString();
+            get = now.get(name);
         } else if (last instanceof JsonArray){
             JsonArray now = (JsonArray) last;
             int num = Integer.parseInt(name);
             if (num >= now.size())
                 return null;
-            return now.get(num).getAsString();
-        } else
-            return null;
+            get = now.get(num);
+        }
+        return get instanceof JsonPrimitive ? get.getAsString() : null;
     }
 
     public static String encode(String str) throws UnsupportedEncodingException {

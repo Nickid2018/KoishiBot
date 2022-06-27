@@ -32,7 +32,7 @@ public class MessageManager {
         RESOLVERS.add(new CurseForgeResolver());
         RESOLVERS.add(new TranslateResolver());
         RESOLVERS.add(new GitHubWebHookResolver());
-        RESOLVERS.add(new GitHubResolver());
+        RESOLVERS.add(new GitHubSubscribeResolver());
 
         JSON_SERVICE_MAP.put("哔哩哔哩", new BilibiliDataResolver());
     }

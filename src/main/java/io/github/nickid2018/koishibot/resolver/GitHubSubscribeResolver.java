@@ -8,14 +8,14 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-public class GitHubResolver extends MessageResolver {
+public class GitHubSubscribeResolver extends MessageResolver {
 
-    public GitHubResolver() {
-        super("~github");
+    public GitHubSubscribeResolver() {
+        super("~github subscribe");
     }
 
     @Override
-    // ~github add/del <repo>
+    // ~github subscribe add/del <repo>
     public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         key = key.trim();
         String[] split = key.split(" ", 2);
