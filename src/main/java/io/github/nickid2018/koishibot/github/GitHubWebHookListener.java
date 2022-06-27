@@ -87,17 +87,22 @@ public class GitHubWebHookListener implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String data = IOUtils.toString(httpExchange.getRequestBody(), StandardCharsets.UTF_8);
+        String function = (String) httpExchange.getAttribute("X-GitHub-Event");
         httpExchange.sendResponseHeaders(204, 0);
         System.out.println(data);
         JsonObject json = JsonParser.parseString(data).getAsJsonObject();
         String repo = WebUtil.getDataInPathOrNull(json, "repository.full_name");
         String send = null;
-        if (json.has("pusher"))
-            send = "[Webhook]" + push(json, repo);
-        else if (json.has("forkee"))
-            send = "[Webhook]" + fork(json, repo);
+        switch (function) {
+            case "push":
+                send = push(json, repo);
+                break;
+            case "fork":
+                send = fork(json, repo);
+                break;
+        }
         if (send != null) {
-            String finalSend = send;
+            String finalSend = "[WebHook]" + send;
             listener.groupData.getGroups().stream().filter(s -> listener.groupData.getData(s).contains(repo))
                     .forEach(group -> {
                         Optional<Environment> environmentOp =
