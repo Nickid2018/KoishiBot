@@ -60,7 +60,10 @@ public class WikiResolver extends MessageResolver {
                 );
                 environment.getMessageSender().sendMessageAwait(context, chain, (source, next) -> {
                     try {
-                        source.recall();
+                        try {
+                            source.recall();
+                        } catch (Exception ignored) {
+                        }
                         boolean accept = false;
                         for (AbstractMessage message : next.getMessages()) {
                             if (!(message instanceof TextMessage))
