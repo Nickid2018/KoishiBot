@@ -87,7 +87,8 @@ public class GitHubWebHookListener implements HttpHandler {
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
         String data = IOUtils.toString(httpExchange.getRequestBody(), StandardCharsets.UTF_8);
-        String function = (String) httpExchange.getAttribute("X-GitHub-Event");
+        String function = httpExchange.getRequestHeaders().getFirst("X-GitHub-Event");
+        System.out.println(function);
         httpExchange.sendResponseHeaders(204, 0);
         System.out.println(data);
         JsonObject json = JsonParser.parseString(data).getAsJsonObject();
