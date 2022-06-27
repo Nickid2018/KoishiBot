@@ -36,7 +36,13 @@ public class ErrorRecord {
             builder.append("错误时间: ").append(String.format("%tc", new Date(entry.getFirst()))).append("\n");
             builder.append("错误模块: ").append(entry.getSecond()).append("\n");
             builder.append("错误描述: ").append(entry.getThird().getMessage()).append("\n");
-            builder.append("栈顶层: ").append(entry.getThird().getStackTrace()[0]);
+            StackTraceElement[] stacks = entry.getThird().getStackTrace();
+            int depth = 0;
+            while (!stacks[depth].getClassName().contains("nickid2018"))
+                depth++;
+            if (depth == stacks.length)
+                depth = 0;
+            builder.append("用户栈顶层: ").append(stacks[depth]);
             entries.add(environment.newMessageEntry(
                     environment.getBotId(),
                     "Koishi bot",
