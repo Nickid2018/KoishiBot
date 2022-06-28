@@ -163,7 +163,7 @@ public class WebUtil {
         return url;
     }
 
-    public static String getDataInPathOrNull(JsonObject root, String path) {
+    public static <T extends JsonElement> T getDataInPathOrNull(JsonObject root, String path, Class<T> type) {
         String[] paths = path.split("\\.");
         JsonElement last = root;
         for (int i = 0; i < paths.length - 1; i++) {
@@ -196,7 +196,12 @@ public class WebUtil {
                 return null;
             get = now.get(num);
         }
-        return get instanceof JsonPrimitive ? get.getAsString() : null;
+        return type.isInstance(get) ? (T) get : null;
+    }
+
+    public static String getDataInPathOrNull(JsonObject root, String path) {
+        JsonPrimitive primitive = getDataInPathOrNull(root, path, JsonPrimitive.class);
+        return primitive == null ? null : primitive.getAsString();
     }
 
     public static String encode(String str) throws UnsupportedEncodingException {

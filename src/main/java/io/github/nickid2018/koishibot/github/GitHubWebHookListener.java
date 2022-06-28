@@ -3,12 +3,13 @@ package io.github.nickid2018.koishibot.github;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.Environments;
-import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpDelete;
@@ -16,6 +17,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -26,6 +28,18 @@ public class GitHubWebHookListener implements HttpHandler {
             "pull_request_review_comment", "push", "release",
             "star", "status", "watch"
     );
+
+    public static final Map<String, Method> REFLECT_HANDLE = new HashMap<>();
+
+    static {
+        WEBHOOK_PERMISSION.forEach(action -> {
+            try {
+                REFLECT_HANDLE.put(action, GitHubListener.class.getDeclaredMethod(
+                        action, JsonObject.class, String.class));
+            } catch (NoSuchMethodException ignored) {
+            }
+        });
+    }
 
     final GitHubListener listener;
     final Map<String, Integer> webHooks;
@@ -92,33 +106,29 @@ public class GitHubWebHookListener implements HttpHandler {
         System.out.println(data);
         JsonObject json = JsonParser.parseString(data).getAsJsonObject();
         String repo = WebUtil.getDataInPathOrNull(json, "repository.full_name");
-        String send = null;
-        switch (function) {
-            case "push":
-                send = push(json, repo);
-                break;
-            case "fork":
-                send = fork(json, repo);
-                break;
-        }
-        if (send != null) {
-            String finalSend = "[WebHook]" + send;
-            listener.groupData.getGroups().stream().filter(s -> listener.groupData.getData(s).contains(repo))
-                    .forEach(group -> {
-                        Optional<Environment> environmentOp =
-                                Environments.getEnvironments().stream().filter(e -> e.getGroup(group) != null).findFirst();
-                        if (!environmentOp.isPresent())
-                            return;
-                        Environment environment = environmentOp.get();
-                        MessageContext context = new MessageContext(environment.getGroup(group), null, null, -1);
-                        environment.getMessageSender().sendMessage(context, environment.newText(finalSend));
-                    });
+        Method method = REFLECT_HANDLE.get(function);
+        if (method != null) {
+            try {
+                Object inv = method.invoke(this, json, repo);
+                if (inv == null)
+                    return;
+                String send = "[WebHook]" + repo + ":\n" + ((String) inv).trim();
+                listener.groupData.getGroups().stream().filter(s -> listener.groupData.getData(s).contains(repo))
+                        .forEach(group -> Environments.getEnvironments().stream().filter(e -> e.getGroup(group) != null).findFirst()
+                                .ifPresent(environment -> {
+                                    MessageContext context = new MessageContext(
+                                            environment.getGroup(group), null, null, -1);
+                                    environment.getMessageSender().sendMessage(context, environment.newText(send));
+                                }));
+            } catch (Exception e) {
+                throw new IOException("Broadcast action but failed", e);
+            }
         }
     }
 
-    private String push(JsonObject object, String repo) {
+    @ReflectTarget
+    public String push(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
-        builder.append(repo).append(":\n");
         builder.append(WebUtil.getDataInPathOrNull(object, "pusher.name")).append(
                 object.get("forced").getAsBoolean() ? "进行了强制推送操作。" : "进行了推送操作。").append("\n");
         builder.append("本次推送的提交信息:\n");
@@ -142,11 +152,67 @@ public class GitHubWebHookListener implements HttpHandler {
         return builder.toString().trim();
     }
 
-    private String fork(JsonObject object, String repo) {
+    @ReflectTarget
+    public String fork(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
-        builder.append(repo).append(":\n");
         builder.append(WebUtil.getDataInPathOrNull(object, "sender.login")).append("进行了Fork。\n");
         builder.append("Fork仓库: ").append(WebUtil.getDataInPathOrNull(object, "forkee.full_name"));
+        return builder.toString();
+    }
+
+    @ReflectTarget
+    public String star(JsonObject object, String repo) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(WebUtil.getDataInPathOrNull(object, "sender.login"));
+        builder.append(Objects.equals(WebUtil.getDataInPathOrNull(object, "action"), "created")
+                ? "star了此仓库" : "取消star了此仓库");
+        return builder.toString();
+    }
+
+    @ReflectTarget
+    public String release(JsonObject object, String repo) {
+        StringBuilder builder = new StringBuilder();
+        String action = WebUtil.getDataInPathOrNull(object, "action");
+        String name = WebUtil.getDataInPathOrNull(object, "release.name");
+        String tag = WebUtil.getDataInPathOrNull(object, "release.tag_name");
+        String body = WebUtil.getDataInPathOrNull(object, "release.body");
+        boolean pre = Objects.requireNonNull(WebUtil.getDataInPathOrNull(
+                object, "release.prerelease", JsonPrimitive.class)).getAsBoolean();
+        boolean draft = Objects.requireNonNull(WebUtil.getDataInPathOrNull(
+                object, "release.draft", JsonPrimitive.class)).getAsBoolean();
+        String user = WebUtil.getDataInPathOrNull(object, "sender.login");
+        switch (Objects.requireNonNull(action)) {
+            case "created":
+                builder.append(user).append("创建了发行包。\n");
+                builder.append("发行包标签: ").append(tag);
+                if (pre)
+                    builder.append("(预发布版)");
+                if (draft)
+                    builder.append("(草稿)");
+                builder.append("\n");
+                if (name != null)
+                    builder.append("发行包名称: ").append(name).append("\n");
+                if (body != null)
+                    builder.append(body);
+                break;
+            case "publish":
+                builder.append(user).append("发布了发行包。\n");
+                builder.append("发行包标签: ").append(tag);
+                if (pre)
+                    builder.append("(预发布版)");
+                builder.append("\n");
+                if (name != null)
+                    builder.append("发行包名称: ").append(name).append("\n");
+                if (body != null)
+                    builder.append(body);
+                break;
+            case "unpublished":
+                builder.append(user).append("取消发布了发行包。\n");
+                builder.append("发行包标签: ").append(tag);
+                break;
+            default:
+                return null;
+        }
         return builder.toString();
     }
 }
