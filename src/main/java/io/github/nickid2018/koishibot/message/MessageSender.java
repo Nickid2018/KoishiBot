@@ -22,9 +22,12 @@ public class MessageSender {
     public static final String[] ANTI_AUTO_FILTER = new String[]{
             "[ffk]", ">anti-auto_filter<", "~防止风向操控~", "=_禁止符卡攻击_="
     };
+
     public static final String[] ERROR_MESSAGES = new String[] {
             "发生了错误", "bot发生了异常", "bot陷入无意识之中"
     };
+
+    public static final int SEND_INTERVAL = 1000;
 
     private final Random random = new Random();
     private final AtomicLong messageCounter = new AtomicLong(0);
@@ -129,7 +132,7 @@ public class MessageSender {
         message = countAntiAutoFilter(message);
         sendLock.lock();
         try {
-            long sleepTime = 250 - (System.currentTimeMillis() - lastSentTime.get());
+            long sleepTime = SEND_INTERVAL - (System.currentTimeMillis() - lastSentTime.get());
             if (sleepTime > 0)
                 try {
                     Thread.sleep(sleepTime);

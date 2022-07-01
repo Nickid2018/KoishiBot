@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.resolver;
 import io.github.nickid2018.koishibot.Constants;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.LazyLoadValue;
+import io.github.nickid2018.koishibot.util.MutableInt;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
@@ -55,13 +56,14 @@ public class HelpResolver extends MessageResolver {
                 ContactInfo contact = environment.getUser(environment.getBotId(), false);
                 StringBuilder message = new StringBuilder();
                 List<MessageEntry> messageEntries = new ArrayList<>();
+                MutableInt val = new MutableInt(Constants.TIME_OF_514);
                 reader.lines().forEach(line -> {
                     if (line.equals("#")) {
                         messageEntries.add(environment.newMessageEntry(
                                 environment.getBotId(),
                                 "Koishi bot",
                                 environment.newText(message.toString().trim()),
-                                Constants.TIME_OF_514
+                                val.getAndIncrease()
                         ));
                         message.delete(0, message.length());
                     } else

@@ -5,6 +5,7 @@ import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.message.api.MessageEntry;
+import io.github.nickid2018.koishibot.util.MutableInt;
 import kotlin.Triple;
 
 import java.util.ArrayList;
@@ -43,11 +44,12 @@ public class ErrorRecord {
             if (depth == stacks.length)
                 depth = 0;
             builder.append("用户栈顶层: ").append(stacks[depth]);
+            MutableInt val = new MutableInt(Constants.TIME_OF_514);
             entries.add(environment.newMessageEntry(
                     environment.getBotId(),
                     "Koishi bot",
                     environment.newText(builder.toString().trim()),
-                    Constants.TIME_OF_514
+                    val.getAndIncrease()
             ));
         }
         forwards.fillForwards(contact, entries.toArray(new MessageEntry[0]));
