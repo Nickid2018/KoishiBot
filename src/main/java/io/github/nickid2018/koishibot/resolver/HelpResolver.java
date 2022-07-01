@@ -33,11 +33,11 @@ public class HelpResolver extends MessageResolver {
     public HelpResolver() {
         super("~help");
     }
-
-    @Override
-    public boolean groupTempChat() {
-        return true;
-    }
+//
+//    @Override
+//    public boolean groupTempChat() {
+//        return true;
+//    }
 
     @Override
     public boolean needAt() {
