@@ -35,7 +35,7 @@ public class GitHubWebHookListener implements HttpHandler {
     static {
         WEBHOOK_PERMISSION.forEach(action -> {
             try {
-                REFLECT_HANDLE.put(action, GitHubListener.class.getDeclaredMethod(
+                REFLECT_HANDLE.put(action, GitHubWebHookListener.class.getDeclaredMethod(
                         action, JsonObject.class, String.class));
             } catch (NoSuchMethodException ignored) {
             }
