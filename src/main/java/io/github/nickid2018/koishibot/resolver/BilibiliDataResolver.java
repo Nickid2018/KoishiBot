@@ -7,6 +7,7 @@ import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
@@ -249,7 +250,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
             }
             builder.append(String.join(", ", staffList));
         } else
-            builder.append("UP主: ").append(WebUtil.getDataInPathOrNull(data, "owner.name"));
+            builder.append("UP主: ").append(JsonUtil.getStringInPathOrNull(data, "owner.name"));
         builder.append("\n");
 
         JsonObject stats = data.getAsJsonObject("stat");
@@ -316,9 +317,9 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         KoishiBotMain.INSTANCE.executor.execute(() -> {
             if (environment instanceof QQEnvironment) {
                 try {
-                    String url = WebUtil.getDataInPathOrNull(content, "meta.news.jumpUrl");
+                    String url = JsonUtil.getStringInPathOrNull(content, "meta.news.jumpUrl");
                     if (url == null)
-                        url = WebUtil.getDataInPathOrNull(content, "meta.detail_1.qqdocurl");
+                        url = JsonUtil.getStringInPathOrNull(content, "meta.detail_1.qqdocurl");
                     if (url == null)
                         return;
                     url = url.split("\\?")[0];

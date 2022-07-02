@@ -1,8 +1,12 @@
 package io.github.nickid2018.koishibot.core;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import org.apache.commons.io.IOUtils;
@@ -10,8 +14,12 @@ import org.apache.commons.io.IOUtils;
 import java.awt.*;
 import java.io.FileReader;
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.PasswordAuthentication;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Properties;
 
 public class Settings {
 
@@ -43,14 +51,7 @@ public class Settings {
         BOT_PASSWORD = settingsRoot.get("password").getAsString();
         LOCAL_IP = settingsRoot.get("local_ip").getAsString();
 
-        loadWiki(settingsRoot);
-        loadMirror(settingsRoot);
-        loadFFmpeg(settingsRoot);
-        loadAppKeyAndSecrets(settingsRoot);
-        loadImageSettings(settingsRoot);
-        loadWebDriver(settingsRoot);
-        loadSensitiveWordsSettings(settingsRoot);
-        loadGitHub(settingsRoot);
+        loadInternal(settingsRoot);
     }
 
     public static void reload() throws IOException {
@@ -58,6 +59,10 @@ public class Settings {
                 KoishiBotMain.INSTANCE.resolveConfigFile("botKoishi.json")));
         JsonObject settingsRoot = JsonParser.parseString(data).getAsJsonObject();
 
+        loadInternal(settingsRoot);
+    }
+
+    private static void loadInternal(JsonObject settingsRoot) throws IOException {
         loadWiki(settingsRoot);
         loadMirror(settingsRoot);
         loadFFmpeg(settingsRoot);
@@ -66,6 +71,7 @@ public class Settings {
         loadWebDriver(settingsRoot);
         loadSensitiveWordsSettings(settingsRoot);
         loadGitHub(settingsRoot);
+        loadProxy(settingsRoot);
     }
 
     public static void loadWiki(JsonObject settingsRoot) {
@@ -132,5 +138,59 @@ public class Settings {
             GITHUB_TOKEN = element.getAsString();
         else
             GITHUB_TOKEN = "";
+    }
+
+    public static void loadProxy(JsonObject settingsRoot) {
+        Properties properties = System.getProperties();
+        properties.remove("http.proxyHost");
+        properties.remove("http.proxyPort");
+        properties.remove("https.proxyHost");
+        properties.remove("https.proxyPort");
+        properties.remove("http.nonProxyHosts");
+        properties.remove("https.nonProxyHosts");
+        properties.remove("socksProxyHost");
+        properties.remove("socksProxyPort");
+        Authenticator.setDefault(null);
+
+        JsonElement element = settingsRoot.get("proxy");
+        if (element != null && element.isJsonObject()) {
+            JsonObject root = element.getAsJsonObject();
+
+            String type = JsonUtil.getDataInPath(root, "type", JsonPrimitive.class)
+                    .map(JsonPrimitive::getAsString)
+                    .filter(s -> s.equalsIgnoreCase("http")
+                            || s.equalsIgnoreCase("https")
+                            || s.equalsIgnoreCase("socks"))
+                    .orElse("http");
+
+            String host = JsonUtil.getStringInPathOrElse(root, "host", "127.0.0.1");
+            Optional<Integer> port = JsonUtil.getDataInPath(root, "port", JsonPrimitive.class)
+                    .filter(JsonPrimitive::isNumber)
+                    .map(JsonPrimitive::getAsInt);
+            if (type.equalsIgnoreCase("http")) {
+                properties.put("http.proxyHost", host);
+                properties.put("http.proxyPort", port.orElse(80));
+                properties.put("http.nonProxyHosts", "localhost");
+            } else if (type.equalsIgnoreCase("https")) {
+                properties.put("https.proxyHost", host);
+                properties.put("https.proxyPort", port.orElse(443));
+                properties.put("https.nonProxyHosts", "localhost");
+            } else {
+                properties.put("socksProxyHost", host);
+                properties.put("socksProxyPort", port.orElse(1080));
+            }
+
+            JsonUtil.getDataInPath(root, "user", JsonPrimitive.class)
+                    .map(JsonPrimitive::getAsString).ifPresent(user -> {
+                        char[] password = JsonUtil.getDataInPath(root, "password", JsonPrimitive.class)
+                                .map(JsonPrimitive::getAsString).map(String::toCharArray).orElse(new char[0]);
+                        Authenticator.setDefault(new Authenticator() {
+                            @Override
+                            protected PasswordAuthentication getPasswordAuthentication() {
+                                return new PasswordAuthentication(user, password);
+                            }
+                        });
+                    });
+        }
     }
 }

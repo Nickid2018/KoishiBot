@@ -8,6 +8,7 @@ import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
@@ -84,7 +85,7 @@ public class BugTrackerResolver extends MessageResolver {
             for (JsonElement element : issues) {
                 JsonObject issue = element.getAsJsonObject();
                 String key = issue.get("key").getAsString();
-                String summary = WebUtil.getDataInPathOrNull(issue, "fields.summary");
+                String summary = JsonUtil.getStringInPathOrNull(issue, "fields.summary");
                 builder.append("[").append(key).append("]").append(summary).append("\n");
             }
         } else
@@ -105,14 +106,14 @@ public class BugTrackerResolver extends MessageResolver {
         if (fields == null)
             throw new IOException("无法获取JSON文本，可能是该漏洞报告被删除或无权访问");
         String title = data.get("key").getAsString() + ": " + fields.get("summary").getAsString();
-        String project = WebUtil.getDataInPathOrNull(fields, "project.name");
-        String created = WebUtil.getDataInPathOrNull(fields, "created");
-        String status = WebUtil.getDataInPathOrNull(fields, "status.name");
-        String subStatus = WebUtil.getDataInPathOrNull(fields, "customfield_10500.value");
-        String resolution = WebUtil.getDataInPathOrNull(fields, "resolution.name");
+        String project = JsonUtil.getStringInPathOrNull(fields, "project.name");
+        String created = JsonUtil.getStringInPathOrNull(fields, "created");
+        String status = JsonUtil.getStringInPathOrNull(fields, "status.name");
+        String subStatus = JsonUtil.getStringInPathOrNull(fields, "customfield_10500.value");
+        String resolution = JsonUtil.getStringInPathOrNull(fields, "resolution.name");
         String versions = null;
         String fixVersion = null;
-        String mojangPriority = WebUtil.getDataInPathOrNull(fields, "customfield_12200.value");
+        String mojangPriority = JsonUtil.getStringInPathOrNull(fields, "customfield_12200.value");
 
         if (resolution == null)
             resolution = "Unresolved";
@@ -120,8 +121,8 @@ public class BugTrackerResolver extends MessageResolver {
             JsonArray issueLinks = fields.getAsJsonArray("issuelinks");
             for (JsonElement element : issueLinks) {
                 JsonObject issue = element.getAsJsonObject();
-                String type = WebUtil.getDataInPathOrNull(issue, "type.name");
-                String outwardIssue = WebUtil.getDataInPathOrNull(issue, "outwardIssue.key");
+                String type = JsonUtil.getStringInPathOrNull(issue, "type.name");
+                String outwardIssue = JsonUtil.getStringInPathOrNull(issue, "outwardIssue.key");
                 if (type != null && outwardIssue != null && type.equals("Duplicate")) {
                     resolution += "(与" + outwardIssue + "重复)";
                     break;

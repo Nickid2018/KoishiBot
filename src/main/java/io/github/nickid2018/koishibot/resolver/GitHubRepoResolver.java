@@ -7,6 +7,7 @@ import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
 
@@ -51,13 +52,13 @@ public class GitHubRepoResolver extends MessageResolver {
         StringBuilder builder = new StringBuilder();
 
         builder.append("仓库名称: ").append(repo).append("\n");
-        builder.append("拥有者: ").append(WebUtil.getDataInPathOrNull(object, "owner.login")).append("\n");
-        builder.append("仓库地址: ").append(WebUtil.getDataInPathOrNull(object, "html_url")).append("\n");
-        builder.append("SSH地址: ").append(WebUtil.getDataInPathOrNull(object, "ssh_url")).append("\n");
+        builder.append("拥有者: ").append(JsonUtil.getStringInPathOrNull(object, "owner.login")).append("\n");
+        builder.append("仓库地址: ").append(JsonUtil.getStringInPathOrNull(object, "html_url")).append("\n");
+        builder.append("SSH地址: ").append(JsonUtil.getStringInPathOrNull(object, "ssh_url")).append("\n");
         builder.append("Watch: ").append(object.get("watchers").getAsInt()).append(" | ");
         builder.append("Fork: ").append(object.get("forks").getAsInt()).append("\n");
 
-        String language = WebUtil.getDataInPathOrNull(object, "language");
+        String language = JsonUtil.getStringInPathOrNull(object, "language");
         if (language != null)
             builder.append("主要编写语言: ").append(language).append("\n");
 
@@ -65,7 +66,7 @@ public class GitHubRepoResolver extends MessageResolver {
         if (element instanceof JsonObject)
             builder.append("开源许可证: ").append(element.getAsJsonObject().get("name").getAsString()).append("\n");
 
-        String desc = WebUtil.getDataInPathOrNull(object, "description");
+        String desc = JsonUtil.getStringInPathOrNull(object, "description");
         if (desc != null)
             builder.append(desc);
 
@@ -79,9 +80,9 @@ public class GitHubRepoResolver extends MessageResolver {
 
         StringBuilder builder = new StringBuilder();
         builder.append(repo).append(" #").append(issue).append("\n");
-        builder.append(WebUtil.getDataInPathOrNull(object, "title")).append("\n");
-        builder.append("创建者: ").append(WebUtil.getDataInPathOrNull(object, "user.login")).append("\n");
-        builder.append("状态: ").append(WebUtil.getDataInPathOrNull(object, "state")).append("\n");
+        builder.append(JsonUtil.getStringInPathOrNull(object, "title")).append("\n");
+        builder.append("创建者: ").append(JsonUtil.getStringInPathOrNull(object, "user.login")).append("\n");
+        builder.append("状态: ").append(JsonUtil.getStringInPathOrNull(object, "state")).append("\n");
 
         JsonArray labels = object.getAsJsonArray("labels");
         List<String> labelList = new ArrayList<>();
@@ -90,7 +91,7 @@ public class GitHubRepoResolver extends MessageResolver {
         builder.append("标签: ").append(String.join(", ", labelList)).append("\n");
 
         String[] strs = Objects.requireNonNull(
-                WebUtil.getDataInPathOrNull(object, "body")).split("\n");
+                JsonUtil.getStringInPathOrNull(object, "body")).split("\n");
         boolean skip = false;
         for (String str : strs)
             if (builder.length() < 500) {

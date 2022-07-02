@@ -163,47 +163,6 @@ public class WebUtil {
         return url;
     }
 
-    public static <T extends JsonElement> T getDataInPathOrNull(JsonObject root, String path, Class<T> type) {
-        String[] paths = path.split("\\.");
-        JsonElement last = root;
-        for (int i = 0; i < paths.length - 1; i++) {
-            String key = paths[i];
-            if (last instanceof JsonArray) {
-                int num = Integer.parseInt(key);
-                JsonArray array = (JsonArray) last;
-                if (num >= array.size())
-                    return null;
-                last = array.get(num);
-            } else if (last instanceof JsonObject) {
-                JsonObject object = (JsonObject) last;
-                if (!object.has(key))
-                    return null;
-                last = object.get(key);
-            } else
-                return null;
-        }
-        String name = paths[paths.length - 1];
-        JsonElement get = null;
-        if (last instanceof JsonObject) {
-            JsonObject now = (JsonObject) last;
-            if (!now.has(name))
-                return null;
-            get = now.get(name);
-        } else if (last instanceof JsonArray){
-            JsonArray now = (JsonArray) last;
-            int num = Integer.parseInt(name);
-            if (num >= now.size())
-                return null;
-            get = now.get(num);
-        }
-        return type.isInstance(get) ? (T) get : null;
-    }
-
-    public static String getDataInPathOrNull(JsonObject root, String path) {
-        JsonPrimitive primitive = getDataInPathOrNull(root, path, JsonPrimitive.class);
-        return primitive == null ? null : primitive.getAsString();
-    }
-
     public static String encode(String str) throws UnsupportedEncodingException {
         return URLEncoder.encode(str, "UTF-8").replace(".", "%2E");
     }

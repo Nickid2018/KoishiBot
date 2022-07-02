@@ -9,6 +9,7 @@ import com.sun.net.httpserver.HttpHandler;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
@@ -105,7 +106,7 @@ public class GitHubWebHookListener implements HttpHandler {
         httpExchange.sendResponseHeaders(204, 0);
         System.out.println(data);
         JsonObject json = JsonParser.parseString(data).getAsJsonObject();
-        String repo = WebUtil.getDataInPathOrNull(json, "repository.full_name");
+        String repo = JsonUtil.getStringInPathOrNull(json, "repository.full_name");
         Method method = REFLECT_HANDLE.get(function);
         if (method != null) {
             try {
@@ -129,7 +130,7 @@ public class GitHubWebHookListener implements HttpHandler {
     @ReflectTarget
     public String push(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
-        builder.append(WebUtil.getDataInPathOrNull(object, "pusher.name")).append(
+        builder.append(JsonUtil.getStringInPathOrNull(object, "pusher.name")).append(
                 object.get("forced").getAsBoolean() ? "进行了强制推送操作。" : "进行了推送操作。").append("\n");
         builder.append("本次推送的提交信息:\n");
         List<JsonObject> commits = new ArrayList<>();
@@ -143,7 +144,7 @@ public class GitHubWebHookListener implements HttpHandler {
             builder.append("提交: ");
             String message = commit.get("message").getAsString().split("\n")[0];
             builder.append(message).append("\n");
-            builder.append("  提交人: ").append(WebUtil.getDataInPathOrNull(commit, "committer.name")).append("\n");
+            builder.append("  提交人: ").append(JsonUtil.getStringInPathOrNull(commit, "committer.name")).append("\n");
             builder.append("  时间: ").append(commit.get("timestamp").getAsString()).append("\n");
             builder.append("  添加").append(commit.get("added").getAsJsonArray().size())
                     .append("文件, 删除").append(commit.get("removed").getAsJsonArray().size())
@@ -155,16 +156,16 @@ public class GitHubWebHookListener implements HttpHandler {
     @ReflectTarget
     public String fork(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
-        builder.append(WebUtil.getDataInPathOrNull(object, "sender.login")).append("进行了Fork。\n");
-        builder.append("Fork仓库: ").append(WebUtil.getDataInPathOrNull(object, "forkee.full_name"));
+        builder.append(JsonUtil.getStringInPathOrNull(object, "sender.login")).append("进行了Fork。\n");
+        builder.append("Fork仓库: ").append(JsonUtil.getStringInPathOrNull(object, "forkee.full_name"));
         return builder.toString();
     }
 
     @ReflectTarget
     public String star(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
-        builder.append(WebUtil.getDataInPathOrNull(object, "sender.login"));
-        builder.append(Objects.equals(WebUtil.getDataInPathOrNull(object, "action"), "created")
+        builder.append(JsonUtil.getStringInPathOrNull(object, "sender.login"));
+        builder.append(Objects.equals(JsonUtil.getStringInPathOrNull(object, "action"), "created")
                 ? "star了此仓库" : "取消star了此仓库");
         return builder.toString();
     }
@@ -172,15 +173,15 @@ public class GitHubWebHookListener implements HttpHandler {
     @ReflectTarget
     public String release(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
-        String action = WebUtil.getDataInPathOrNull(object, "action");
-        String name = WebUtil.getDataInPathOrNull(object, "release.name");
-        String tag = WebUtil.getDataInPathOrNull(object, "release.tag_name");
-        String body = WebUtil.getDataInPathOrNull(object, "release.body");
-        boolean pre = Objects.requireNonNull(WebUtil.getDataInPathOrNull(
-                object, "release.prerelease", JsonPrimitive.class)).getAsBoolean();
-        boolean draft = Objects.requireNonNull(WebUtil.getDataInPathOrNull(
-                object, "release.draft", JsonPrimitive.class)).getAsBoolean();
-        String user = WebUtil.getDataInPathOrNull(object, "sender.login");
+        String action = JsonUtil.getStringInPathOrNull(object, "action");
+        String name = JsonUtil.getStringInPathOrNull(object, "release.name");
+        String tag = JsonUtil.getStringInPathOrNull(object, "release.tag_name");
+        String body = JsonUtil.getStringInPathOrNull(object, "release.body");
+        boolean pre = JsonUtil.getDataInPath(
+                object, "release.prerelease", JsonPrimitive.class).map(JsonPrimitive::getAsBoolean).orElse(false);
+        boolean draft = JsonUtil.getDataInPath(
+                object, "release.draft", JsonPrimitive.class).map(JsonPrimitive::getAsBoolean).orElse(false);
+        String user = JsonUtil.getStringInPathOrNull(object, "sender.login");
         switch (Objects.requireNonNull(action)) {
             case "created":
                 builder.append(user).append("创建了发行包。\n");

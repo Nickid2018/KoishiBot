@@ -2,10 +2,7 @@ package io.github.nickid2018.koishibot.wiki;
 
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.KoishiBotMain;
-import io.github.nickid2018.koishibot.util.ImageRenderer;
-import io.github.nickid2018.koishibot.util.MutableBoolean;
-import io.github.nickid2018.koishibot.util.RegexUtil;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.*;
 import org.apache.http.client.methods.HttpGet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -97,14 +94,14 @@ public class WikiInfo {
                     break;
                 }
             }
-            String server = WebUtil.getDataInPathOrNull(object, "query.general.server");
+            String server = JsonUtil.getStringInPathOrNull(object, "query.general.server");
             String realURL;
             if (server != null && server.startsWith("/"))
                 realURL = url.split("/")[0] + server;
             else
                 realURL = server;
-            articleURL = realURL + WebUtil.getDataInPathOrNull(object, "query.general.articlepath");
-            script = realURL + WebUtil.getDataInPathOrNull(object, "query.general.script");
+            articleURL = realURL + JsonUtil.getStringInPathOrNull(object, "query.general.articlepath");
+            script = realURL + JsonUtil.getStringInPathOrNull(object, "query.general.script");
             baseURI = "https://" + new URL(articleURL).getHost();
 
             if (!getInterWikiDataFromPage()) {
@@ -259,7 +256,7 @@ public class WikiInfo {
     private PageInfo random(String prefix) throws Exception {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_RANDOM)).getAsJsonObject();
         PageInfo info =  parsePageInfo(Objects.requireNonNull(
-                WebUtil.getDataInPathOrNull(data, "query.random.0.title")), 0, prefix);
+                JsonUtil.getStringInPathOrNull(data, "query.random.0.title")), 0, prefix);
         info.isRandom = true;
         return info;
     }
@@ -376,7 +373,7 @@ public class WikiInfo {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + QUERY_PAGE_TEXT + "&page="
                         + WebUtil.encode(page)))
                 .getAsJsonObject();
-        String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
+        String html = JsonUtil.getStringInPathOrNull(data, "parse.text.*");
         if (html == null)
             throw new IOException("页面无内容");
         String markdown = WebUtil.getAsMarkdownClean(html);
@@ -402,7 +399,7 @@ public class WikiInfo {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + QUERY_PAGE_TEXT + "&page="
                         + WebUtil.encode(page)))
                 .getAsJsonObject();
-        String html = WebUtil.getDataInPathOrNull(data, "parse.text.*");
+        String html = JsonUtil.getStringInPathOrNull(data, "parse.text.*");
         if (html == null)
             throw new IOException("页面无内容");
 
