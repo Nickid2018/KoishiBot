@@ -2,12 +2,12 @@ Koishi bot GITHUB 模块帮助
 #
 监听GitHub上的信息。
 #
-~github subscribe add <repo> 订阅库，库需要事先添加过Webhook
-~github subscribe del <repo> 取消订阅库
-~github webhook add <repo> 创建仓库的Webhook用于监听
-~github webhook del <repo> 销毁仓库的Webhook
-~github repo <repo> 查询仓库信息
-~github repo <repo> issue <issue> 查询仓库Issue信息
+~github subscribe add [repo] 订阅库，库需要事先添加过Webhook
+~github subscribe del [repo] 取消订阅库
+~github webhook add [repo] 创建仓库的Webhook用于监听
+~github webhook del [repo] 销毁仓库的Webhook
+~github repo [repo] 查询仓库信息
+~github repo [repo] issue [issue] 查询仓库Issue信息
 #
 ~github subscribe add/del只能在群或者私聊中触发
 ~github webhook add/del只能在群临时会话或者私聊中触发

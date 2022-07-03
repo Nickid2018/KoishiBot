@@ -102,15 +102,14 @@ public class ImageRenderer {
         g2.fillRect(0, 0, image.getWidth(), image.getHeight());
         g2.setColor(Color.BLACK);
 
-        MutableInt y = new MutableInt(margin);
+        MutableInt y = new MutableInt(margin + fontBold.getSize());
         g2.setFont(fontBold);
         g2.drawString(title, margin, y.getValue());
-        y.setValue(y.getValue() + fontBold.getSize() + 2 * margin);
 
         g2.setFont(font);
         lines.forEach(line -> {
-            g2.drawString(line, margin, y.getValue());
             y.setValue(y.getValue() + charHeight + 2 * margin);
+            g2.drawString(line, margin, y.getValue());
         });
 
         return image;
