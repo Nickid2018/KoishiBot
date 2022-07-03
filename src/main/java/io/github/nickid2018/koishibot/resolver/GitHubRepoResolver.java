@@ -94,7 +94,7 @@ public class GitHubRepoResolver extends MessageResolver {
                 JsonUtil.getStringInPathOrNull(object, "body")).split("\n");
         boolean skip = false;
         for (String str : strs)
-            if (builder.length() < 500) {
+            if (builder.length() < 800) {
                 builder.append(str).append("\n");
                 skip = true;
                 break;

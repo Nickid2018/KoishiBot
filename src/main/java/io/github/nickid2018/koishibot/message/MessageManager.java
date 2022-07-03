@@ -3,8 +3,8 @@ package io.github.nickid2018.koishibot.message;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.resolver.*;
-import io.github.nickid2018.koishibot.util.Either;
-import io.github.nickid2018.koishibot.util.MutableBoolean;
+import io.github.nickid2018.koishibot.util.value.Either;
+import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import kotlin.Pair;
 import kotlin.Triple;
 

@@ -2,7 +2,7 @@ package io.github.nickid2018.koishibot.message;
 
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
-import io.github.nickid2018.koishibot.util.MutableBoolean;
+import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 
 import java.util.Collections;
 import java.util.HashMap;

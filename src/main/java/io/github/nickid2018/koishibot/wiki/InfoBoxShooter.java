@@ -58,7 +58,7 @@ public class InfoBoxShooter {
 
         URLConnection connection = new URL(url).openConnection();
         connection.addRequestProperty("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
-        connection.addRequestProperty("MessageContext-Agent", WebUtil.chooseRandomUA());
+        connection.addRequestProperty("User-Agent", WebUtil.chooseRandomUA());
         String htmlData = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
         Document doc = Jsoup.parse(htmlData);
 
@@ -74,8 +74,10 @@ public class InfoBoxShooter {
             }
         }
 
-        if (element == null)
+        if (element == null) {
+            System.out.println("URL " + url + " has no infobox.");
             return null;
+        }
 
         while (!element.equals(doc.body())) {
             Element parent = element.parent();

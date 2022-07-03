@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.github.nickid2018.koishibot.message.api.ServiceMessage;
-import io.github.nickid2018.koishibot.util.Either;
+import io.github.nickid2018.koishibot.util.value.Either;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import net.mamoe.mirai.message.data.LightApp;
 import net.mamoe.mirai.message.data.Message;

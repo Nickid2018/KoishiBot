@@ -1,7 +1,7 @@
 package io.github.nickid2018.koishibot.message.api;
 
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.util.Either;
+import io.github.nickid2018.koishibot.util.value.Either;
 
 public interface ServiceMessage {
 

@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.wiki;
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.util.*;
+import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import org.apache.http.client.methods.HttpGet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -289,7 +290,7 @@ public class WikiInfo {
             for (JsonElement element : (JsonArray) entry) {
                 JsonObject object = element.getAsJsonObject();
                 String from = object.get("from").getAsString();
-                if (from.equalsIgnoreCase(info.title)) {
+                if (from.equals(info.title)) {
                     String to = element.getAsJsonObject().get("to").getAsString();
                     if (info.titlePast == null)
                         info.titlePast = info.title;

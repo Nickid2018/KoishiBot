@@ -2,8 +2,8 @@ package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.Constants;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.util.LazyLoadValue;
-import io.github.nickid2018.koishibot.util.MutableInt;
+import io.github.nickid2018.koishibot.util.value.LazyLoadValue;
+import io.github.nickid2018.koishibot.util.value.MutableInt;
 import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;

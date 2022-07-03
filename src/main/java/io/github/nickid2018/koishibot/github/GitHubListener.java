@@ -5,7 +5,7 @@ import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.GroupDataReader;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
-import io.github.nickid2018.koishibot.util.MutableBoolean;
+import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import io.github.nickid2018.koishibot.webhook.WebHookManager;
 import org.apache.http.client.methods.HttpGet;

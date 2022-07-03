@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.filter;
 
-import io.github.nickid2018.koishibot.util.MutableBoolean;
+import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

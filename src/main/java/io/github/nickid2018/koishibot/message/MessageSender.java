@@ -5,7 +5,7 @@ import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
-import io.github.nickid2018.koishibot.util.MutableBoolean;
+import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import kotlin.Pair;
 
 import java.io.IOException;

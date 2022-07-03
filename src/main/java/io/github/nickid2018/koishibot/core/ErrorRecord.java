@@ -5,7 +5,7 @@ import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.message.api.MessageEntry;
-import io.github.nickid2018.koishibot.util.MutableInt;
+import io.github.nickid2018.koishibot.util.value.MutableInt;
 import kotlin.Triple;
 
 import java.util.ArrayList;
