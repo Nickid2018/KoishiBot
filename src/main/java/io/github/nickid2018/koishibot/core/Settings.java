@@ -87,7 +87,7 @@ public class Settings {
                     Map<String, String> header = new HashMap<>();
                     for (Map.Entry<String, JsonElement> headerEntry : headers.entrySet())
                         header.put(headerEntry.getKey(), headerEntry.getValue().getAsString());
-                    SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(wikiData.get("url").getAsString() + "?", header));
+                    SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(JsonUtil.getStringOrNull(wikiData, "url") + "?", header));
                 }
             }
         BASE_WIKI = wikiRoot.get("base").getAsString();
@@ -101,43 +101,46 @@ public class Settings {
 
     public static void loadAppKeyAndSecrets(JsonObject settingsRoot) {
         JsonObject youdao = settingsRoot.getAsJsonObject("youdao");
-        YOUDAO_APP_KEY = youdao.get("app_key").getAsString();
-        YOUDAO_APP_SECRET = youdao.get("app_secret").getAsString();
+        YOUDAO_APP_KEY = JsonUtil.getStringOrNull(youdao, "app_key");
+        YOUDAO_APP_SECRET = JsonUtil.getStringOrNull(youdao, "app_secret");
     }
 
     public static void loadFFmpeg(JsonObject settingsRoot) {
         JsonObject audio = settingsRoot.getAsJsonObject("audio");
-        FFMPEG_LOCATION = audio.get("ffmpeg").getAsString();
-        ENCODER_LOCATION = audio.get("encoder").getAsString();
+        FFMPEG_LOCATION = JsonUtil.getStringOrNull(audio, "ffmpeg");
+        ENCODER_LOCATION = JsonUtil.getStringOrNull(audio, "encoder");
     }
 
     public static void loadImageSettings(JsonObject settingsRoot) {
         JsonObject image = settingsRoot.getAsJsonObject("image");
-        IMAGE_FONT = new Font(image.get("family").getAsString(), Font.PLAIN,
-                Integer.parseInt(image.get("size").getAsString()));
-        IMAGE_FONT_BOLD = new Font(image.get("family").getAsString(), Font.BOLD,
-                Integer.parseInt(image.get("size").getAsString()));
+        IMAGE_FONT = new Font(JsonUtil.getStringOrNull(image, "family"), Font.PLAIN,
+                JsonUtil.getIntOrZero(image, "size"));
+        IMAGE_FONT_BOLD = new Font(JsonUtil.getStringOrNull(image, "family"), Font.BOLD,
+                JsonUtil.getIntOrZero(image, "size"));
     }
 
-    public static void loadSensitiveWordsSettings(JsonObject settingsRoot) throws IOException {
-        if (settingsRoot.has("sensitives"))
-            SensitiveWordFilter.loadWordFromFile(settingsRoot.get("sensitives").getAsString());
+    public static void loadSensitiveWordsSettings(JsonObject settingsRoot) {
+        JsonUtil.getString(settingsRoot, "sensitives").ifPresent(
+                s -> {
+                    try {
+                        SensitiveWordFilter.loadWordFromFile(s);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
     }
 
     public static void loadWebDriver(JsonObject settingsRoot) {
         InfoBoxShooter.close();
-        if (settingsRoot.has("webdriver")) {
-            System.setProperty("webdriver.gecko.driver", settingsRoot.get("webdriver").getAsString());
+        JsonUtil.getString(settingsRoot, "webdriver").ifPresent(web -> {
+            System.setProperty("webdriver.gecko.driver", web);
             InfoBoxShooter.loadWebDriver();
-        }
+        });
     }
 
     public static void loadGitHub(JsonObject settingsRoot) {
-        JsonElement element = settingsRoot.get("github_token");
-        if (element != null && element.isJsonPrimitive())
-            GITHUB_TOKEN = element.getAsString();
-        else
-            GITHUB_TOKEN = "";
+        GITHUB_TOKEN = JsonUtil.getString(settingsRoot, "github_token").orElse("");
     }
 
     public static void loadProxy(JsonObject settingsRoot) {
@@ -152,45 +155,43 @@ public class Settings {
         properties.remove("socksProxyPort");
         Authenticator.setDefault(null);
 
-        JsonElement element = settingsRoot.get("proxy");
-        if (element != null && element.isJsonObject()) {
-            JsonObject root = element.getAsJsonObject();
+        JsonUtil.getData(settingsRoot, "proxy", JsonObject.class).ifPresent(root -> {
+                    String type = JsonUtil.getDataInPath(root, "type", JsonPrimitive.class)
+                            .map(JsonPrimitive::getAsString)
+                            .filter(s -> s.equalsIgnoreCase("http")
+                                    || s.equalsIgnoreCase("https")
+                                    || s.equalsIgnoreCase("socks"))
+                            .orElse("http");
 
-            String type = JsonUtil.getDataInPath(root, "type", JsonPrimitive.class)
-                    .map(JsonPrimitive::getAsString)
-                    .filter(s -> s.equalsIgnoreCase("http")
-                            || s.equalsIgnoreCase("https")
-                            || s.equalsIgnoreCase("socks"))
-                    .orElse("http");
+                    String host = JsonUtil.getStringInPathOrElse(root, "host", "127.0.0.1");
+                    Optional<Integer> port = JsonUtil.getDataInPath(root, "port", JsonPrimitive.class)
+                            .filter(JsonPrimitive::isNumber)
+                            .map(JsonPrimitive::getAsInt);
+                    if (type.equalsIgnoreCase("http")) {
+                        properties.put("http.proxyHost", host);
+                        properties.put("http.proxyPort", port.orElse(80));
+                        properties.put("http.nonProxyHosts", "localhost");
+                    } else if (type.equalsIgnoreCase("https")) {
+                        properties.put("https.proxyHost", host);
+                        properties.put("https.proxyPort", port.orElse(443));
+                        properties.put("https.nonProxyHosts", "localhost");
+                    } else {
+                        properties.put("socksProxyHost", host);
+                        properties.put("socksProxyPort", port.orElse(1080));
+                    }
 
-            String host = JsonUtil.getStringInPathOrElse(root, "host", "127.0.0.1");
-            Optional<Integer> port = JsonUtil.getDataInPath(root, "port", JsonPrimitive.class)
-                    .filter(JsonPrimitive::isNumber)
-                    .map(JsonPrimitive::getAsInt);
-            if (type.equalsIgnoreCase("http")) {
-                properties.put("http.proxyHost", host);
-                properties.put("http.proxyPort", port.orElse(80));
-                properties.put("http.nonProxyHosts", "localhost");
-            } else if (type.equalsIgnoreCase("https")) {
-                properties.put("https.proxyHost", host);
-                properties.put("https.proxyPort", port.orElse(443));
-                properties.put("https.nonProxyHosts", "localhost");
-            } else {
-                properties.put("socksProxyHost", host);
-                properties.put("socksProxyPort", port.orElse(1080));
-            }
-
-            JsonUtil.getDataInPath(root, "user", JsonPrimitive.class)
-                    .map(JsonPrimitive::getAsString).ifPresent(user -> {
-                        char[] password = JsonUtil.getDataInPath(root, "password", JsonPrimitive.class)
-                                .map(JsonPrimitive::getAsString).map(String::toCharArray).orElse(new char[0]);
-                        Authenticator.setDefault(new Authenticator() {
-                            @Override
-                            protected PasswordAuthentication getPasswordAuthentication() {
-                                return new PasswordAuthentication(user, password);
-                            }
-                        });
-                    });
-        }
+                    JsonUtil.getDataInPath(root, "user", JsonPrimitive.class)
+                            .map(JsonPrimitive::getAsString).ifPresent(user -> {
+                                char[] password = JsonUtil.getDataInPath(root, "password", JsonPrimitive.class)
+                                        .map(JsonPrimitive::getAsString).map(String::toCharArray).orElse(new char[0]);
+                                Authenticator.setDefault(new Authenticator() {
+                                    @Override
+                                    protected PasswordAuthentication getPasswordAuthentication() {
+                                        return new PasswordAuthentication(user, password);
+                                    }
+                                });
+                            });
+                }
+        );
     }
 }

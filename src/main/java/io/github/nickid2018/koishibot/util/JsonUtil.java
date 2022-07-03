@@ -83,6 +83,19 @@ public class JsonUtil {
         return getInt(root, path).orElse(other);
     }
 
+    public static OptionalInt getIntInPath(JsonObject root, String path) {
+        return getDataInPath(root, path, JsonPrimitive.class)
+                .map(JsonPrimitive::getAsInt).map(OptionalInt::of).orElse(OptionalInt.empty());
+    }
+
+    public static int getIntInPathOrZero(JsonObject root, String path) {
+        return getIntInPath(root, path).orElse(0);
+    }
+
+    public static int getIntInPathOrElse(JsonObject root, String path, int other) {
+        return getIntInPath(root, path).orElse(other);
+    }
+
     public static Optional<String> getStringInPath(JsonObject root, String path) {
         return getDataInPath(root, path, JsonPrimitive.class).map(JsonPrimitive::getAsString);
     }

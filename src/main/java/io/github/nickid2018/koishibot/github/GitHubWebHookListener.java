@@ -14,6 +14,7 @@ import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 
@@ -142,13 +143,23 @@ public class GitHubWebHookListener implements HttpHandler {
         }
         for (JsonObject commit : commits) {
             builder.append("提交: ");
-            String message = commit.get("message").getAsString().split("\n")[0];
+            String message = JsonUtil.getStringOrNull(commit, "message").split("\n")[0];
             builder.append(message).append("\n");
             builder.append("  提交人: ").append(JsonUtil.getStringInPathOrNull(commit, "committer.name")).append("\n");
             builder.append("  时间: ").append(JsonUtil.getStringOrNull(commit, "timestamp")).append("\n");
             builder.append("  添加").append(commit.get("added").getAsJsonArray().size())
                     .append("文件, 删除").append(commit.get("removed").getAsJsonArray().size())
                     .append("文件, 修改").append(commit.get("modified").getAsJsonArray().size()).append("文件。\n");
+            try {
+                JsonObject commitData = WebUtil.fetchDataInJson(GitHubListener.acceptJSON(
+                        new HttpGet(GitHubListener.GITHUB_API + "/repos/" + repo + "/commits/"
+                                + JsonUtil.getStringOrNull(commit, "id")))).getAsJsonObject();
+                builder.append("[增加").append(JsonUtil.getIntInPathOrZero(commitData, "stats.additions"))
+                        .append("行，删除").append(JsonUtil.getIntInPathOrZero(commitData, "stats.deletions")).append("行]\n");
+            } catch (Exception e) {
+                System.out.println("无法获取commit具体信息");
+                e.printStackTrace();
+            }
         }
         return builder.toString().trim();
     }
