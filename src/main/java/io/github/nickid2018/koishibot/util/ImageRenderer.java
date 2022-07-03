@@ -1,11 +1,13 @@
 package io.github.nickid2018.koishibot.util;
 
 import io.github.nickid2018.koishibot.core.Settings;
+import io.github.nickid2018.koishibot.util.value.MutableInt;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RectangularShape;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +76,42 @@ public class ImageRenderer {
             g2.drawString(values.get(i),
                     nameLength + valueAlign.compute(valueLength, (int) valueBound.get(i).getWidth(), margin), y);
         }
+
+        return image;
+    }
+
+    public static BufferedImage renderText(String title, List<String> lines) {
+        Font font = Settings.IMAGE_FONT;
+        Font fontBold = Settings.IMAGE_FONT_BOLD;
+
+        int margin = font.getSize() / 2;
+        FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, false);
+
+        List<Rectangle2D> lineBound = lines.stream().map(str -> font.getStringBounds(str, frc))
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        lineBound.add(fontBold.getStringBounds(title, frc));
+
+        int width = (int) lineBound.stream().mapToDouble(RectangularShape::getWidth).max().getAsDouble() + 2 * margin;
+        int charHeight = font.getSize();
+        int height = fontBold.getSize() + charHeight * lines.size() + 2 * margin * (lines.size() + 1);
+
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_BGR);
+        Graphics2D g2 = image.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setColor(Color.WHITE);
+        g2.fillRect(0, 0, image.getWidth(), image.getHeight());
+        g2.setColor(Color.BLACK);
+
+        MutableInt y = new MutableInt(margin);
+        g2.setFont(fontBold);
+        g2.drawString(title, margin, y.getValue());
+        y.setValue(y.getValue() + fontBold.getSize() + 2 * margin);
+
+        g2.setFont(font);
+        lines.forEach(line -> {
+            g2.drawString(line, margin, y.getValue());
+            y.setValue(y.getValue() + charHeight + 2 * margin);
+        });
 
         return image;
     }

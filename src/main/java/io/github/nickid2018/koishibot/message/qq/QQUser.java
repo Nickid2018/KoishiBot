@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.message.qq;
 
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
+import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.contact.User;
 
 public class QQUser implements UserInfo {
@@ -30,7 +31,7 @@ public class QQUser implements UserInfo {
     }
 
     public boolean isStranger() {
-        return stranger;
+        return stranger || user instanceof Stranger;
     }
 
     @Override
