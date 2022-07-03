@@ -154,7 +154,7 @@ public class GitHubWebHookListener implements HttpHandler {
                 JsonObject commitData = WebUtil.fetchDataInJson(GitHubListener.acceptJSON(
                         new HttpGet(GitHubListener.GITHUB_API + "/repos/" + repo + "/commits/"
                                 + JsonUtil.getStringOrNull(commit, "id")))).getAsJsonObject();
-                builder.append("[增加").append(JsonUtil.getIntInPathOrZero(commitData, "stats.additions"))
+                builder.append("  [增加").append(JsonUtil.getIntInPathOrZero(commitData, "stats.additions"))
                         .append("行，删除").append(JsonUtil.getIntInPathOrZero(commitData, "stats.deletions")).append("行]\n");
             } catch (Exception e) {
                 System.out.println("无法获取commit具体信息");
