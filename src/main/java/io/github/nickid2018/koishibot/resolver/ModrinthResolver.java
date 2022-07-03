@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 /*
  * API Documentation: https://docs.modrinth.com/api-spec/
  */
-public class CurseForgeResolver extends MessageResolver {
+public class ModrinthResolver extends MessageResolver {
 
     public static final Pattern MOD_PATTERN = Pattern.compile("<mod:.+?>");
     public static final Pattern MOD_SEARCH_PATTERN = Pattern.compile("<mod:search:.+?>");
@@ -31,7 +32,7 @@ public class CurseForgeResolver extends MessageResolver {
 
     public static final String MODRINTH_API_URL = "https://api.modrinth.com/v2";
 
-    public CurseForgeResolver() {
+    public ModrinthResolver() {
         super(MOD_SEARCH_PATTERN, MOD_FILES_PATTERN, MOD_PATTERN);
     }
 
@@ -58,7 +59,7 @@ public class CurseForgeResolver extends MessageResolver {
             throw new IOException("未查找到此模组，请矫正拼写");
 
         JsonObject mod = addons.get(0).getAsJsonObject();
-        String modName = mod.get("title").getAsString();
+        String modName = JsonUtil.getStringOrNull(mod, "title");
         StringBuilder builder = new StringBuilder();
         if (!modName.equalsIgnoreCase(key))
             builder.append("未能查找到名称相同的模组，自动从 ").append(key).append(" 重定向到最高匹配项 ").append(modName).append("\n");
@@ -72,7 +73,7 @@ public class CurseForgeResolver extends MessageResolver {
             builder.append("(仅显示正式版)");
         }
 
-        String slug = mod.get("slug").getAsString();
+        String slug = JsonUtil.getStringOrNull(mod, "slug");
         if (versions.size() > 15)
             builder.append("(仅显示前15文件)\n");
         for (int i = versions.size() - 1, j = 0; j < 15 && i >= 0; i--, j++) {
@@ -80,9 +81,8 @@ public class CurseForgeResolver extends MessageResolver {
                     + "/version?game_versions=" + WebUtil.encode("[\"" + versions.get(i) + "\"]")));
             JsonArray array = element.getAsJsonArray();
             JsonObject object = array.get(0).getAsJsonObject();
-            JsonArray files = object.getAsJsonArray("files");
-            JsonObject lastFile = files.get(0).getAsJsonObject();
-            builder.append(versions.get(i)).append(": ").append(lastFile.get("url").getAsString()).append("\n");
+            builder.append(versions.get(i)).append(": ").append(
+                    JsonUtil.getStringInPathOrNull(object, "files.0.url")).append("\n");
         }
 
         environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
@@ -115,8 +115,8 @@ public class CurseForgeResolver extends MessageResolver {
         builder.append("\n");
         for (JsonElement element : addons) {
             JsonObject object = element.getAsJsonObject();
-            String name = object.get("title").getAsString();
-            String summary = object.get("description").getAsString();
+            String name = JsonUtil.getStringOrNull(object, "title");
+            String summary = JsonUtil.getStringOrNull(object, "description");
             if (summary.length() > 63)
                 summary = summary.substring(0, 60) + "...";
             builder.append("[").append(name).append("]").append(summary).append("\n");
@@ -135,7 +135,7 @@ public class CurseForgeResolver extends MessageResolver {
             throw new IOException("未查找到此模组，请矫正拼写");
 
         JsonObject mod = addons.get(0).getAsJsonObject();
-        String modName = mod.get("title").getAsString();
+        String modName = JsonUtil.getStringOrNull(mod, "title");
         StringBuilder builder = new StringBuilder();
         if (!modName.equalsIgnoreCase(id))
             builder.append("未能查找到名称相同的模组，自动从 ").append(id).append(" 重定向到最高匹配项 ").append(modName).append("\n");
@@ -150,9 +150,9 @@ public class CurseForgeResolver extends MessageResolver {
             builder.append("\n");
         }
 
-        builder.append("作者: ").append(mod.get("author").getAsString()).append("\n");
+        builder.append("作者: ").append(JsonUtil.getStringOrNull(mod, "author")).append("\n");
 
-        int downloadCount = mod.get("downloads").getAsInt();
+        int downloadCount = JsonUtil.getIntOrZero(mod, "downloads");
         builder.append("下载量: ").append(downloadCount).append("\n");
 
         builder.append("支持版本: ");
@@ -168,7 +168,7 @@ public class CurseForgeResolver extends MessageResolver {
         builder.delete(builder.length() - 2, builder.length());
         builder.append("\n");
 
-        BufferedReader reader = new BufferedReader(new StringReader(mod.get("description").getAsString()));
+        BufferedReader reader = new BufferedReader(new StringReader(JsonUtil.getStringOrNull(mod, "description")));
         String line;
         while ((line = reader.readLine()) != null && builder.length() <= 801) {
             line = line.trim();

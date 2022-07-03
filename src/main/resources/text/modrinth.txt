@@ -1,6 +1,6 @@
-Koishi bot CURSEFORGE 模块帮助
+Koishi bot MODRINTH 模块帮助
 #
-作用: 获取CurseForge模组信息，使用Modrinth API（可能有一些模组无法搜到）
+作用: 获取Modrinth模组信息。
 #
 下方所有格式都要以尖括号包括（防止屏蔽）
 #

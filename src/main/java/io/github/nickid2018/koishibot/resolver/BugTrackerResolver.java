@@ -67,12 +67,15 @@ public class BugTrackerResolver extends MessageResolver {
                 bufferSize = Math.min(30, Integer.parseInt(regions[1]));
         }
         searchKey = WebUtil.encode(searchKey);
-        HttpGet get = new HttpGet(MOJIRA_SEARCH_API_URL + searchKey + "&fields=key,summary&maxResults=10&startAt=" + page * bufferSize);
+
+        HttpGet get = new HttpGet(MOJIRA_SEARCH_API_URL + searchKey
+                + "&fields=key,summary&maxResults=10&startAt=" + page * bufferSize);
         JsonObject data = WebUtil.fetchDataInJson(get).getAsJsonObject();
         if (data.has("errorMessages"))
             // Error while getting
             throw new IOException(data.get("errorMessages").getAsString());
-        int total = data.get("total").getAsInt();
+
+        int total = JsonUtil.getIntOrZero(data, "total");
         JsonArray issues = data.getAsJsonArray("issues");
         StringBuilder builder = new StringBuilder("查找结果\n");
         if (total != 0) {
@@ -84,7 +87,7 @@ public class BugTrackerResolver extends MessageResolver {
             builder.append("\n");
             for (JsonElement element : issues) {
                 JsonObject issue = element.getAsJsonObject();
-                String key = issue.get("key").getAsString();
+                String key = JsonUtil.getStringOrNull(issue, "key");
                 String summary = JsonUtil.getStringInPathOrNull(issue, "fields.summary");
                 builder.append("[").append(key).append("]").append(summary).append("\n");
             }
@@ -102,17 +105,16 @@ public class BugTrackerResolver extends MessageResolver {
         if (data.has("errorMessage"))
             // Error while getting
             throw new IOException(data.get("errorMessage").getAsString());
+
         JsonObject fields = data.getAsJsonObject("fields");
         if (fields == null)
             throw new IOException("无法获取JSON文本，可能是该漏洞报告被删除或无权访问");
-        String title = data.get("key").getAsString() + ": " + fields.get("summary").getAsString();
+        String title = JsonUtil.getStringOrNull(data, "key") + ": " + JsonUtil.getStringOrNull(fields, "summary");
         String project = JsonUtil.getStringInPathOrNull(fields, "project.name");
-        String created = JsonUtil.getStringInPathOrNull(fields, "created");
+        String created = JsonUtil.getStringOrNull(fields, "created");
         String status = JsonUtil.getStringInPathOrNull(fields, "status.name");
         String subStatus = JsonUtil.getStringInPathOrNull(fields, "customfield_10500.value");
         String resolution = JsonUtil.getStringInPathOrNull(fields, "resolution.name");
-        String versions = null;
-        String fixVersion = null;
         String mojangPriority = JsonUtil.getStringInPathOrNull(fields, "customfield_12200.value");
 
         if (resolution == null)
@@ -129,29 +131,35 @@ public class BugTrackerResolver extends MessageResolver {
                 }
             }
         }
-        if (fields.has("versions")) {
-            JsonArray versionsArray = fields.getAsJsonArray("versions");
+
+        String versions = JsonUtil.getData(fields, "versions", JsonArray.class).map(versionsArray -> {
             if (versionsArray.size() == 1) {
                 JsonObject versionRoot = versionsArray.get(0).getAsJsonObject();
-                versions = versionRoot.get("name").getAsString() + "(" + versionRoot.get("releaseDate").getAsString() + ")";
+                return JsonUtil.getStringOrNull(versionRoot, "name") + "("
+                        + JsonUtil.getStringOrNull(versionRoot, "releaseDate") + ")";
             } else {
                 JsonObject versionRoot1 = versionsArray.get(0).getAsJsonObject();
                 JsonObject versionRoot2 = versionsArray.get(versionsArray.size() - 1).getAsJsonObject();
-                versions = versionRoot1.get("name").getAsString() + "(" + versionRoot1.get("releaseDate").getAsString() + ") ~ " +
-                        versionRoot2.get("name").getAsString() + "(" + versionRoot2.get("releaseDate").getAsString() + ")";
+                return JsonUtil.getStringOrNull(versionRoot1, "name") + "("
+                        + JsonUtil.getStringOrNull(versionRoot1, "releaseDate") + ") ~ " +
+                        JsonUtil.getStringOrNull(versionRoot2, "name") + "("
+                        + JsonUtil.getStringOrNull(versionRoot2, "releaseDate") + ")";
             }
-        }
-        if (fields.has("fixVersions")) {
-            JsonArray fixArray = fields.getAsJsonArray("fixVersions");
+        }).orElse(null);
+
+        String finalResolution = resolution;
+        String fixVersion = JsonUtil.getData(fields, "fixVersions", JsonArray.class).map(fixArray -> {
             if (fixArray.size() != 0) {
                 JsonObject lastFix = fixArray.get(fixArray.size() - 1).getAsJsonObject();
-                fixVersion = lastFix.get("name").getAsString() + "(" + lastFix.get("releaseDate").getAsString() + ")";
-                if (!resolution.equals("Resolved") && !resolution.equals("Fixed"))
-                    fixVersion += "(尝试修复)";
+                String ret = JsonUtil.getStringOrNull(lastFix, "name") + "("
+                        + JsonUtil.getStringOrNull(lastFix, "releaseDate") + ")";
+                if (!finalResolution.equals("Resolved") && !finalResolution.equals("Fixed"))
+                    ret += "(尝试修复)";
                 if (fixArray.size() > 1)
-                    fixVersion += "(仅显示最后一次修复)";
-            }
-        }
+                    ret += "(仅显示最后一次修复)";
+                return ret;
+            } else return null;
+        }).orElse(null);
 
         StringBuilder builder = new StringBuilder(title).append("\n");
         if (project != null)
@@ -172,7 +180,8 @@ public class BugTrackerResolver extends MessageResolver {
         if (mojangPriority != null)
             builder.append("Mojang优先级: ").append(mojangPriority).append("\n");
         builder.append("主条目URL: https://bugs.mojang.com/browse/").append(id).append("\n");
-        BufferedReader reader = new BufferedReader(new StringReader(fields.get("description").getAsString()));
+
+        BufferedReader reader = new BufferedReader(new StringReader(JsonUtil.getStringOrNull(fields, "description")));
         String line;
         while ((line = reader.readLine()) != null && builder.length() <= 600) {
             line = line.trim();
@@ -186,9 +195,9 @@ public class BugTrackerResolver extends MessageResolver {
         JsonArray array = fields.getAsJsonArray("attachment");
         for (JsonElement element : array) {
             JsonObject object = element.getAsJsonObject();
-            String[] fileNameSplit = object.get("filename").getAsString().split("\\.");
+            String[] fileNameSplit = JsonUtil.getStringOrNull(object, "filename").split("\\.");
             if (WebUtil.SUPPORTED_IMAGE.contains(fileNameSplit[fileNameSplit.length - 1])) {
-                image = object.get("content").getAsString();
+                image = JsonUtil.getStringOrNull(object, "content");
                 break;
             }
         }

@@ -80,7 +80,7 @@ public class GitHubWebHookListener implements HttpHandler {
         entity.setContentType("application/json");
         post.setEntity(entity);
         JsonObject json = WebUtil.fetchDataInJson(GitHubListener.acceptJSON(post, token)).getAsJsonObject();
-        int id = json.get("id").getAsInt();
+        int id = JsonUtil.getIntOrZero(json, "id");
         webHooks.put(repo, id);
         saveHooks();
     }
@@ -145,7 +145,7 @@ public class GitHubWebHookListener implements HttpHandler {
             String message = commit.get("message").getAsString().split("\n")[0];
             builder.append(message).append("\n");
             builder.append("  提交人: ").append(JsonUtil.getStringInPathOrNull(commit, "committer.name")).append("\n");
-            builder.append("  时间: ").append(commit.get("timestamp").getAsString()).append("\n");
+            builder.append("  时间: ").append(JsonUtil.getStringOrNull(commit, "timestamp")).append("\n");
             builder.append("  添加").append(commit.get("added").getAsJsonArray().size())
                     .append("文件, 删除").append(commit.get("removed").getAsJsonArray().size())
                     .append("文件, 修改").append(commit.get("modified").getAsJsonArray().size()).append("文件。\n");
@@ -165,7 +165,7 @@ public class GitHubWebHookListener implements HttpHandler {
     public String star(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
         builder.append(JsonUtil.getStringInPathOrNull(object, "sender.login"));
-        builder.append(Objects.equals(JsonUtil.getStringInPathOrNull(object, "action"), "created")
+        builder.append(Objects.equals(JsonUtil.getStringOrNull(object, "action"), "created")
                 ? "star了此仓库" : "取消star了此仓库");
         return builder.toString();
     }
@@ -173,7 +173,7 @@ public class GitHubWebHookListener implements HttpHandler {
     @ReflectTarget
     public String release(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
-        String action = JsonUtil.getStringInPathOrNull(object, "action");
+        String action = JsonUtil.getStringOrNull(object, "action");
         String name = JsonUtil.getStringInPathOrNull(object, "release.name");
         String tag = JsonUtil.getStringInPathOrNull(object, "release.tag_name");
         String body = JsonUtil.getStringInPathOrNull(object, "release.body");

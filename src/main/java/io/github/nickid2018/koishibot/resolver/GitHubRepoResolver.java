@@ -53,22 +53,20 @@ public class GitHubRepoResolver extends MessageResolver {
 
         builder.append("仓库名称: ").append(repo).append("\n");
         builder.append("拥有者: ").append(JsonUtil.getStringInPathOrNull(object, "owner.login")).append("\n");
-        builder.append("仓库地址: ").append(JsonUtil.getStringInPathOrNull(object, "html_url")).append("\n");
-        builder.append("SSH地址: ").append(JsonUtil.getStringInPathOrNull(object, "ssh_url")).append("\n");
-        builder.append("Watch: ").append(object.get("watchers").getAsInt()).append(" | ");
-        builder.append("Fork: ").append(object.get("forks").getAsInt()).append("\n");
+        builder.append("仓库地址: ").append(JsonUtil.getStringOrNull(object, "html_url")).append("\n");
+        builder.append("SSH地址: ").append(JsonUtil.getStringOrNull(object, "ssh_url")).append("\n");
+        builder.append("Watch: ").append(JsonUtil.getIntOrZero(object, "watchers")).append(" | ");
+        builder.append("Fork: ").append(JsonUtil.getIntOrZero(object, "forks")).append("\n");
 
-        String language = JsonUtil.getStringInPathOrNull(object, "language");
-        if (language != null)
-            builder.append("主要编写语言: ").append(language).append("\n");
+        JsonUtil.getString(object, "language").ifPresent(
+                language -> builder.append("主要编写语言: ").append(language).append("\n"));
 
         JsonElement element = object.get("license");
         if (element instanceof JsonObject)
-            builder.append("开源许可证: ").append(element.getAsJsonObject().get("name").getAsString()).append("\n");
+            builder.append("开源许可证: ").append(
+                    JsonUtil.getStringOrNull(element.getAsJsonObject(), "name")).append("\n");
 
-        String desc = JsonUtil.getStringInPathOrNull(object, "description");
-        if (desc != null)
-            builder.append(desc);
+        JsonUtil.getString(object, "description").ifPresent(builder::append);
 
         environment.getMessageSender().sendMessage(context, environment.newText(builder.toString().trim()));
     }
@@ -80,18 +78,18 @@ public class GitHubRepoResolver extends MessageResolver {
 
         StringBuilder builder = new StringBuilder();
         builder.append(repo).append(" #").append(issue).append("\n");
-        builder.append(JsonUtil.getStringInPathOrNull(object, "title")).append("\n");
+        builder.append(JsonUtil.getStringOrNull(object, "title")).append("\n");
         builder.append("创建者: ").append(JsonUtil.getStringInPathOrNull(object, "user.login")).append("\n");
-        builder.append("状态: ").append(JsonUtil.getStringInPathOrNull(object, "state")).append("\n");
+        builder.append("状态: ").append(JsonUtil.getStringOrNull(object, "state")).append("\n");
 
         JsonArray labels = object.getAsJsonArray("labels");
         List<String> labelList = new ArrayList<>();
         for (JsonElement element : labels)
-            labelList.add(element.getAsJsonObject().get("name").getAsString());
+            labelList.add(JsonUtil.getStringOrNull(element.getAsJsonObject(), "name"));
         builder.append("标签: ").append(String.join(", ", labelList)).append("\n");
 
         String[] strs = Objects.requireNonNull(
-                JsonUtil.getStringInPathOrNull(object, "body")).split("\n");
+                JsonUtil.getStringOrNull(object, "body")).split("\n");
         boolean skip = false;
         for (String str : strs)
             if (builder.length() < 800) {

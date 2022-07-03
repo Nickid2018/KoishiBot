@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.resolver;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.KoishiBotMain;
@@ -20,6 +21,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class BilibiliDataResolver extends MessageResolver implements JSONServiceResolver {
@@ -84,44 +86,45 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
     private void doEpisodeDisplay(String key, MessageContext contact, boolean isSSID, Environment environment) throws IOException {
         JsonObject articleData = WebUtil.fetchDataInJson(new HttpGet(
                 BILIBILI_EPISODE_API + (isSSID ? "?season_id=" : "?ep_id=") + key.substring(2))).getAsJsonObject();
-        int code = articleData.get("code").getAsInt();
+        int code = JsonUtil.getIntOrZero(articleData, "code");
         if (code != 0)
-            throw new IOException("API接口返回" + code + "(" + articleData.get("message").getAsString() + ")");
+            throw new IOException("API接口返回" + code + "(" + JsonUtil.getStringOrNull(articleData, "message") + ")");
 
         JsonObject data = articleData.getAsJsonObject("result");
         StringBuilder builder = new StringBuilder();
 
-        builder.append("剧集标题: ").append(data.get("title").getAsString()).append("\n");
+        builder.append("剧集标题: ").append(JsonUtil.getStringOrNull(data, "title")).append("\n");
 
         JsonObject publish = data.getAsJsonObject("publish");
-        boolean isStart = publish.get("is_started").getAsInt() == 1;
-        boolean isFinish = publish.get("is_finish").getAsInt() == 1;
+        boolean isStart = JsonUtil.getIntOrZero(publish, "is_started") == 1;
+        boolean isFinish = JsonUtil.getIntOrZero(publish, "is_finish") == 1;
         builder.append("状态: ");
         if (!isStart)
             builder.append("尚未发布");
         else {
-            builder.append("于 ").append(publish.get("pub_time").getAsString()).append(" 发布，");
+            builder.append("于 ").append(JsonUtil.getStringOrNull(publish, "pub_time")).append(" 发布，");
             if (isFinish)
-                builder.append("已完结，共").append(data.get("total").getAsInt()).append("集");
+                builder.append("已完结，共").append(JsonUtil.getIntOrZero(data, "total")).append("集");
             else
                 builder.append("未完结");
         }
         builder.append("\n");
 
-        builder.append("剧集类型: ").append(EPISODE_TYPE[data.get("type").getAsInt()]).append("\n");
+        builder.append("剧集类型: ").append(EPISODE_TYPE[JsonUtil.getIntOrZero(data, "type")]).append("\n");
 
         JsonObject stats = data.getAsJsonObject("stat");
-        builder.append("总播放量: ").append(stats.get("views").getAsInt()).append(" | ");
-        builder.append("总弹幕数: ").append(stats.get("danmakus").getAsInt()).append(" | ");
-        builder.append("总评论数: ").append(stats.get("reply").getAsInt()).append("\n");
-        builder.append("总点赞数: ").append(stats.get("likes").getAsInt()).append(" | ");
-        builder.append("总硬币数: ").append(stats.get("coins").getAsInt()).append(" | ");
-        builder.append("总收藏数: ").append(stats.get("favorites").getAsInt()).append(" | ");
-        builder.append("总分享数: ").append(stats.get("share").getAsInt()).append("\n");
+        builder.append("总播放量: ").append(JsonUtil.getIntOrZero(stats, "views")).append(" | ");
+        builder.append("总弹幕数: ").append(JsonUtil.getIntOrZero(stats, "danmakus")).append(" | ");
+        builder.append("总评论数: ").append(JsonUtil.getIntOrZero(stats, "reply")).append("\n");
+        builder.append("总点赞数: ").append(JsonUtil.getIntOrZero(stats, "likes")).append(" | ");
+        builder.append("总硬币数: ").append(JsonUtil.getIntOrZero(stats, "coins")).append(" | ");
+        builder.append("总收藏数: ").append(JsonUtil.getIntOrZero(stats, "favorites")).append(" | ");
+        builder.append("总分享数: ").append(JsonUtil.getIntOrZero(stats, "share")).append("\n");
 
-        builder.append("主条目URL: https://www.bilibili.com/bangumi/play/ss").append(data.get("season_id")).append("\n");
+        builder.append("主条目URL: https://www.bilibili.com/bangumi/play/ss")
+                .append(JsonUtil.getIntOrZero(data, "season_id")).append("\n");
 
-        BufferedReader reader = new BufferedReader(new StringReader(data.get("evaluate").getAsString()));
+        BufferedReader reader = new BufferedReader(new StringReader(JsonUtil.getStringOrElse(data, "evaluate", "")));
         String line;
         while ((line = reader.readLine()) != null && builder.length() <= 400) {
             line = line.trim();
@@ -132,12 +135,12 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
             builder.append("(简介过长截断)");
 
         ImageMessage image = environment.newImage();
-        try (InputStream stream = new URL(data.get("cover").getAsString()).openStream()) {
+        try (InputStream stream = new URL(JsonUtil.getStringOrNull(data, "cover")).openStream()) {
             image.fillImage(stream);
         }
 
         environment.getMessageSender().sendMessageRecallable(contact, environment.newChain(
-                environment.newText(builder.toString()),
+                environment.newText(builder.toString().trim()),
                 image
         ));
     }
@@ -145,37 +148,32 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
     private void doAudioDisplay(String key, MessageContext contact, Environment environment) throws IOException {
         JsonObject articleData = WebUtil.fetchDataInJson(new HttpGet(
                 BILIBILI_AUDIO_API + "info?sid=" + key.substring(2))).getAsJsonObject();
-        int code = articleData.get("code").getAsInt();
+        int code = JsonUtil.getIntOrZero(articleData, "code");
         if (code != 0)
-            throw new IOException("API接口返回" + code + "(" + articleData.get("msg").getAsString() + ")");
+            throw new IOException("API接口返回" + code + "(" + JsonUtil.getStringOrNull(articleData, "msg") + ")");
 
         JsonObject data = articleData.getAsJsonObject("data");
         StringBuilder builder = new StringBuilder();
 
-        builder.append("音频标题: ").append(data.get("title").getAsString()).append("\n");
-        builder.append("作者: ").append(data.get("author").getAsString()).append("\n");
-        builder.append("UP主: ").append(data.get("uname").getAsString()).append("\n");
+        builder.append("音频标题: ").append(JsonUtil.getStringOrNull(data, "title")).append("\n");
+        builder.append("作者: ").append(JsonUtil.getStringOrNull(data, "author")).append("\n");
+        builder.append("UP主: ").append(JsonUtil.getStringOrNull(data, "uname")).append("\n");
 
-        builder.append("音频长度: ").append(formatTime(data.get("duration").getAsInt())).append("\n");
+        builder.append("音频长度: ").append(formatTime(JsonUtil.getIntOrZero(data, "duration"))).append("\n");
 
-        long publishTime = data.get("passtime").getAsInt() * 1000L;
+        long publishTime = JsonUtil.getIntOrZero(data, "passtime") * 1000L;
         Date date = new Date(publishTime);
         builder.append("发布时间: ").append(String.format("%tY/%tm/%td %tT", date, date, date, date)).append("\n");
 
-        JsonElement bvid = data.get("bvid");
-        if (bvid.isJsonPrimitive()) {
-            String bvidS = bvid.getAsString();
-            if (!bvidS.isEmpty())
-                builder.append("关联视频: ").append(bvidS).append("\n");
-        }
+        JsonUtil.getString(data, "bvid").ifPresent(bvid -> builder.append("关联视频: ").append(bvid).append("\n"));
 
         ImageMessage image = environment.newImage();
-        try (InputStream stream = new URL(data.get("cover").getAsString()).openStream()) {
+        try (InputStream stream = new URL(JsonUtil.getStringOrNull(data, "cover")).openStream()) {
             image.fillImage(stream);
         }
 
         environment.getMessageSender().sendMessageRecallable(contact, environment.newChain(
-                environment.newText(builder.toString()),
+                environment.newText(builder.toString().trim()),
                 image
         ));
     }
@@ -183,34 +181,34 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
     private void doArticleDisplay(String key, MessageContext contact, Environment environment) throws IOException {
         JsonObject articleData = WebUtil.fetchDataInJson(new HttpGet(
                 BILIBILI_ARTICLE_API + "viewinfo?id=" + key.substring(2))).getAsJsonObject();
-        int code = articleData.get("code").getAsInt();
+        int code = JsonUtil.getIntOrZero(articleData, "code");
         if (code != 0)
-            throw new IOException("API接口返回" + code + "(" + articleData.get("message").getAsString() + ")");
+            throw new IOException("API接口返回" + code + "(" + JsonUtil.getStringOrNull(articleData, "message") + ")");
 
         JsonObject data = articleData.getAsJsonObject("data");
         StringBuilder builder = new StringBuilder();
 
-        builder.append("专栏标题: ").append(data.get("title").getAsString()).append("\n");
-        builder.append("作者: ").append(data.get("author_name").getAsString()).append("\n");
+        builder.append("专栏标题: ").append(JsonUtil.getStringOrNull(data, "title")).append("\n");
+        builder.append("作者: ").append(JsonUtil.getStringOrNull(data, "author_name")).append("\n");
 
         JsonObject stats = data.getAsJsonObject("stats");
-        builder.append("阅读数: ").append(stats.get("view").getAsInt()).append(" | ");
-        builder.append("评论数: ").append(stats.get("reply").getAsInt()).append("\n");
-        builder.append("点赞数: ").append(stats.get("like").getAsInt()).append(" | ");
-        builder.append("硬币数: ").append(stats.get("coin").getAsInt()).append(" | ");
-        builder.append("收藏数: ").append(stats.get("favorite").getAsInt()).append("\n");
-        builder.append("动态转发数: ").append(stats.get("dynamic").getAsInt()).append(" | ");
-        builder.append("分享数: ").append(stats.get("share").getAsInt()).append("\n");
+        builder.append("阅读数: ").append(JsonUtil.getIntOrZero(stats, "view")).append(" | ");
+        builder.append("评论数: ").append(JsonUtil.getIntOrZero(stats, "reply")).append("\n");
+        builder.append("点赞数: ").append(JsonUtil.getIntOrZero(stats, "like")).append(" | ");
+        builder.append("硬币数: ").append(JsonUtil.getIntOrZero(stats, "coin")).append(" | ");
+        builder.append("收藏数: ").append(JsonUtil.getIntOrZero(stats, "favorite")).append("\n");
+        builder.append("动态转发数: ").append(JsonUtil.getIntOrZero(stats, "dynamic")).append(" | ");
+        builder.append("分享数: ").append(JsonUtil.getIntOrZero(stats, "share")).append("\n");
 
         builder.append("主条目URL: https://www.bilibili.com/read/").append(key);
 
         ImageMessage image = environment.newImage();
-        try (InputStream stream = new URL(data.getAsJsonArray("origin_image_urls").get(0).getAsString()).openStream()) {
+        try (InputStream stream = new URL(JsonUtil.getStringInPathOrNull(data, "origin_image_urls.0")).openStream()) {
             image.fillImage(stream);
         }
 
         environment.getMessageSender().sendMessageRecallable(contact, environment.newChain(
-                environment.newText(builder.toString()),
+                environment.newText(builder.toString().trim()),
                 image
         ));
     }
@@ -225,27 +223,29 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         } else
             videoData = WebUtil.fetchDataInJson(new HttpGet(
                     BILIBILI_VIDEO_API + "view?bvid=" + key)).getAsJsonObject();
-        int code = videoData.get("code").getAsInt();
+
+        int code = JsonUtil.getIntOrZero(videoData, "code");
         if (code != 0)
-            throw new IOException("API接口返回" + code + "(" + videoData.get("message").getAsString() + ")");
+            throw new IOException("API接口返回" + code + "(" + JsonUtil.getStringOrNull(videoData, "message") + ")");
 
         JsonObject data = videoData.getAsJsonObject("data");
         StringBuilder builder = new StringBuilder();
-        builder.append("视频ID: ").append(data.get("bvid").getAsString());
+        builder.append("视频ID: ").append(JsonUtil.getStringOrNull(videoData, "bvid"));
         if (useAVID)
             builder.append(" (已从").append(key).append("自动转换)");
         builder.append("\n");
 
-        builder.append("视频标题: ").append(data.get("title").getAsString()).append("\n");
-        builder.append("视频类型: ").append(data.get("copyright").getAsInt() == 1 ? "自制" : "转载").append("\n");
+        builder.append("视频标题: ").append(JsonUtil.getStringOrNull(videoData, "title")).append("\n");
+        builder.append("视频类型: ").append(JsonUtil.getIntOrZero(videoData, "copyright") == 1 ? "自制" : "转载").append("\n");
 
-        if (data.has("staff")) {
+        Optional<JsonArray> staffArray = JsonUtil.getData(data, "staff", JsonArray.class);
+        if (staffArray.isPresent()) {
             builder.append("制作团队: ");
             List<String> staffList = new ArrayList<>();
-            for (JsonElement element : data.getAsJsonArray("staff")) {
+            for (JsonElement element : staffArray.get()) {
                 JsonObject staff = element.getAsJsonObject();
-                String name = staff.get("name").getAsString();
-                String title = staff.get("title").getAsString();
+                String name = JsonUtil.getStringOrNull(staff, "name");
+                String title = JsonUtil.getStringOrNull(staff, "title");
                 staffList.add(name + "(" + title + ")");
             }
             builder.append(String.join(", ", staffList));
@@ -254,27 +254,28 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         builder.append("\n");
 
         JsonObject stats = data.getAsJsonObject("stat");
-        builder.append("播放量: ").append(stats.get("view").getAsInt()).append(" | ");
-        builder.append("弹幕数: ").append(stats.get("danmaku").getAsInt()).append(" | ");
-        builder.append("评论数: ").append(stats.get("reply").getAsInt()).append("\n");
-        builder.append("点赞数: ").append(stats.get("like").getAsInt()).append(" | ");
-        builder.append("硬币数: ").append(stats.get("coin").getAsInt()).append(" | ");
-        builder.append("收藏数: ").append(stats.get("favorite").getAsInt()).append(" | ");
-        builder.append("分享数: ").append(stats.get("share").getAsInt()).append("\n");
+        builder.append("播放量: ").append(JsonUtil.getIntOrZero(stats, "view")).append(" | ");
+        builder.append("弹幕数: ").append(JsonUtil.getIntOrZero(stats, "danmaku")).append(" | ");
+        builder.append("评论数: ").append(JsonUtil.getIntOrZero(stats, "reply")).append("\n");
+        builder.append("点赞数: ").append(JsonUtil.getIntOrZero(stats, "like")).append(" | ");
+        builder.append("硬币数: ").append(JsonUtil.getIntOrZero(stats, "coin")).append(" | ");
+        builder.append("收藏数: ").append(JsonUtil.getIntOrZero(stats, "favorite")).append(" | ");
+        builder.append("分享数: ").append(JsonUtil.getIntOrZero(stats, "share")).append("\n");
 
-        long publishTime = data.get("pubdate").getAsInt() * 1000L;
+        long publishTime = JsonUtil.getIntOrZero(data, "pubdate") * 1000L;
         Date date = new Date(publishTime);
         builder.append("发布时间: ").append(String.format("%tY/%tm/%td %tT", date, date, date, date)).append("\n");
 
-        builder.append("视频总长度: ").append(formatTime(data.get("duration").getAsInt()));
-        int videos = data.get("videos").getAsInt();
+        builder.append("视频总长度: ").append(formatTime(JsonUtil.getIntOrZero(data, "duration")));
+        int videos = JsonUtil.getIntOrZero(data, "videos");
         if (videos > 1)
             builder.append("(共").append(videos).append("个视频)");
         builder.append("\n");
 
-        builder.append("主条目URL: https://www.bilibili.com/video/").append(data.get("bvid").getAsString()).append("\n");
+        builder.append("主条目URL: https://www.bilibili.com/video/").append(
+                JsonUtil.getStringOrNull(data, "bvid")).append("\n");
 
-        BufferedReader reader = new BufferedReader(new StringReader(data.get("desc").getAsString()));
+        BufferedReader reader = new BufferedReader(new StringReader(JsonUtil.getStringOrNull(data, "desc")));
         String line;
         while ((line = reader.readLine()) != null && builder.length() <= 400) {
             line = line.trim();
@@ -285,12 +286,12 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
             builder.append("(简介过长截断)");
 
         ImageMessage image = environment.newImage();
-        try (InputStream stream = new URL(data.get("pic").getAsString()).openStream()) {
+        try (InputStream stream = new URL(JsonUtil.getStringOrNull(data, "pic")).openStream()) {
             image.fillImage(stream);
         }
 
         environment.getMessageSender().sendMessageRecallable(contact, environment.newChain(
-                environment.newText(builder.toString()),
+                environment.newText(builder.toString().trim()),
                 image
         ));
     }

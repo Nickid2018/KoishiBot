@@ -6,8 +6,20 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 public class JsonUtil {
+
+    @SuppressWarnings("unchecked")
+    public static <T extends JsonElement> Optional<T> getData(JsonObject root, String name, Class<T> type) {
+        JsonElement element = root.get(name);
+        if (element == null)
+            return Optional.empty();
+        if (type.isInstance(element))
+            return Optional.of((T) element);
+        else
+            return Optional.empty();
+    }
 
     @SuppressWarnings("unchecked")
     public static <T extends JsonElement> Optional<T> getDataInPath(JsonObject root, String path, Class<T> type) {
@@ -46,13 +58,40 @@ public class JsonUtil {
         return type.isInstance(get) ? Optional.of((T) get) : Optional.empty();
     }
 
-    public static String getStringInPathOrNull(JsonObject root, String path) {
-        return getDataInPath(root, path, JsonPrimitive.class)
-                .map(JsonPrimitive::getAsString).orElse(null);
+    public static Optional<String> getString(JsonObject root, String path) {
+        return getData(root, path, JsonPrimitive.class).map(JsonPrimitive::getAsString);
     }
 
-    public static String getStringInPathOrElse(JsonObject root, String path, String el) {
-        return getDataInPath(root, path, JsonPrimitive.class)
-                .map(JsonPrimitive::getAsString).orElse(el);
+    public static String getStringOrNull(JsonObject root, String path) {
+        return getString(root, path).orElse(null);
+    }
+
+    public static String getStringOrElse(JsonObject root, String path, String other) {
+        return getString(root, path).orElse(other);
+    }
+
+    public static OptionalInt getInt(JsonObject root, String path) {
+        return getData(root, path, JsonPrimitive.class)
+                .map(JsonPrimitive::getAsInt).map(OptionalInt::of).orElse(OptionalInt.empty());
+    }
+
+    public static int getIntOrZero(JsonObject root, String path) {
+        return getInt(root, path).orElse(0);
+    }
+
+    public static int getIntOrElse(JsonObject root, String path, int other) {
+        return getInt(root, path).orElse(other);
+    }
+
+    public static Optional<String> getStringInPath(JsonObject root, String path) {
+        return getDataInPath(root, path, JsonPrimitive.class).map(JsonPrimitive::getAsString);
+    }
+
+    public static String getStringInPathOrNull(JsonObject root, String path) {
+        return getStringInPath(root, path).orElse(null);
+    }
+
+    public static String getStringInPathOrElse(JsonObject root, String path, String other) {
+        return getStringInPath(root, path).orElse(other);
     }
 }

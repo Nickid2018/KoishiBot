@@ -87,14 +87,16 @@ public class WikiInfo {
                 }
             }
 
-            JsonArray extensions = object.getAsJsonObject("query").getAsJsonArray("extensions");
-            for (JsonElement element : extensions) {
-                String name = element.getAsJsonObject().get("name").getAsString();
-                if (name.equals("TextExtracts")) {
-                    useTextExtracts = true;
-                    break;
+            JsonUtil.getDataInPath(object, "query.extensions", JsonArray.class).ifPresent(extensions -> {
+                for (JsonElement element : extensions) {
+                    String name = element.getAsJsonObject().get("name").getAsString();
+                    if (name.equals("TextExtracts")) {
+                        useTextExtracts = true;
+                        break;
+                    }
                 }
-            }
+            });
+
             String server = JsonUtil.getStringInPathOrNull(object, "query.general.server");
             String realURL;
             if (server != null && server.startsWith("/"))
@@ -106,17 +108,18 @@ public class WikiInfo {
             baseURI = "https://" + new URL(articleURL).getHost();
 
             if (!getInterWikiDataFromPage()) {
-                JsonArray interwikiMap = object.getAsJsonObject("query").getAsJsonArray("interwikimap");
-                for (JsonElement element : interwikiMap) {
-                    JsonObject obj = element.getAsJsonObject();
-                    String url = obj.get("url").getAsString();
-                    String prefix = obj.get("prefix").getAsString();
-                    interWikiMap.put(prefix, url);
-                    WikiInfo info = new WikiInfo(url.contains("?") ?
-                            url.substring(0, url.lastIndexOf('?') + 1) : url + "?");
-                    STORED_WIKI_INFO.put(url, info);
-                    STORED_INTERWIKI_SOURCE_URL.put(info, url);
-                }
+                JsonUtil.getDataInPath(object, "query.interwikiMap", JsonArray.class).ifPresent(interwikiMap -> {
+                    for (JsonElement element : interwikiMap) {
+                        JsonObject obj = element.getAsJsonObject();
+                        String url = JsonUtil.getStringOrNull(obj, "url");
+                        String prefix = JsonUtil.getStringOrNull(obj, "prefix");
+                        interWikiMap.put(prefix, url);
+                        WikiInfo info = new WikiInfo(url.contains("?") ?
+                                url.substring(0, url.lastIndexOf('?') + 1) : url + "?");
+                        STORED_WIKI_INFO.put(url, info);
+                        STORED_INTERWIKI_SOURCE_URL.put(info, url);
+                    }
+                });
             }
 
             available = true;
@@ -234,15 +237,15 @@ public class WikiInfo {
             if (object.has("imageinfo")) {
                 JsonArray array = object.getAsJsonArray("imageinfo");
                 if (array.size() > 0) {
-                    String type = array.get(0).getAsJsonObject().get("descriptionurl").getAsString();
+                    String type = JsonUtil.getStringOrNull(array.get(0).getAsJsonObject(), "descriptionurl");
                     String suffix = type.substring(Math.min(type.length() - 1, type.lastIndexOf('.') + 1))
                             .toLowerCase(Locale.ROOT);
                     if (SUPPORTED_IMAGE.contains(suffix) || NEED_TRANSFORM_IMAGE.contains(suffix))
-                        pageInfo.imageStream = new URL(array.get(0).getAsJsonObject().get("url").getAsString()).openStream();
+                        pageInfo.imageStream = new URL(JsonUtil.getStringOrNull(array.get(0).getAsJsonObject(), "url")).openStream();
                     else if (NEED_TRANSFORM_AUDIO.contains(suffix)) {
                         pageInfo.shortDescription = "音频信息，将分割后发送";
                         pageInfo.audioFiles = KoishiBotMain.INSTANCE.executor.submit(() -> AudioTransform.transform(
-                                suffix, new URL(array.get(0).getAsJsonObject().get("url").getAsString())));
+                                suffix, new URL(JsonUtil.getStringOrNull(array.get(0).getAsJsonObject(), "url"))));
                     }
                 }
             }
@@ -289,9 +292,9 @@ public class WikiInfo {
         if (entry instanceof JsonArray && info.title != null) {
             for (JsonElement element : (JsonArray) entry) {
                 JsonObject object = element.getAsJsonObject();
-                String from = object.get("from").getAsString();
+                String from = JsonUtil.getStringOrNull(object, "from");
                 if (from.equals(info.title)) {
-                    String to = element.getAsJsonObject().get("to").getAsString();
+                    String to = JsonUtil.getStringOrNull(object, "to");
                     if (info.titlePast == null)
                         info.titlePast = info.title;
                     info.title = to;

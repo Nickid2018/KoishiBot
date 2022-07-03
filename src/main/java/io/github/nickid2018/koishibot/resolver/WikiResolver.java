@@ -99,7 +99,7 @@ public class WikiResolver extends MessageResolver {
             boolean shouldHide = false;
             if (page.url != null)
                 for (String prefix : Settings.MIRROR.values())
-                   if (page.url.contains(prefix) && !prefix.contains("moegirl")) {
+                   if (page.url.contains(prefix)) {
                         shouldHide = true;
                         break;
                     }
