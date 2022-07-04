@@ -230,13 +230,13 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
 
         JsonObject data = videoData.getAsJsonObject("data");
         StringBuilder builder = new StringBuilder();
-        builder.append("视频ID: ").append(JsonUtil.getStringOrNull(videoData, "bvid"));
+        builder.append("视频ID: ").append(JsonUtil.getStringOrNull(data, "bvid"));
         if (useAVID)
             builder.append(" (已从").append(key).append("自动转换)");
         builder.append("\n");
 
-        builder.append("视频标题: ").append(JsonUtil.getStringOrNull(videoData, "title")).append("\n");
-        builder.append("视频类型: ").append(JsonUtil.getIntOrZero(videoData, "copyright") == 1 ? "自制" : "转载").append("\n");
+        builder.append("视频标题: ").append(JsonUtil.getStringOrNull(data, "title")).append("\n");
+        builder.append("视频类型: ").append(JsonUtil.getIntOrZero(data, "copyright") == 1 ? "自制" : "转载").append("\n");
 
         Optional<JsonArray> staffArray = JsonUtil.getData(data, "staff", JsonArray.class);
         if (staffArray.isPresent()) {
