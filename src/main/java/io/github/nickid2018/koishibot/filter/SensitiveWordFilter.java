@@ -14,7 +14,7 @@ public final class SensitiveWordFilter {
     private static final List<SingleChar> SINGLE_CHAR_LIST = new ArrayList<>();
     private final static char REPLACE_CHARACTER = '*';
     private final static char[] SKIP_CHARACTERS = new char[] {
-            '!', '*', '-', '+', '_', '=', ',', '.', ' '
+            '!', '*', '-', '+', '_', '=', ',', '.'
     };
 
     public static String filter(String text, MutableBoolean filtered) {
