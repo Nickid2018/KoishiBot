@@ -29,6 +29,7 @@ public class HelpResolver extends MessageResolver {
         HELP_DATA.put("bugtracker", new LazyLoadValue<>(loadMessage("bugtracker")));
         HELP_DATA.put("info", new LazyLoadValue<>(loadMessage("info")));
         HELP_DATA.put("modrinth", new LazyLoadValue<>(loadMessage("modrinth")));
+        HELP_DATA.put("curseforge", new LazyLoadValue<>(loadMessage("curseforge")));
         HELP_DATA.put("bilibili", new LazyLoadValue<>(loadMessage("bilibili")));
         HELP_DATA.put("wiki", new LazyLoadValue<>(loadMessage("wiki")));
         HELP_DATA.put("latex", new LazyLoadValue<>(loadMessage("latex")));
