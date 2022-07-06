@@ -68,6 +68,9 @@ public class FormatTransformer {
 
     public static InputStream transformImageToPNG(InputStream input, String format) throws Exception {
         File inputImage = TempFileSystem.createTmpFile("image", format);
+        try (FileOutputStream fos = new FileOutputStream(inputImage)) {
+            IOUtils.copy(input, fos);
+        }
         File output = TempFileSystem.createTmpFile("imageO", "png");
         executeCommand(null, Settings.FFMPEG_LOCATION,
                 "-i", inputImage.getAbsolutePath(), output.getAbsolutePath());
