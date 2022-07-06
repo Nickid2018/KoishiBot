@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -139,7 +140,7 @@ public class WikiInfo {
                 pageInfo.prefix = prefix;
                 pageInfo.title = title;
                 pageInfo.url = STORED_INTERWIKI_SOURCE_URL.get(this)
-                        .replace("$1", title);
+                        .replace("$1", URLEncoder.encode(title, "UTF-8").replace("%2F", "/"));
                 pageInfo.shortDescription = "目标可能不是一个MediaWiki，已自动转换为网址链接";
                 return pageInfo;
             } else
