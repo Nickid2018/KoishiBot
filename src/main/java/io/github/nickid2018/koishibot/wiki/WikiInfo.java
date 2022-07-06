@@ -241,12 +241,15 @@ public class WikiInfo {
                     String type = JsonUtil.getStringOrNull(array.get(0).getAsJsonObject(), "descriptionurl");
                     String suffix = type.substring(Math.min(type.length() - 1, type.lastIndexOf('.') + 1))
                             .toLowerCase(Locale.ROOT);
-                    if (SUPPORTED_IMAGE.contains(suffix) || NEED_TRANSFORM_IMAGE.contains(suffix))
-                        pageInfo.imageStream = new URL(JsonUtil.getStringOrNull(array.get(0).getAsJsonObject(), "url")).openStream();
+                    URL link = new URL(JsonUtil.getStringOrNull(array.get(0).getAsJsonObject(), "url"));
+                    if (SUPPORTED_IMAGE.contains(suffix))
+                        pageInfo.imageStream = link.openStream();
+                    else if (NEED_TRANSFORM_IMAGE.contains(suffix))
+                        pageInfo.imageStream = FormatTransformer.transformImageToPNG(link.openStream(), suffix);
                     else if (NEED_TRANSFORM_AUDIO.contains(suffix)) {
                         pageInfo.shortDescription = "音频信息，将分割后发送";
-                        pageInfo.audioFiles = KoishiBotMain.INSTANCE.executor.submit(() -> AudioTransform.transform(
-                                suffix, new URL(JsonUtil.getStringOrNull(array.get(0).getAsJsonObject(), "url"))));
+                        pageInfo.audioFiles = KoishiBotMain.INSTANCE.executor.submit(() -> FormatTransformer.transformWebAudioToSilks(
+                                suffix, link));
                     }
                 }
             }

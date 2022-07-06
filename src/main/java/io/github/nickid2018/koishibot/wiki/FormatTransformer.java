@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.wiki;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.URL;
@@ -11,9 +12,9 @@ import java.util.List;
 
 // CAN'T BE TESTED IN PRODUCTION ENVIRONMENT(aka IDE)!
 // PROCESS CAN'T RUN WITHOUT AN ACTUAL CONSOLE, EVEN THOUGH IDE CONSOLES!
-public class AudioTransform {
+public class FormatTransformer {
 
-    public static File[] transform(String suffix, URL source) throws Exception {
+    public static File[] transformWebAudioToSilks(String suffix, URL source) throws Exception {
         File sourceFile = TempFileSystem.createTmpFileAndCreate("as", suffix);
         IOUtils.copy(source, sourceFile);
         return transformAsSilk(sourceFile);
@@ -50,7 +51,6 @@ public class AudioTransform {
                 sourceFile.getAbsolutePath(), "-ss", offset + "", "-f", "s16le", "-ar", "24000", "-ac", "1",
                 "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
         silks.add(transformPCMtoSILK(pcm));
-        sourceFile.delete();
         TempFileSystem.unlockFileAndDelete(sourceFile);
 
         return silks.toArray(new File[0]);
@@ -61,10 +61,18 @@ public class AudioTransform {
         executeCommand(null, Settings.ENCODER_LOCATION,
                 sourceFile.getAbsolutePath(), silk.getAbsolutePath(),
                 "-Fs_API", "24000", "-tencent");
-        sourceFile.delete();
         TempFileSystem.unlockFileAndDelete(sourceFile);
 
         return silk;
+    }
+
+    public static InputStream transformImageToPNG(InputStream input, String format) throws Exception {
+        File inputImage = TempFileSystem.createTmpFile("image", format);
+        File output = TempFileSystem.createTmpFile("imageO", "png");
+        executeCommand(null, Settings.FFMPEG_LOCATION,
+                "-i", inputImage.getAbsolutePath(), output.getAbsolutePath());
+        TempFileSystem.unlockFileAndDelete(inputImage);
+        return new DeleteStream(output);
     }
 
     public static void executeCommand(OutputStream output, String... commandStr) throws Exception {
@@ -84,5 +92,21 @@ public class AudioTransform {
         while ((length = in.read(buffer, 0, 1024)) >= 0)
             if (output != null)
                 output.write(buffer, 0, length);
+    }
+
+    private static class DeleteStream extends FileInputStream {
+
+        private final File source;
+
+        public DeleteStream(@NotNull File file) throws FileNotFoundException {
+            super(file);
+            source = file;
+        }
+
+        @Override
+        public void close() throws IOException {
+            super.close();
+            TempFileSystem.unlockFileAndDelete(source);
+        }
     }
 }
