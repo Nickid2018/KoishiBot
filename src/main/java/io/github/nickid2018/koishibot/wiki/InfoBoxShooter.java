@@ -1,8 +1,10 @@
 package io.github.nickid2018.koishibot.wiki;
 
+import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,6 +13,8 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.HasFullPageScreenshot;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -28,6 +32,8 @@ import java.util.concurrent.Future;
 
 public class InfoBoxShooter {
 
+    public static final Logger INFOBOX_LOGGER = LoggerFactory.getLogger("Wiki Infobox");
+
     private static WebDriver driver;
     private static ExecutorService executor;
 
@@ -37,7 +43,10 @@ public class InfoBoxShooter {
         firefoxOptions.addArguments("--no-sandbox");
         driver = new FirefoxDriver(firefoxOptions);
         driver.manage().window().setSize(new Dimension(0, 0));
-        executor = Executors.newSingleThreadExecutor();
+        executor = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().uncaughtExceptionHandler(
+                (t, e) -> ErrorRecord.enqueueError("wiki.infoboxshoot", e)
+        ).daemon(true).build());
+        INFOBOX_LOGGER.info("Infobox Shooter initialized.");
     }
 
     public static final String[] SUPPORT_INFOBOX = new String[] {
@@ -75,9 +84,10 @@ public class InfoBoxShooter {
         }
 
         if (element == null) {
-            System.out.println("URL " + url + " has no infobox.");
+            INFOBOX_LOGGER.info("URL {} has no infobox.", url);
             return null;
-        }
+        } else
+            INFOBOX_LOGGER.info("URL {} has an infobox, element class is {}", url, className);
 
         while (!element.equals(doc.body())) {
             Element parent = element.parent();
@@ -132,5 +142,6 @@ public class InfoBoxShooter {
             executor.shutdownNow();
         if (driver != null)
             driver.quit();
+        INFOBOX_LOGGER.info("Infobox Shooter closed.");
     }
 }

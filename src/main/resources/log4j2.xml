@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Appenders>
+		<Console name="SysOut" target="SYSTEM_OUT">
+			<PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg%n" />
+			<ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY" />
+		</Console>
+		<RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg%n" />
+			<ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<OnStartupTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="20 MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="50" />
+		</RollingRandomAccessFile>
+	</Appenders>
+	<Loggers>
+		<Root level="DEBUG">
+			<AppenderRef ref="SysOut"/>
+			<AppenderRef ref="File"/>
+		</Root>
+	</Loggers>
+</Configuration>

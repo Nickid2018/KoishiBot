@@ -11,6 +11,8 @@ import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.utils.BotConfiguration;
+import net.mamoe.mirai.utils.LoggerAdapters;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
@@ -26,6 +28,8 @@ public class QQEnvironment implements Environment {
             setHeartbeatStrategy(HeartbeatStrategy.STAT_HB);
             setWorkingDir(new File("qq"));
             fileBasedDeviceInfo();
+            setBotLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger("Mirai Bot")));
+            setNetworkLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger("Mirai Net")));
         }});
         bot.login();
         publisher = new QQMessagePublisher(this);

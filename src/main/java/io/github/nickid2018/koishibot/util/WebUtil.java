@@ -28,6 +28,8 @@ import java.util.*;
 
 public class WebUtil {
 
+    public static final Logger WEB_LOGGER = LoggerFactory.getLogger("Web");
+
     public static final Set<String> SUPPORTED_IMAGE = new HashSet<>(
             Arrays.asList("jpg", "jpeg", "png", "bmp", "gif")
     );
@@ -39,7 +41,6 @@ public class WebUtil {
     };
 
     private static final Remark REMARK;
-    private static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot-Web");
     private static final Random UA_RANDOM = new Random();
 
     public static String chooseRandomUA() {
@@ -54,16 +55,19 @@ public class WebUtil {
         return fetchDataInJson(post, UA, true);
     }
 
-    public static JsonElement fetchDataInJson(HttpUriRequest post, String UA, boolean check) throws IOException {
+    public static JsonElement fetchDataInJson(HttpUriRequest request, String UA, boolean check) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableCookieManagement()
                 .setUserAgent(UA).build();
         CloseableHttpResponse httpResponse = null;
+        String json = null;
         try {
-            httpResponse = httpClient.execute(post);
+            httpResponse = httpClient.execute(request);
             int status = httpResponse.getStatusLine().getStatusCode();
-            if (status / 100 != 2)
+            if (status / 100 != 2) {
+                WEB_LOGGER.debug("Incorrect return code in requesting {}: {}", request.getURI(), status);
                 throw new ErrorCodeException(status);
+            }
             if (check) {
                 Header[] headers = httpResponse.getHeaders("Content-Type");
                 if (headers.length > 0 && headers[0] != null && !headers[0].getValue()
@@ -71,35 +75,41 @@ public class WebUtil {
                     throw new IOException("Return a non-JSON Content.");
             }
             HttpEntity httpEntity = httpResponse.getEntity();
-            String json = EntityUtils.toString(httpEntity, "UTF-8");
+            json = EntityUtils.toString(httpEntity, "UTF-8");
             EntityUtils.consume(httpEntity);
             return JsonParser.parseString(json);
+        } catch (JsonSyntaxException jse) {
+            if (json != null)
+                WEB_LOGGER.debug("Incorrect JSON data in requesting {}: {}", request.getURI(), json);
+            throw jse;
         } finally {
             try {
                 if (httpResponse != null)
                     httpResponse.close();
             } catch (IOException e) {
-                LOGGER.error("## release resource error ##" + e);
+                WEB_LOGGER.error("## release resource error ##" + e);
             }
         }
     }
 
-    public static void sendReturnNoContent(HttpUriRequest post) throws IOException {
+    public static void sendReturnNoContent(HttpUriRequest request) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableCookieManagement()
                 .setUserAgent(chooseRandomUA()).build();
         CloseableHttpResponse httpResponse = null;
         try {
-            httpResponse = httpClient.execute(post);
+            httpResponse = httpClient.execute(request);
             int status = httpResponse.getStatusLine().getStatusCode();
-            if (status != 204)
+            if (status != 204) {
+                WEB_LOGGER.debug("Incorrect return code in requesting {}: {}", request.getURI(), status);
                 throw new ErrorCodeException(status);
+            }
         } finally {
             try {
                 if (httpResponse != null)
                     httpResponse.close();
             } catch (IOException e) {
-                LOGGER.error("## release resource error ##" + e);
+                WEB_LOGGER.error("## release resource error ##" + e);
             }
         }
     }
@@ -127,7 +137,7 @@ public class WebUtil {
                 if (httpResponse != null)
                     httpResponse.close();
             } catch (IOException e) {
-                LOGGER.error("## release resource error ##" + e);
+                WEB_LOGGER.error("## release resource error ##" + e);
             }
         }
     }
@@ -147,7 +157,7 @@ public class WebUtil {
                 if (httpResponse != null)
                     httpResponse.close();
             } catch (IOException e) {
-                LOGGER.error("## release resource error ##" + e);
+                WEB_LOGGER.error("## release resource error ##" + e);
             }
         }
     }

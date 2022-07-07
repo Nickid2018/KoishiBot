@@ -1,11 +1,16 @@
 package io.github.nickid2018.koishibot.core;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
 public class TempFileSystem {
+
+    public static final Logger TEMP_LOGGER = LoggerFactory.getLogger("Temp File System");
 
     private static final Set<File> FILES_NOT_DELETE = Collections.synchronizedSet(new HashSet<>());
     private static final Map<String, Map<String, File>> BUFFERED = Collections.synchronizedMap(new HashMap<>());
@@ -23,6 +28,7 @@ public class TempFileSystem {
                     Stream.of(Objects.requireNonNull(TEMP_DIR.listFiles())).filter(
                             file -> !FILES_NOT_DELETE.contains(file)
                     ).forEach(File::delete);
+                    TEMP_LOGGER.info("Ran scheduled temporary files deleting.");
                 } catch (InterruptedException ignored) {
                 }
             }

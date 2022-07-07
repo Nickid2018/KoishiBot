@@ -1,6 +1,8 @@
 package io.github.nickid2018.koishibot.filter;
 
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -10,6 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public final class SensitiveWordFilter {
+
+    public static final Logger SENSITIVE_LOGGER = LoggerFactory.getLogger("Sensitive Filter");
 
     private static final List<SingleChar> SINGLE_CHAR_LIST = new ArrayList<>();
     private final static char REPLACE_CHARACTER = '*';
@@ -104,7 +108,7 @@ public final class SensitiveWordFilter {
             }
         }
         sort(SINGLE_CHAR_LIST);
-        System.out.printf("Sensitive Library loaded with %d words.%n", SINGLE_CHAR_LIST.size());
+        SENSITIVE_LOGGER.info("Sensitive Library loaded with {} words.", SINGLE_CHAR_LIST.size());
     }
 
     private static void sort(List<SingleChar> singleChars) {

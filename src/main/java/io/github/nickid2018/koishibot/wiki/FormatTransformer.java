@@ -4,6 +4,8 @@ import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
@@ -13,6 +15,8 @@ import java.util.List;
 // CAN'T BE TESTED IN PRODUCTION ENVIRONMENT(aka IDE)!
 // PROCESS CAN'T RUN WITHOUT AN ACTUAL CONSOLE, EVEN THOUGH IDE CONSOLES!
 public class FormatTransformer {
+
+    public static final Logger TRANSFORMER_LOGGER = LoggerFactory.getLogger("Format Transformer");
 
     public static File[] transformWebAudioToSilks(String suffix, URL source) throws Exception {
         File sourceFile = TempFileSystem.createTmpFileAndCreate("as", suffix);
@@ -52,7 +56,7 @@ public class FormatTransformer {
                 "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
         silks.add(transformPCMtoSILK(pcm));
         TempFileSystem.unlockFileAndDelete(sourceFile);
-
+        TRANSFORMER_LOGGER.info("Transformed {} to silk files, audio length is {}s.", sourceFile, length);
         return silks.toArray(new File[0]);
     }
 
@@ -62,7 +66,6 @@ public class FormatTransformer {
                 sourceFile.getAbsolutePath(), silk.getAbsolutePath(),
                 "-Fs_API", "24000", "-tencent");
         TempFileSystem.unlockFileAndDelete(sourceFile);
-
         return silk;
     }
 
@@ -75,6 +78,7 @@ public class FormatTransformer {
         executeCommand(null, Settings.FFMPEG_LOCATION,
                 "-i", inputImage.getAbsolutePath(), output.getAbsolutePath());
         TempFileSystem.unlockFileAndDelete(inputImage);
+        TRANSFORMER_LOGGER.info("Transformed a {} image to PNG.", format);
         return new DeleteStream(output);
     }
 
@@ -82,6 +86,7 @@ public class FormatTransformer {
         ProcessBuilder builder = new ProcessBuilder();
         builder.redirectErrorStream(true);
         builder.command(commandStr);
+        TRANSFORMER_LOGGER.debug("Execute Command: {}", String.join(" ", commandStr));
         Process process = builder.start();
         InputStream stream = process.getInputStream();
         if (stream != null)

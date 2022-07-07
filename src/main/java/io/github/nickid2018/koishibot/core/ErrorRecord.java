@@ -6,6 +6,8 @@ import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.message.api.MessageEntry;
 import io.github.nickid2018.koishibot.util.value.MutableInt;
 import kotlin.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,10 +17,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class ErrorRecord {
 
+    public static final Logger ERROR_LOGGER = LoggerFactory.getLogger("Error Recorder");
+
     public static final Queue<Triple<Long, String, Throwable>> ERROR_QUEUE = new ConcurrentLinkedDeque<>();
 
     public static synchronized void enqueueError(String module, Throwable t) {
-        t.printStackTrace();
+        ERROR_LOGGER.error("Error recorder enqueued an error from " + module + ".", t);
         ERROR_QUEUE.offer(new Triple<>(System.currentTimeMillis(), module, t));
         if (ERROR_QUEUE.size() > 30)
             ERROR_QUEUE.poll();

@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
@@ -17,6 +18,8 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -24,6 +27,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class GitHubWebHookListener implements HttpHandler {
+
+    public static final Logger GITHUB_WEBHOOK_LOGGER = LoggerFactory.getLogger("GitHub WebHook");
 
     public static final List<String> WEBHOOK_PERMISSION = Arrays.asList(
             "fork", "issue_comment", "issues", "pull_request",
@@ -58,6 +63,7 @@ public class GitHubWebHookListener implements HttpHandler {
             listener.webhook.createNewFile();
             saveHooks();
         }
+        GITHUB_WEBHOOK_LOGGER.info("Successfully loaded github webhook data.");
     }
 
     public void addHook(String repo, String token) throws IOException {
@@ -84,6 +90,7 @@ public class GitHubWebHookListener implements HttpHandler {
         int id = JsonUtil.getIntOrZero(json, "id");
         webHooks.put(repo, id);
         saveHooks();
+        GITHUB_WEBHOOK_LOGGER.info("Successfully added github webhook to {}.", repo);
     }
 
     public void deleteHook(String repo, String token) throws IOException {
@@ -91,6 +98,7 @@ public class GitHubWebHookListener implements HttpHandler {
                 GitHubListener.GITHUB_API + "/repos/" + repo + "/hooks/" + webHooks.get(repo));
         WebUtil.sendReturnNoContent(GitHubListener.acceptJSON(delete, token));
         webHooks.remove(repo);
+        GITHUB_WEBHOOK_LOGGER.info("Successfully deleted github webhook to {}.", repo);
         saveHooks();
     }
 
@@ -105,7 +113,7 @@ public class GitHubWebHookListener implements HttpHandler {
         String data = IOUtils.toString(httpExchange.getRequestBody(), StandardCharsets.UTF_8);
         String function = httpExchange.getRequestHeaders().getFirst("X-GitHub-Event");
         httpExchange.sendResponseHeaders(204, 0);
-        System.out.println(data);
+        GITHUB_WEBHOOK_LOGGER.debug(data);
         JsonObject json = JsonParser.parseString(data).getAsJsonObject();
         String repo = JsonUtil.getStringInPathOrNull(json, "repository.full_name");
         Method method = REFLECT_HANDLE.get(function);
@@ -157,8 +165,7 @@ public class GitHubWebHookListener implements HttpHandler {
                 builder.append("  [增加").append(JsonUtil.getIntInPathOrZero(commitData, "stats.additions"))
                         .append("行，删除").append(JsonUtil.getIntInPathOrZero(commitData, "stats.deletions")).append("行]\n");
             } catch (Exception e) {
-                System.out.println("无法获取commit具体信息");
-                e.printStackTrace();
+                ErrorRecord.enqueueError("github.webhook.push", e);
             }
         }
         return builder.toString().trim();

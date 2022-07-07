@@ -4,6 +4,8 @@ import io.github.nickid2018.koishibot.core.BotLoginData;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,6 +14,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 public class Environments {
+
+    public static final Logger ENVIRONMENT_LOGGER = LoggerFactory.getLogger("Environment");
 
     public static final Map<String, Function<BotLoginData, ? extends Environment>> ENVIRONMENT_PROVIDER = new HashMap<>();
     private static final Map<String, Environment> ENVIRONMENT_MAP = new HashMap<>();
@@ -39,9 +43,9 @@ public class Environments {
             String backend = loginDataEntry.getKey();
             if (ENVIRONMENT_PROVIDER.containsKey(backend)) {
                 ENVIRONMENT_MAP.put(backend, ENVIRONMENT_PROVIDER.get(backend).apply(loginDataEntry.getValue()));
-                System.out.println("Successfully load environment " + backend + ".");
+                ENVIRONMENT_LOGGER.info("Successfully load environment {}.", backend);
             } else
-                System.err.println("Backend Environment \"" + backend + "\" not found.");
+                ENVIRONMENT_LOGGER.error("Backend Environment \"{}\" not found.", backend);
         }
         loginDataMap.clear();
     }
