@@ -1,11 +1,11 @@
 package io.github.nickid2018.koishibot.resolver;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.message.api.TextMessage;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -61,7 +61,7 @@ public class GitHubWebHookResolver extends MessageResolver {
                     .filter(m -> m instanceof TextMessage).map(m -> (TextMessage) m).collect(Collectors.toList());
             if (texts.size() == 1 && !texts.get(0).getText().equalsIgnoreCase("N")) {
                 String token = texts.get(0).getText();
-                KoishiBotMain.INSTANCE.executor.execute(() -> {
+                AsyncUtil.execute(() -> {
                     try {
                         GitHubListener.LISTENER.getWebHookListener().addHook(repo, token);
                         environment.getMessageSender().sendMessage(context,
@@ -87,7 +87,7 @@ public class GitHubWebHookResolver extends MessageResolver {
                     .filter(m -> m instanceof TextMessage).map(m -> (TextMessage) m).collect(Collectors.toList());
             if (texts.size() == 1 && !texts.get(0).getText().equalsIgnoreCase("N")) {
                 String token = texts.get(0).getText();
-                KoishiBotMain.INSTANCE.executor.execute(() -> {
+                AsyncUtil.execute(() -> {
                     try {
                         GitHubListener.LISTENER.getWebHookListener().deleteHook(repo, token);
                         environment.getMessageSender().sendMessage(context,

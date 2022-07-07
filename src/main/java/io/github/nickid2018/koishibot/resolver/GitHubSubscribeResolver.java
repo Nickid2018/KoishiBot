@@ -1,9 +1,9 @@
 package io.github.nickid2018.koishibot.resolver;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -34,7 +34,7 @@ public class GitHubSubscribeResolver extends MessageResolver {
     }
 
     private void addRepo(String repo, MessageContext context, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 GitHubListener.LISTENER.addRepo(context.getGroup().getGroupId(), repo);
                 environment.getMessageSender().sendMessage(context, environment.newText("已填加仓库"));
@@ -45,7 +45,7 @@ public class GitHubSubscribeResolver extends MessageResolver {
     }
 
     private void removeRepo(String repo, MessageContext context, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 GitHubListener.LISTENER.removeRepo(context.getGroup().getGroupId(), repo);
                 environment.getMessageSender().sendMessage(context, environment.newText("已移除仓库"));

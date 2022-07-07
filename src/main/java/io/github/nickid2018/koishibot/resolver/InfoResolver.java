@@ -1,10 +1,11 @@
 package io.github.nickid2018.koishibot.resolver;
 
-import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.KoishiBotMain;
+import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.Date;
 import java.util.Locale;
@@ -54,7 +55,7 @@ public class InfoResolver extends MessageResolver {
         builder.append("占比").append(String.format("%.2f", (total - free) / max * 100)).append("%\n");
         builder.append("系统信息: ").append(System.getProperty("os.name")).append("\n");
         builder.append("项目已在Github上开源: https://github.com/Nickid2018/KoishiBot (AGPL v3)");
-        KoishiBotMain.INSTANCE.executor.execute(
+        AsyncUtil.execute(
                 () -> environment.getMessageSender().sendMessage(context, environment.newText(builder.toString())));
     }
 

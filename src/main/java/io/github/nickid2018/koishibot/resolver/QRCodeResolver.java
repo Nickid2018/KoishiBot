@@ -4,11 +4,11 @@ import com.google.zxing.*;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -52,7 +52,7 @@ public class QRCodeResolver extends MessageResolver {
     }
 
     private void encode(String message, MessageContext context, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 BitMatrix matrix = WRITER.encode(message, BarcodeFormat.QR_CODE, 200, 200, HINTS);
                 ByteArrayOutputStream boas = new ByteArrayOutputStream();
@@ -83,7 +83,7 @@ public class QRCodeResolver extends MessageResolver {
         if (image == null)
             return false;
         ImageMessage finalImage = image;
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 BufferedImage qrcode = ImageIO.read(finalImage.getImage());
                 RGBLuminanceSource source = new RGBLuminanceSource(qrcode.getWidth(), qrcode.getHeight(),

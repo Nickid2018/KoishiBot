@@ -3,16 +3,19 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class GitHubRepoResolver extends MessageResolver {
@@ -28,7 +31,7 @@ public class GitHubRepoResolver extends MessageResolver {
     public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         key = key.trim();
         String[] data = key.split(" ");
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 if (data.length == 1)
                     doRepoInfoGet(data[0], context, environment);

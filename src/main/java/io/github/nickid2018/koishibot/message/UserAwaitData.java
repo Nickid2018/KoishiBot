@@ -1,16 +1,15 @@
 package io.github.nickid2018.koishibot.message;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class UserAwaitData {
 
@@ -59,7 +58,7 @@ public class UserAwaitData {
         dataConsumer = AWAIT_MAP.remove(find);
         lock.unlock();
         MessageData finalFind = find;
-        KoishiBotMain.INSTANCE.executor.execute(() -> dataConsumer.accept(finalFind.sent, reply));
+        AsyncUtil.execute(() -> dataConsumer.accept(finalFind.sent, reply));
     }
 }
 

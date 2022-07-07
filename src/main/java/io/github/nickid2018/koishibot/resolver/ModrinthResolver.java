@@ -4,9 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
@@ -15,7 +15,8 @@ import org.apache.http.client.methods.HttpGet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,7 @@ public class ModrinthResolver extends MessageResolver {
 
     @Override
     public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 if (pattern == MOD_SEARCH_PATTERN)
                     displaySearch(key.substring(12, key.length() - 1), context, environment);

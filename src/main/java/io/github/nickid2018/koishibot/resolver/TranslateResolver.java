@@ -1,11 +1,11 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.translation.TranslationProvider;
 import io.github.nickid2018.koishibot.translation.YoudaoTranslation;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.regex.Pattern;
 
@@ -22,7 +22,7 @@ public class TranslateResolver extends MessageResolver {
 
     @Override
     public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             String[] splits = key.split(":", 3);
             String from = null, to = null;
             if (!splits[1].isEmpty()) {

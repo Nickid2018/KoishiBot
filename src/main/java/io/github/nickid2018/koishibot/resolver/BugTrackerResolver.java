@@ -3,11 +3,11 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
@@ -41,7 +41,7 @@ public class BugTrackerResolver extends MessageResolver {
         boolean isSearch = RegexUtil.match(BUG_SEARCH_PATTERN, resolve);
         if (!isDisplay && !isSearch)
             return false;
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 if (isDisplay)
                     doBugDisplay(resolve, context, environment);

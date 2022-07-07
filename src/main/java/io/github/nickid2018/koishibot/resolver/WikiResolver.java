@@ -1,10 +1,10 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.wiki.PageInfo;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 
@@ -30,7 +30,7 @@ public class WikiResolver extends MessageResolver {
     public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
         key = key.substring(2, key.length() - 2);
         String finalKey = key;
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             String[] splits = finalKey.split(":", 2);
             try {
                 if (splits.length == 1 || !Settings.SUPPORT_WIKIS.containsKey(splits[0].toLowerCase(Locale.ROOT)))
@@ -132,7 +132,7 @@ public class WikiResolver extends MessageResolver {
                 });
             }
             if (page.infobox != null) {
-                KoishiBotMain.INSTANCE.executor.execute(() -> {
+                AsyncUtil.execute(() -> {
                     try {
                         File file = page.infobox.get();
                         if (file == null)

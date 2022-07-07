@@ -1,8 +1,8 @@
 package io.github.nickid2018.koishibot.resolver;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.batik.transcoder.SVGAbstractTranscoder;
 import org.apache.batik.transcoder.Transcoder;
@@ -40,7 +40,7 @@ public class LaTeXResolver extends MessageResolver {
 
     @Override
     public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             String latex = key;
             Transcoder use = transcoder;
             if (latex.startsWith("-a") || latex.startsWith("-A")) {

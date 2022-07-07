@@ -1,13 +1,13 @@
 package io.github.nickid2018.koishibot;
 
 import io.github.nickid2018.koishibot.core.BotKoishiCommand;
-import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.MemberFilter;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.webhook.WebHookManager;
 import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
 import net.mamoe.mirai.Bot;
@@ -16,12 +16,9 @@ import net.mamoe.mirai.console.command.CommandManager;
 import net.mamoe.mirai.console.plugin.jvm.JavaPlugin;
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescriptionBuilder;
 import net.mamoe.mirai.utils.BotConfiguration;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public final class KoishiBotMain extends JavaPlugin {
 
@@ -32,7 +29,6 @@ public final class KoishiBotMain extends JavaPlugin {
     public File tmpDir;
 
     public Bot botKoishi;
-    public ExecutorService executor;
     public long startTime = System.currentTimeMillis();
 
     public QQEnvironment environment;
@@ -63,10 +59,8 @@ public final class KoishiBotMain extends JavaPlugin {
         }});
         CommandManager.INSTANCE.registerCommand(new BotKoishiCommand(this), true);
         botKoishi.login();
-        executor = Executors.newCachedThreadPool(new BasicThreadFactory.Builder().uncaughtExceptionHandler(
-                (th, t) -> ErrorRecord.enqueueError("concurrent", t)
-        ).build());
         environment = new QQEnvironment(botKoishi);
+        AsyncUtil.start();
         Environments.putEnvironment("qq", environment);
         MemberFilter.init();
         GitHubListener.clinit();
@@ -77,8 +71,7 @@ public final class KoishiBotMain extends JavaPlugin {
         if (botKoishi == null)
             return;
         botKoishi.close();
-        executor.shutdown();
-        executor = null;
+        AsyncUtil.terminate();
         TempFileSystem.onDisable();
         InfoBoxShooter.close();
         WebHookManager.stop();

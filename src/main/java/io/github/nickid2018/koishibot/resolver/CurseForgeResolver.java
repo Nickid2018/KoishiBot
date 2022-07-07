@@ -3,9 +3,9 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
@@ -32,7 +32,7 @@ public class CurseForgeResolver extends MessageResolver {
 
     @Override
     public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 if (pattern == MOD_FILES_PATTERN)
                     displayFiles(key.substring(11, key.length() - 1), context, environment);

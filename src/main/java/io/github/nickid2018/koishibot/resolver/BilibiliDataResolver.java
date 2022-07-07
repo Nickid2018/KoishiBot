@@ -3,11 +3,11 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
@@ -49,7 +49,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
 
     @Override
     public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 if (pattern == B_SHORT_LINK_PATTERN)
                     fromShortLink(key, context, environment);
@@ -315,7 +315,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
 
     @Override
     public void resolveService(JsonObject content, MessageContext context, Environment environment) {
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             if (environment instanceof QQEnvironment) {
                 try {
                     String url = JsonUtil.getStringInPathOrNull(content, "meta.news.jumpUrl");

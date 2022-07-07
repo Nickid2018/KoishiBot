@@ -1,9 +1,9 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import com.google.gson.JsonArray;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
@@ -23,7 +23,7 @@ public class UrbanDictResolver extends MessageResolver {
         String term = key.trim();
         if (term.isEmpty())
             return false;
-        KoishiBotMain.INSTANCE.executor.execute(() -> {
+        AsyncUtil.execute(() -> {
             try {
                 JsonArray object = WebUtil.fetchDataInJson(
                         new HttpGet(URBAN_API + WebUtil.encode(term))).getAsJsonArray();
