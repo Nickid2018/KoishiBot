@@ -8,6 +8,9 @@ plugins {
 
 dependencies {
     api("net.mamoe:mirai-core:2.9.2")
+    api("org.apache.logging.log4j:log4j-api:2.17.2")
+    api("org.apache.logging.log4j:log4j-core:2.17.2")
+    api("org.apache.logging.log4j:log4j-slf4j-impl:2.17.2")
     api("org.apache.httpcomponents:httpclient:4.5.13")
     api("com.google.code.gson:gson:2.9.0")
     api("org.jsoup:jsoup:1.14.3")
