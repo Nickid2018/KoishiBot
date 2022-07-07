@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.message;
 import io.github.nickid2018.koishibot.core.BotLoginData;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,5 +48,9 @@ public class Environments {
 
     public static void closeEnvironments() {
         ENVIRONMENT_MAP.values().forEach(Environment::close);
+    }
+
+    static {
+        ENVIRONMENT_PROVIDER.put("qq", QQEnvironment::new);
     }
 }

@@ -12,6 +12,8 @@ import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.utils.BotConfiguration;
 
+import java.io.File;
+
 public class QQEnvironment implements Environment {
 
     private final Bot bot;
@@ -22,7 +24,8 @@ public class QQEnvironment implements Environment {
     public QQEnvironment(BotLoginData loginData) {
         bot = BotFactory.INSTANCE.newBot(Long.parseLong(loginData.uid), loginData.password, new BotConfiguration() {{
             setHeartbeatStrategy(HeartbeatStrategy.STAT_HB);
-            fileBasedDeviceInfo("qq/device.json");
+            setWorkingDir(new File("qq"));
+            fileBasedDeviceInfo();
         }});
         bot.login();
         publisher = new QQMessagePublisher(this);
