@@ -28,7 +28,7 @@ public class GitHubWebHookListener implements HttpHandler {
     public static final List<String> WEBHOOK_PERMISSION = Arrays.asList(
             "fork", "issue_comment", "issues", "pull_request",
             "pull_request_review_comment", "push", "release",
-            "star", "status", "watch"
+            "star", "status"
     );
 
     public static final Map<String, Method> REFLECT_HANDLE = new HashMap<>();
@@ -177,7 +177,7 @@ public class GitHubWebHookListener implements HttpHandler {
         StringBuilder builder = new StringBuilder();
         builder.append(JsonUtil.getStringInPathOrNull(object, "sender.login"));
         builder.append(Objects.equals(JsonUtil.getStringOrNull(object, "action"), "created")
-                ? "star了此仓库" : "取消star了此仓库");
+                ? " star了此仓库" : " 取消star了此仓库");
         return builder.toString();
     }
 

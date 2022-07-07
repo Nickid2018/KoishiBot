@@ -32,6 +32,7 @@ public class MessageManager {
         RESOLVERS.add(new ModrinthResolver());
         RESOLVERS.add(new CurseForgeResolver());
         RESOLVERS.add(new TranslateResolver());
+        RESOLVERS.add(new UrbanDictResolver());
         RESOLVERS.add(new GitHubRepoResolver());
         RESOLVERS.add(new GitHubWebHookResolver());
         RESOLVERS.add(new GitHubSubscribeResolver());
