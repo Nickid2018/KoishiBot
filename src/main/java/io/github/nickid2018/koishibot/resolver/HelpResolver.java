@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.resolver;
 
-import io.github.nickid2018.koishibot.Constants;
+import io.github.nickid2018.koishibot.core.Constants;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.ImageRenderer;
 import io.github.nickid2018.koishibot.util.value.LazyLoadValue;

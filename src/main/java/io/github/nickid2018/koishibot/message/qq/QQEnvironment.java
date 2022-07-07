@@ -1,13 +1,16 @@
 package io.github.nickid2018.koishibot.message.qq;
 
+import io.github.nickid2018.koishibot.core.BotLoginData;
 import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.MessageSender;
-import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.message.api.ServiceMessage;
 import io.github.nickid2018.koishibot.message.api.UnsupportedMessage;
+import io.github.nickid2018.koishibot.message.api.*;
 import net.mamoe.mirai.Bot;
+import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.message.data.*;
+import net.mamoe.mirai.utils.BotConfiguration;
 
 public class QQEnvironment implements Environment {
 
@@ -16,8 +19,12 @@ public class QQEnvironment implements Environment {
     private final MessageSender sender;
     private final MessageManager manager;
 
-    public QQEnvironment(Bot bot) {
-        this.bot = bot;
+    public QQEnvironment(BotLoginData loginData) {
+        bot = BotFactory.INSTANCE.newBot(Long.parseLong(loginData.uid), loginData.password, new BotConfiguration() {{
+            setHeartbeatStrategy(HeartbeatStrategy.STAT_HB);
+            fileBasedDeviceInfo("qq/device.json");
+        }});
+        bot.login();
         publisher = new QQMessagePublisher(this);
         sender = new MessageSender(this, true);
         manager = new MessageManager(this);
@@ -102,6 +109,10 @@ public class QQEnvironment implements Environment {
     @Override
     public boolean forwardMessageSupported() {
         return true;
+    }
+
+    public void close() {
+        bot.close();
     }
 
     public Bot getBot() {

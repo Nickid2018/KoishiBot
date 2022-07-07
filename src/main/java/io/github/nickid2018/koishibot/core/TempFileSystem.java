@@ -1,7 +1,5 @@
 package io.github.nickid2018.koishibot.core;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -13,14 +11,16 @@ public class TempFileSystem {
     private static final Map<String, Map<String, File>> BUFFERED = Collections.synchronizedMap(new HashMap<>());
     private static final Random NAME_RANDOM = new Random();
 
+    public static final File TEMP_DIR = new File("temp");
+
     static {
         Thread cleaner = new Thread(() -> {
-            if (!KoishiBotMain.INSTANCE.tmpDir.isDirectory())
-                KoishiBotMain.INSTANCE.tmpDir.mkdir();
+            if (!TEMP_DIR.isDirectory())
+                TEMP_DIR.mkdir();
             while (true) {
                 try {
                     Thread.sleep(7200_000);
-                    Stream.of(Objects.requireNonNull(KoishiBotMain.INSTANCE.tmpDir.listFiles())).filter(
+                    Stream.of(Objects.requireNonNull(TEMP_DIR.listFiles())).filter(
                             file -> !FILES_NOT_DELETE.contains(file)
                     ).forEach(File::delete);
                 } catch (InterruptedException ignored) {
@@ -32,13 +32,13 @@ public class TempFileSystem {
     }
 
     public static File createTmpFile(String prefix, String suffix) {
-        File file = new File(KoishiBotMain.INSTANCE.tmpDir, name(prefix, suffix));
+        File file = new File(TEMP_DIR, name(prefix, suffix));
         FILES_NOT_DELETE.add(file);
         return file;
     }
 
     public static File createTmpFileAndCreate(String prefix, String suffix) throws IOException {
-        File file = new File(KoishiBotMain.INSTANCE.tmpDir, name(prefix, suffix));
+        File file = new File(TEMP_DIR, name(prefix, suffix));
         file.createNewFile();
         FILES_NOT_DELETE.add(file);
         return file;
@@ -46,7 +46,7 @@ public class TempFileSystem {
 
     public static File createTmpFileBuffered(
             String module, String name, String prefix, String suffix, boolean create) throws IOException {
-        File file = new File(KoishiBotMain.INSTANCE.tmpDir, name(prefix, suffix));
+        File file = new File(TEMP_DIR, name(prefix, suffix));
         if (create)
             file.createNewFile();
         FILES_NOT_DELETE.add(file);
@@ -80,7 +80,7 @@ public class TempFileSystem {
         FILES_NOT_DELETE.remove(file);
     }
 
-    public static void onDisable() {
-        Stream.of(Objects.requireNonNull(KoishiBotMain.INSTANCE.tmpDir.listFiles())).forEach(File::delete);
+    public static void close() {
+        Stream.of(Objects.requireNonNull(TEMP_DIR.listFiles())).forEach(File::delete);
     }
 }

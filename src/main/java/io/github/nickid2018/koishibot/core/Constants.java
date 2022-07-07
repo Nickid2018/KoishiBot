@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot;
+package io.github.nickid2018.koishibot.core;
 
 import java.util.Calendar;
 

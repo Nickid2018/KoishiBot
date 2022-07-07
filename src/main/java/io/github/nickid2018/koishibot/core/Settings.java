@@ -4,7 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
@@ -23,8 +22,7 @@ import java.util.Properties;
 
 public class Settings {
 
-    public static long BOT_QQ;
-    public static String BOT_PASSWORD;
+    public static final Map<String ,BotLoginData> BOT_DATA = new HashMap<>();
 
     public static String LOCAL_IP;
 
@@ -44,19 +42,23 @@ public class Settings {
     public static String GITHUB_TOKEN;
 
     public static void load() throws IOException {
-        String data = IOUtils.toString(new FileReader(KoishiBotMain.INSTANCE.resolveConfigFile("botKoishi.json")));
+        String data = IOUtils.toString(new FileReader("botKoishi.json"));
         JsonObject settingsRoot = JsonParser.parseString(data).getAsJsonObject();
 
-        BOT_QQ = settingsRoot.get("qq").getAsLong();
-        BOT_PASSWORD = settingsRoot.get("password").getAsString();
-        LOCAL_IP = settingsRoot.get("local_ip").getAsString();
+        JsonObject bots = settingsRoot.getAsJsonObject("bots");
+        for (Map.Entry<String, JsonElement> en : bots.entrySet()) {
+            JsonObject loginData = en.getValue().getAsJsonObject();
+            BOT_DATA.put(en.getKey(), new BotLoginData(
+                    JsonUtil.getStringOrNull(loginData, "uid"), JsonUtil.getStringOrNull(loginData, "password")));
+        }
+
+        LOCAL_IP = JsonUtil.getStringOrNull(settingsRoot, "local_ip");
 
         loadInternal(settingsRoot);
     }
 
     public static void reload() throws IOException {
-        String data = IOUtils.toString(new FileReader(
-                KoishiBotMain.INSTANCE.resolveConfigFile("botKoishi.json")));
+        String data = IOUtils.toString(new FileReader("botKoishi.json"));
         JsonObject settingsRoot = JsonParser.parseString(data).getAsJsonObject();
 
         loadInternal(settingsRoot);

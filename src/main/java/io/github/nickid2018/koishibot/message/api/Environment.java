@@ -42,6 +42,8 @@ public interface Environment {
 
     boolean forwardMessageSupported();
 
+    void close();
+
     default AtMessage newAt(UserInfo user) {
         return newAt().fillAt(user);
     }

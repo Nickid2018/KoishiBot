@@ -1,6 +1,5 @@
 package io.github.nickid2018.koishibot.core;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
 import io.github.nickid2018.koishibot.util.BiConsumerE;
 import io.github.nickid2018.koishibot.util.FunctionE;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
@@ -29,7 +28,7 @@ public class GroupDataReader<E> {
        this.reader = reader;
        this.writer = writer;
        this.empty = empty;
-       folder = new File(KoishiBotMain.INSTANCE.getDataFolder(), name);
+       folder = new File("data", name);
        if (!folder.isDirectory())
            folder.mkdir();
     }

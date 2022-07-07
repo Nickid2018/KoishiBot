@@ -1,6 +1,5 @@
 package io.github.nickid2018.koishibot.core;
 
-import io.github.nickid2018.koishibot.Constants;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;

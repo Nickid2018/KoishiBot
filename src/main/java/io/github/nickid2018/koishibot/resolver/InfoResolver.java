@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.resolver;
 
-import io.github.nickid2018.koishibot.KoishiBotMain;
+import io.github.nickid2018.koishibot.core.BotStart;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
@@ -41,7 +41,7 @@ public class InfoResolver extends MessageResolver {
 
     private void printSystemData(MessageContext context, Environment environment) {
         StringBuilder builder = new StringBuilder("Koishi bot 1.0-SNAPSHOT by Nickid2018\n");
-        long time = System.currentTimeMillis() - KoishiBotMain.INSTANCE.startTime;
+        long time = System.currentTimeMillis() - BotStart.START_TIME;
         builder.append("已运行时间：").append(time / 86400_000).append("天").append(time % 86400_000 / 3600_000).append("小时")
                         .append(time % 3600_000 / 60_000).append("分").append(time % 60_000 / 1_000).append("秒")
                         .append(time % 1_000).append("毫秒\n");
