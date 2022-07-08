@@ -88,6 +88,7 @@ public class MessageManager {
             return;
         }
         UserAwaitData.onMessage(group, user, message);
+        MessageReplyData.onMessage(group, user, message);
 
         List<String> strings = new ArrayList<>();
         ServiceMessage service = null;

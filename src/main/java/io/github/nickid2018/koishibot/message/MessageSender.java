@@ -91,6 +91,11 @@ public class MessageSender {
         UserAwaitData.add(contact.getGroup(), contact.getUser(), send(contact, message, true), consumer);
     }
 
+    public void sendMessageReply(MessageContext contact, AbstractMessage message, boolean once,
+                                 BiConsumer<AbstractMessage, ChainMessage> consumer) {
+        MessageReplyData.add(contact.getGroup(), contact.getUser(), send(contact, message, false), consumer, once);
+    }
+
     public void onError(Throwable t, String module, MessageContext context, boolean recall) {
         ErrorRecord.enqueueError(module, t);
         ChainMessage chain;

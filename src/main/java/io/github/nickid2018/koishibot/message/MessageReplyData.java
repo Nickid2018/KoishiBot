@@ -5,34 +5,34 @@ import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
+import kotlin.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 
-public class UserAwaitData {
+public class MessageReplyData {
 
-    public static final Map<MessageData, BiConsumer<AbstractMessage, ChainMessage>> AWAIT_MAP = new HashMap<>();
+    private static final Map<Pair<MessageData, Boolean>, BiConsumer<AbstractMessage, ChainMessage>> REPLIES = new HashMap<>();
     private static final ReentrantLock lock = new ReentrantLock();
 
-    public static void add(GroupInfo group, UserInfo user, AbstractMessage sent, BiConsumer<AbstractMessage, ChainMessage> consumer) {
+    public static void add(GroupInfo group, UserInfo user, AbstractMessage sent,
+                           BiConsumer<AbstractMessage, ChainMessage> consumer, boolean once) {
         lock.lock();
-        AWAIT_MAP.put(new MessageData(group, user, sent), consumer);
+        REPLIES.put(new Pair<>(new MessageData(group, user, sent), once), consumer);
         lock.unlock();
     }
 
     public static void onMessage(GroupInfo group, UserInfo user, ChainMessage reply) {
-        MessageData find = null;
+        Pair<MessageData, Boolean> find = null;
         lock.lock();
-        for (MessageData data : AWAIT_MAP.keySet()) {
-            if (group == null ^ data.group == null)
+        for (Pair<MessageData, Boolean> data : REPLIES.keySet()) {
+            if (group == null ^ data.getFirst().group == null)
                 continue;
-            if (group != null && !group.equals(data.group))
+            if (group != null && !group.equals(data.getFirst().group))
                 continue;
-            if (user == null ^ data.user == null)
-                continue;
-            if (user != null && !user.equals(data.user))
+            if (group == null && !user.equals(data.getFirst().user))
                 continue;
             find = data;
             break;
@@ -42,10 +42,9 @@ public class UserAwaitData {
             return;
         BiConsumer<AbstractMessage, ChainMessage> dataConsumer;
         lock.lock();
-        dataConsumer = AWAIT_MAP.remove(find);
+        dataConsumer = find.getSecond() ? REPLIES.remove(find) :  REPLIES.get(find);
         lock.unlock();
-        MessageData finalFind = find;
+        MessageData finalFind = find.getFirst();
         AsyncUtil.execute(() -> dataConsumer.accept(finalFind.sent, reply));
     }
 }
-

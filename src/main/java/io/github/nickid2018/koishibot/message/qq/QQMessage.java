@@ -1,11 +1,15 @@
 package io.github.nickid2018.koishibot.message.qq;
 
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
-import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
+import io.github.nickid2018.koishibot.message.api.UserInfo;
 import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.Message;
+import net.mamoe.mirai.message.data.MessageChain;
+import net.mamoe.mirai.message.data.MessageSource;
+
+import java.util.Arrays;
 
 public abstract class QQMessage implements AbstractMessage {
 
@@ -50,6 +54,14 @@ public abstract class QQMessage implements AbstractMessage {
     public boolean equals(Object o) {
         if (!(o instanceof QQMessage))
             return false;
-        return getQQMessage().equals(((QQMessage) o).getQQMessage());
+        Message other = ((QQMessage) o).getQQMessage();
+        if (other instanceof MessageChain) {
+            MessageChain chain = (MessageChain) other;
+            MessageSource source;
+            if ((source = chain.get(MessageSource.Key)) != null)
+                if (Arrays.equals(source.getIds(), receipt.getSource().getIds()))
+                    return true;
+        }
+        return getQQMessage().equals(other);
     }
 }
