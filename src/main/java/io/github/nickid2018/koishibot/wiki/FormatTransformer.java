@@ -41,6 +41,7 @@ public class FormatTransformer {
         List<File> silks = new ArrayList<>();
         int length = getAudioLength(sourceFile);
         int offset = 0;
+        TRANSFORMER_LOGGER.info("Start transforming {} to silk files, length = {}s.", sourceFile, length);
         while (length > 50) {
             File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
             executeCommand(null, Settings.FFMPEG_LOCATION, "-i",
@@ -56,7 +57,7 @@ public class FormatTransformer {
                 "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
         silks.add(transformPCMtoSILK(pcm));
         TempFileSystem.unlockFileAndDelete(sourceFile);
-        TRANSFORMER_LOGGER.info("Transformed {} to silk files, audio length is {}s.", sourceFile, length);
+        TRANSFORMER_LOGGER.info("Transformed {} to silk files.", sourceFile);
         return silks.toArray(new File[0]);
     }
 

@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.resolver;
 
+import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.github.GitHubAuthenticator;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.api.Environment;
@@ -13,6 +14,11 @@ public class GitHubWebHookResolver extends MessageResolver {
 
     public GitHubWebHookResolver() {
         super("~github webhook");
+    }
+
+    @Override
+    public boolean groupEnabled() {
+        return Settings.GITHUB_OAUTH2_CLIENT_ID != null;
     }
 
     @Override
