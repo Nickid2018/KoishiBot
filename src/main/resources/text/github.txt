@@ -12,7 +12,9 @@ Koishi bot GITHUB 模块帮助
 ~github subscribe add/del只能在群或者私聊中触发
 ~github webhook add/del只能在群临时会话或者私聊中触发
 #
-使用~github webhook机器人会向你请求发送私人访问令牌，在GitHub中可以从Settings->Developer settings->Personal access tokens中获取。
+如果机器人指定了OAuth Client ID，使用~github webhook机器人会向你请求用户名并要求点击链接授权。
+#
+如果机器人未指定OAuth Client ID，使用~github webhook机器人会向你请求发送私人访问令牌，在GitHub中可以从Settings->Developer settings->Personal access tokens中获取。
 要求使用的令牌有repo和admin:repo_hook权限。
 机器人不会保存你的令牌，在操作结束之后请立刻撤回你的令牌信息，并删除GitHub上临时创建的令牌。
 #
