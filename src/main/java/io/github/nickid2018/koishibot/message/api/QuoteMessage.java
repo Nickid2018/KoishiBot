@@ -13,6 +13,8 @@ public interface QuoteMessage extends AbstractMessage {
     @Nonnull
     String getReplyToID();
 
+    ChainMessage getQuoteMessage();
+
     default void send(GroupInfo group) {
         format().send(group);
     }

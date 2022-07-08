@@ -79,21 +79,21 @@ public class MessageSender {
         return message;
     }
 
-    public void sendMessage(MessageContext contact, AbstractMessage message) {
-        send(contact, message, false);
+    public void sendMessage(MessageContext context, AbstractMessage message) {
+        send(context, message, false);
     }
 
-    public void sendMessageRecallable(MessageContext contact, AbstractMessage message) {
-        send(contact, message, true);
+    public void sendMessageRecallable(MessageContext context, AbstractMessage message) {
+        send(context, message, true);
     }
 
-    public void sendMessageAwait(MessageContext contact, AbstractMessage message, BiConsumer<AbstractMessage, ChainMessage> consumer) {
-        UserAwaitData.add(contact.getGroup(), contact.getUser(), send(contact, message, true), consumer);
+    public void sendMessageAwait(MessageContext context, AbstractMessage message, BiConsumer<AbstractMessage, ChainMessage> consumer) {
+        UserAwaitData.add(context.getGroup(), context.getUser(), send(context, message, true), consumer);
     }
 
-    public void sendMessageReply(MessageContext contact, AbstractMessage message, boolean once,
+    public void sendMessageReply(MessageContext context, AbstractMessage message, boolean once,
                                  BiConsumer<AbstractMessage, ChainMessage> consumer) {
-        MessageReplyData.add(contact.getGroup(), contact.getUser(), send(contact, message, false), consumer, once);
+        MessageReplyData.add(context.getGroup(), context.getUser(), send(context, message, false), consumer, once);
     }
 
     public void onError(Throwable t, String module, MessageContext context, boolean recall) {

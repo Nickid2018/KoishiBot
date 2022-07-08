@@ -5,12 +5,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.github.GitHubAuthenticator;
 import io.github.nickid2018.koishibot.github.GitHubListener;
-import io.github.nickid2018.koishibot.message.api.Environment;
-import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
+import io.github.nickid2018.koishibot.util.ConsumerE;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,7 +75,8 @@ public class GitHubRepoResolver extends MessageResolver {
 
         JsonUtil.getString(object, "description").ifPresent(builder::append);
 
-        environment.getMessageSender().sendMessage(context, environment.newText(builder.toString().trim()));
+        environment.getMessageSender().sendMessageReply(context, environment.newText(builder.toString().trim()), false,
+                (source, message) -> doRepoReply(message, repo, environment, context));
     }
 
     private void doRepoIssueGet(String repo, String issue, MessageContext context, Environment environment) throws IOException {
@@ -105,5 +109,51 @@ public class GitHubRepoResolver extends MessageResolver {
             builder.append("(描述过长截断)");
 
         environment.getMessageSender().sendMessage(context, environment.newText(builder.toString().trim()));
+    }
+
+    private void doRepoReply(ChainMessage message, String repo, Environment environment, MessageContext context) {
+        String command = null;
+        for (AbstractMessage content : message.getMessages()) {
+            if (content instanceof TextMessage) {
+                command = ((TextMessage) content).getText();
+                break;
+            }
+        }
+
+        if (command == null)
+            return;
+        command = command.trim();
+        if (command.isEmpty())
+            return;
+
+        String[] split = command.split(" ", 2);
+        AsyncUtil.execute(() -> {
+            switch (split[0].toLowerCase(Locale.ROOT)) {
+                case "~star":
+                    doAuthenticatedOperation(new HttpPut("https://api.github.com/user/starred/" + repo),
+                            environment, context, WebUtil::sendReturnNoContent,
+                            environment.newText("已star仓库"), "github.repo.star", "repo");
+                    break;
+                case "~unstar":
+                    doAuthenticatedOperation(new HttpDelete("https://api.github.com/user/starred/" + repo),
+                            environment, context, WebUtil::sendReturnNoContent,
+                            environment.newText("已取消star仓库"), "github.repo.unstar", "repo");
+                    break;
+            }
+        });
+    }
+
+    private void doAuthenticatedOperation(HttpUriRequest request, Environment environment, MessageContext context,
+                                          ConsumerE<HttpUriRequest> requestConsumer, AbstractMessage success, String module,
+                                          String... scopes) {
+        GitHubAuthenticator.authenticateOperation(token -> {
+            GitHubAuthenticator.acceptGitHubJSON(request, token);
+            try {
+                requestConsumer.accept(request);
+                environment.getMessageSender().sendMessage(context, success);
+            } catch (Exception e) {
+                environment.getMessageSender().onError(e, module, context, false);
+            }
+        }, context, environment, scopes);
     }
 }

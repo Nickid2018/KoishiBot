@@ -1,9 +1,6 @@
 package io.github.nickid2018.koishibot.message.qq;
 
-import io.github.nickid2018.koishibot.message.api.AbstractMessage;
-import io.github.nickid2018.koishibot.message.api.GroupInfo;
-import io.github.nickid2018.koishibot.message.api.QuoteMessage;
-import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.message.api.*;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.QuoteReply;
@@ -45,6 +42,11 @@ public class QQQuote extends QQMessage implements QuoteMessage {
     @Override
     public String getReplyToID() {
         return "qq.user" + quoteReply.getSource().getFromId();
+    }
+
+    @Override
+    public ChainMessage getQuoteMessage() {
+        return new QQChain(environment, quoteReply.getSource().getOriginalMessage());
     }
 
     @Override

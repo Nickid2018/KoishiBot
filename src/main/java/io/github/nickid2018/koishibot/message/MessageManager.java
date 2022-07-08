@@ -88,12 +88,11 @@ public class MessageManager {
             return;
         }
         UserAwaitData.onMessage(group, user, message);
-        MessageReplyData.onMessage(group, user, message);
 
         List<String> strings = new ArrayList<>();
         ServiceMessage service = null;
         boolean att = false;
-        boolean replyMe = false;
+        QuoteMessage replyMe = null;
 
         for (AbstractMessage content : message.getMessages()) {
             if (content instanceof TextMessage)
@@ -103,10 +102,13 @@ public class MessageManager {
                     att = true;
             if (content instanceof QuoteMessage)
                 if (((QuoteMessage) content).getReplyToID().equals(environment.getBotId()))
-                    replyMe = true;
+                    replyMe = (QuoteMessage) content;
             if (content instanceof ServiceMessage)
                 service = (ServiceMessage) content;
         }
+
+        if (replyMe != null)
+            MessageReplyData.onMessage(group, user, replyMe.getQuoteMessage());
 
         MutableBoolean bool = new MutableBoolean(false);
         if (service == null) {
@@ -116,7 +118,7 @@ public class MessageManager {
                         if (!bool.getValue() && messageResolver.resolve(string, context, environment))
                             bool.setValue(true);
                     }));
-            if (!bool.getValue() && att && inGroup && !replyMe) {
+            if (!bool.getValue() && att && inGroup && replyMe == null) {
                 environment.getMessageSender().sendMessage(context, environment.newChain(
                         environment.newQuote(message),
                         environment.newText("不要乱@人，会被514打电话的。")
