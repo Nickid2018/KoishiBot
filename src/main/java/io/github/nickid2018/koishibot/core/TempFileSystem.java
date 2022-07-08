@@ -32,7 +32,7 @@ public class TempFileSystem {
                 } catch (InterruptedException ignored) {
                 }
             }
-        });
+        }, "Temp File Cleaner");
         cleaner.setDaemon(true);
         cleaner.start();
     }

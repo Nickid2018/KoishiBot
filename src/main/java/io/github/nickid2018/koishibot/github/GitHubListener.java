@@ -3,13 +3,13 @@ package io.github.nickid2018.koishibot.github;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.GroupDataReader;
-import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import io.github.nickid2018.koishibot.webhook.WebHookManager;
+import io.github.nickid2018.koishibot.server.ServerManager;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
@@ -21,6 +21,8 @@ public class GitHubListener {
 
     public static void clinit() {
     }
+
+    public static final Logger GITHUB_LOGGER = LoggerFactory.getLogger("GitHub");
 
     public static final GitHubListener LISTENER;
 
@@ -41,6 +43,7 @@ public class GitHubListener {
     final Map<String, Repository> pushData;
     final File repo;
     final File webhook;
+    final File auth;
     final GitHubWebHookListener webHookListener;
 
     @SuppressWarnings("unchecked")
@@ -50,10 +53,12 @@ public class GitHubListener {
                 (writer, data) -> new ObjectOutputStream(writer).writeObject(data),
                 HashSet::new);
         groupData.loadAll();
+
         repo = new File(groupData.getFolder(), "repo.dat");
         webhook = new File(groupData.getFolder(), "webhook.dat");
+        auth = new File(groupData.getFolder(), "auth.dat");
 
-        WebHookManager.addHandle("/github", webHookListener = new GitHubWebHookListener(this));
+        ServerManager.addHandle("/github", webHookListener = new GitHubWebHookListener(this));
 
         if (repo.exists())
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(repo))) {
@@ -134,30 +139,13 @@ public class GitHubListener {
         });
     }
 
-    public static HttpUriRequest acceptJSON(HttpUriRequest request, String token) {
-        request.addHeader("Authorization", "token " + token);
-        request.addHeader("Accept", "application/vnd.github.v3+json");
-        return request;
-    }
-
-    public static HttpUriRequest authenticate(HttpUriRequest request) {
-        if (Settings.GITHUB_TOKEN != null && !Settings.GITHUB_TOKEN.isEmpty())
-            request.addHeader("Authorization", "token " + Settings.GITHUB_TOKEN);
-        return request;
-    }
-
-    public static HttpUriRequest acceptJSON(HttpUriRequest request) {
-        request.addHeader("Accept", "application/vnd.github.v3+json");
-        return authenticate(request);
-    }
-
     public static JsonObject queryRepo(String key) throws IOException {
         String[] data = key.split("/");
         if (data.length != 2)
             throw new IOException("无效的仓库");
         try {
             return WebUtil.fetchDataInJson(
-                    acceptJSON(new HttpGet(GITHUB_API + "/repos/" + data[0] + "/" + data[1]))).getAsJsonObject();
+                    GitHubAuthenticator.acceptGitHubJSON(new HttpGet(GITHUB_API + "/repos/" + data[0] + "/" + data[1]))).getAsJsonObject();
         } catch (ErrorCodeException e) {
             if (e.code == 404)
                 throw new IOException("仓库不存在或未公开");

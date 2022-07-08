@@ -92,6 +92,23 @@ public class WebUtil {
         }
     }
 
+    public static void sendNoCheck(HttpUriRequest request) throws IOException {
+        CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableCookieManagement()
+                .setUserAgent(chooseRandomUA()).build();
+        CloseableHttpResponse httpResponse = null;
+        try {
+            httpResponse = httpClient.execute(request);
+        } finally {
+            try {
+                if (httpResponse != null)
+                    httpResponse.close();
+            } catch (IOException e) {
+                WEB_LOGGER.error("## release resource error ##" + e);
+            }
+        }
+    }
+
     public static void sendReturnNoContent(HttpUriRequest request) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableCookieManagement()

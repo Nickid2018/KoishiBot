@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.webhook;
+package io.github.nickid2018.koishibot.server;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -11,32 +11,32 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
-public class WebHookManager {
+public class ServerManager {
 
-    public static final Logger WEBHOOK_LOGGER = LoggerFactory.getLogger("Webhook Manager");
+    public static final Logger SERVER_LOGGER = LoggerFactory.getLogger("Server Manager");
 
     private static HttpServer httpServer;
 
-    public static void startWebHook() throws IOException {
+    public static void startServer() throws IOException {
         httpServer = HttpServer.create(new InetSocketAddress(14514), 0);
         httpServer.setExecutor(Executors.newCachedThreadPool(
                 new BasicThreadFactory.Builder().daemon(true).uncaughtExceptionHandler(
                         (th, t) -> ErrorRecord.enqueueError("concurrent.webhook", t)
                 ).build()));
         httpServer.start();
-        WEBHOOK_LOGGER.info("Webhook Manager started on port 14514.");
+        SERVER_LOGGER.info("Server Manager started on port 14514.");
     }
 
     public static void addHandle(String root, HttpHandler handler) throws IOException {
         if (httpServer == null)
-            startWebHook();
+            startServer();
         httpServer.createContext(root, handler);
-        WEBHOOK_LOGGER.info("Webhook Manager added a handle named {}.", root);
+        SERVER_LOGGER.info("Server Manager added a handle named {}.", root);
     }
 
     public static void stop() {
         if (httpServer != null)
             httpServer.stop(0);
-        WEBHOOK_LOGGER.info("Webhook Manager stopped.");
+        SERVER_LOGGER.info("Server Manager stopped.");
     }
 }

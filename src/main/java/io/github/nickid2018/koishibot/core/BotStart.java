@@ -4,7 +4,7 @@ import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.MemberFilter;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
-import io.github.nickid2018.koishibot.webhook.WebHookManager;
+import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
 
 import java.io.IOException;
@@ -16,6 +16,7 @@ public class BotStart {
     public static final long START_TIME = System.currentTimeMillis();
 
     public static void main(String[] args) {
+
         try {
             start();
         } catch (Exception e) {
@@ -54,6 +55,7 @@ public class BotStart {
         AsyncUtil.terminate();
         TempFileSystem.close();
         InfoBoxShooter.close();
-        WebHookManager.stop();
+        ServerManager.stop();
+        System.exit(0);
     }
 }

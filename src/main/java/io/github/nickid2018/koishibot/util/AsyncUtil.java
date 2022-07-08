@@ -15,7 +15,7 @@ public class AsyncUtil {
     public static void start() {
         executor = Executors.newCachedThreadPool(new BasicThreadFactory.Builder().uncaughtExceptionHandler(
                 (th, t) -> ErrorRecord.enqueueError("concurrent", t)
-        ).build());
+        ).daemon(true).namingPattern("Async Worker %d").build());
     }
 
     public static void execute(Runnable runnable) {

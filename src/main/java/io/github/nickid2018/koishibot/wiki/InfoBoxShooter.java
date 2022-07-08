@@ -9,10 +9,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.openqa.selenium.*;
+import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.firefox.HasFullPageScreenshot;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -29,12 +33,25 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 
 public class InfoBoxShooter {
 
     public static final Logger INFOBOX_LOGGER = LoggerFactory.getLogger("Wiki Infobox");
 
-    private static WebDriver driver;
+    static {
+        try {
+            Class<?> remoteDriverClass = RemoteWebDriver.class;
+            Field field = remoteDriverClass.getDeclaredField("logger");
+            field.setAccessible(true);
+            ((java.util.logging.Logger) field.get(null)).setLevel(Level.OFF);
+        } catch (Exception e) {
+            INFOBOX_LOGGER.error("Cannot turn off logger.", e);
+        }
+
+    }
+
+    private static FirefoxDriver driver;
     private static ExecutorService executor;
 
     public static void loadWebDriver() {
@@ -45,7 +62,7 @@ public class InfoBoxShooter {
         driver.manage().window().setSize(new Dimension(0, 0));
         executor = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().uncaughtExceptionHandler(
                 (t, e) -> ErrorRecord.enqueueError("wiki.infoboxshoot", e)
-        ).daemon(true).build());
+        ).daemon(true).namingPattern("Infobox Shooter %d").build());
         INFOBOX_LOGGER.info("Infobox Shooter initialized.");
     }
 
@@ -119,7 +136,7 @@ public class InfoBoxShooter {
         }
 
         driver.get(html.getAbsolutePath());
-        File srcFile = ((HasFullPageScreenshot) driver).getFullPageScreenshotAs(OutputType.FILE);
+        File srcFile = driver.getFullPageScreenshotAs(OutputType.FILE);
         TempFileSystem.unlockFileAndDelete(html);
 
         File png = TempFileSystem.createTmpFileBuffered("infobox", url, "infobox", "png", false);
@@ -142,6 +159,9 @@ public class InfoBoxShooter {
             executor.shutdownNow();
         if (driver != null)
             driver.quit();
-        INFOBOX_LOGGER.info("Infobox Shooter closed.");
+        if (executor != null || driver != null)
+            INFOBOX_LOGGER.info("Infobox Shooter closed.");
+        executor = null;
+        driver = null;
     }
 }

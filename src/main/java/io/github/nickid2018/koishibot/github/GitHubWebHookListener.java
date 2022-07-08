@@ -86,7 +86,7 @@ public class GitHubWebHookListener implements HttpHandler {
         entity.setContentEncoding("UTF-8");
         entity.setContentType("application/json");
         post.setEntity(entity);
-        JsonObject json = WebUtil.fetchDataInJson(GitHubListener.acceptJSON(post, token)).getAsJsonObject();
+        JsonObject json = WebUtil.fetchDataInJson(GitHubAuthenticator.acceptGitHubJSON(post, token)).getAsJsonObject();
         int id = JsonUtil.getIntOrZero(json, "id");
         webHooks.put(repo, id);
         saveHooks();
@@ -96,7 +96,7 @@ public class GitHubWebHookListener implements HttpHandler {
     public void deleteHook(String repo, String token) throws IOException {
         HttpDelete delete = new HttpDelete(
                 GitHubListener.GITHUB_API + "/repos/" + repo + "/hooks/" + webHooks.get(repo));
-        WebUtil.sendReturnNoContent(GitHubListener.acceptJSON(delete, token));
+        WebUtil.sendReturnNoContent(GitHubAuthenticator.acceptGitHubJSON(delete, token));
         webHooks.remove(repo);
         GITHUB_WEBHOOK_LOGGER.info("Successfully deleted github webhook to {}.", repo);
         saveHooks();
@@ -112,7 +112,7 @@ public class GitHubWebHookListener implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         String data = IOUtils.toString(httpExchange.getRequestBody(), StandardCharsets.UTF_8);
         String function = httpExchange.getRequestHeaders().getFirst("X-GitHub-Event");
-        httpExchange.sendResponseHeaders(204, 0);
+        httpExchange.sendResponseHeaders(204, -1);
         GITHUB_WEBHOOK_LOGGER.debug(data);
         JsonObject json = JsonParser.parseString(data).getAsJsonObject();
         String repo = JsonUtil.getStringInPathOrNull(json, "repository.full_name");
@@ -159,7 +159,7 @@ public class GitHubWebHookListener implements HttpHandler {
                     .append("文件, 删除").append(commit.get("removed").getAsJsonArray().size())
                     .append("文件, 修改").append(commit.get("modified").getAsJsonArray().size()).append("文件。\n");
             try {
-                JsonObject commitData = WebUtil.fetchDataInJson(GitHubListener.acceptJSON(
+                JsonObject commitData = WebUtil.fetchDataInJson(GitHubAuthenticator.acceptGitHubJSON(
                         new HttpGet(GitHubListener.GITHUB_API + "/repos/" + repo + "/commits/"
                                 + JsonUtil.getStringOrNull(commit, "id")))).getAsJsonObject();
                 builder.append("  [增加").append(JsonUtil.getIntInPathOrZero(commitData, "stats.additions"))

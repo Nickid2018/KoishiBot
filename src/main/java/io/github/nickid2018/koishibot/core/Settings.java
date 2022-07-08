@@ -41,6 +41,9 @@ public class Settings {
 
     public static String GITHUB_TOKEN;
 
+    public static String GITHUB_OAUTH2_CLIENT_ID;
+    public static String GITHUB_OAUTH2_CLIENT_SECRET;
+
     public static void load() throws IOException {
         String data = IOUtils.toString(new FileReader("botKoishi.json"));
         JsonObject settingsRoot = JsonParser.parseString(data).getAsJsonObject();
@@ -143,6 +146,10 @@ public class Settings {
 
     public static void loadGitHub(JsonObject settingsRoot) {
         GITHUB_TOKEN = JsonUtil.getString(settingsRoot, "github_token").orElse("");
+        JsonUtil.getData(settingsRoot, "github_oauth2", JsonObject.class).ifPresent(oauth -> {
+            GITHUB_OAUTH2_CLIENT_ID = JsonUtil.getStringOrNull(oauth, "client_id");
+            GITHUB_OAUTH2_CLIENT_SECRET = JsonUtil.getStringOrNull(oauth, "client_secret");
+        });
     }
 
     public static void loadProxy(JsonObject settingsRoot) {
@@ -158,7 +165,7 @@ public class Settings {
         Authenticator.setDefault(null);
 
         JsonUtil.getData(settingsRoot, "proxy", JsonObject.class).ifPresent(root -> {
-                    String type = JsonUtil.getDataInPath(root, "type", JsonPrimitive.class)
+                    String type = JsonUtil.getData(root, "type", JsonPrimitive.class)
                             .map(JsonPrimitive::getAsString)
                             .filter(s -> s.equalsIgnoreCase("http")
                                     || s.equalsIgnoreCase("https")

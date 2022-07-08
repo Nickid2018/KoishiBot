@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.github.GitHubAuthenticator;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
@@ -76,7 +77,7 @@ public class GitHubRepoResolver extends MessageResolver {
 
     private void doRepoIssueGet(String repo, String issue, MessageContext context, Environment environment) throws IOException {
         HttpGet get = new HttpGet(GITHUB_API + "repos/" + repo + "/issues/" + issue);
-        GitHubListener.acceptJSON(get);
+        GitHubAuthenticator.acceptGitHubJSON(get);
         JsonObject object = WebUtil.fetchDataInJson(get).getAsJsonObject();
 
         StringBuilder builder = new StringBuilder();
