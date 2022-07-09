@@ -10,12 +10,11 @@ import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.ConsumerE;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.*;
+import org.apache.http.entity.StringEntity;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -107,10 +106,11 @@ public class GitHubRepoResolver extends MessageResolver {
         if (skip)
             builder.append("(描述过长截断)");
 
-        environment.getMessageSender().sendMessage(context, environment.newText(builder.toString().trim()));
+        environment.getMessageSender().sendMessageReply(context, environment.newText(builder.toString().trim()), false,
+                (source, message) -> doIssueReply(message, issue, repo, environment, context));
     }
 
-    private void doRepoReply(ChainMessage message, String repo, Environment environment, MessageContext context) {
+    private String dealStr(ChainMessage message) {
         String command = null;
         for (AbstractMessage content : message.getMessages()) {
             if (content instanceof TextMessage) {
@@ -118,11 +118,17 @@ public class GitHubRepoResolver extends MessageResolver {
                 break;
             }
         }
-
         if (command == null)
-            return;
+            return null;
         command = command.trim();
         if (command.isEmpty())
+            return null;
+        return command;
+    }
+
+    private void doRepoReply(ChainMessage message, String repo, Environment environment, MessageContext context) {
+        String command = dealStr(message);
+        if (command == null)
             return;
 
         String[] split = command.split(" ", 2);
@@ -134,6 +140,32 @@ public class GitHubRepoResolver extends MessageResolver {
                 case "~unstar" -> doAuthenticatedOperation(new HttpDelete("https://api.github.com/user/starred/" + repo),
                         environment, context, WebUtil::sendReturnNoContent,
                         environment.newText("已取消star仓库"), "github.repo.unstar", "repo");
+                case "~fork" -> doAuthenticatedOperation(new HttpPost("https://api.github.com/user/repos/" + repo + "/forks"),
+                        environment, context, WebUtil::sendReturnNoContent,
+                        environment.newText("已fork仓库"), "github.repo.fork", "repo");
+            }
+        });
+    }
+
+    private void doIssueReply(ChainMessage message, String repo, String issue, Environment environment, MessageContext context) {
+        String command = dealStr(message);
+        if (command == null)
+            return;
+
+        String[] split = command.split(" ", 2);
+        AsyncUtil.execute(() -> {
+            switch (split[0].toLowerCase(Locale.ROOT)) {
+                case "~comment" -> {
+                    if (split.length != 2)
+                        return;
+                    HttpPost post = new HttpPost("https://api.github.com/repos/" + repo + "/issues/" + issue + "/comments");
+                    JsonObject data = new JsonObject();
+                    data.addProperty("body", split[1]);
+                    post.setEntity(new StringEntity(data.getAsString(), StandardCharsets.UTF_8));
+                    doAuthenticatedOperation(post,
+                            environment, context, request -> WebUtil.sendNeedCode(request, 201),
+                            environment.newText("评论已发送"), "github.issue.comment", "repo");
+                }
             }
         });
     }

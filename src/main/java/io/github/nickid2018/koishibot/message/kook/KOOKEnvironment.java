@@ -7,6 +7,7 @@ import io.github.nickid2018.koishibot.message.api.*;
 import io.github.zly2006.kookybot.JavaBaseClass;
 import io.github.zly2006.kookybot.client.Client;
 import io.github.zly2006.kookybot.contract.Self;
+import io.github.zly2006.kookybot.contract.TextChannel;
 
 public class KOOKEnvironment implements Environment {
 
@@ -52,6 +53,7 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public ForwardMessage newForwards() {
+
         // Unsupported
         return null;
     }
@@ -80,7 +82,8 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public GroupInfo getGroup(String id) {
-        return id.startsWith("kook.group") ? new KOOKGroup(self.getChannel(id.substring(10))) : null;
+        return id.startsWith("kook.group") ? new KOOKTextChannel(
+                (TextChannel) self.getChannel(id.substring(10))) : null;
     }
 
     @Override
@@ -116,5 +119,13 @@ public class KOOKEnvironment implements Environment {
     @Override
     public void close() {
         kookClient.close();
+    }
+
+    public Client getKookClient() {
+        return kookClient;
+    }
+
+    public Self getSelf() {
+        return self;
     }
 }

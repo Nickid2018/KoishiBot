@@ -93,13 +93,19 @@ public class WebUtil {
         }
     }
 
-    public static void sendNoCheck(HttpUriRequest request) throws IOException {
+    public static void sendNeedCode(HttpUriRequest request, int code) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .disableCookieManagement()
                 .setUserAgent(chooseRandomUA()).build();
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(request);
+            int status = httpResponse.getStatusLine().getStatusCode();
+            if (status != code) {
+                WEB_LOGGER.debug("Incorrect return code in requesting {}: {}, required {}.",
+                        request.getURI(), status, code);
+                throw new ErrorCodeException(status);
+            }
         } finally {
             try {
                 if (httpResponse != null)
@@ -111,25 +117,7 @@ public class WebUtil {
     }
 
     public static void sendReturnNoContent(HttpUriRequest request) throws IOException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement()
-                .setUserAgent(chooseRandomUA()).build();
-        CloseableHttpResponse httpResponse = null;
-        try {
-            httpResponse = httpClient.execute(request);
-            int status = httpResponse.getStatusLine().getStatusCode();
-            if (status != 204) {
-                WEB_LOGGER.debug("Incorrect return code in requesting {}: {}", request.getURI(), status);
-                throw new ErrorCodeException(status);
-            }
-        } finally {
-            try {
-                if (httpResponse != null)
-                    httpResponse.close();
-            } catch (IOException e) {
-                WEB_LOGGER.error("## release resource error ##" + e);
-            }
-        }
+        sendNeedCode(request, 204);
     }
 
     public static String fetchDataInText(HttpUriRequest post) throws IOException {

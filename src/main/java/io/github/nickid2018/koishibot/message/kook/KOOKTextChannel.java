@@ -2,23 +2,23 @@ package io.github.nickid2018.koishibot.message.kook;
 
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
-import io.github.zly2006.kookybot.contract.Channel;
+import io.github.zly2006.kookybot.contract.TextChannel;
 
-public class KOOKGroup implements GroupInfo {
+public class KOOKTextChannel implements GroupInfo {
 
-    private final Channel channel;
+    private final TextChannel channel;
 
-    public KOOKGroup(Channel channel) {
+    public KOOKTextChannel(TextChannel channel) {
         this.channel = channel;
     }
 
-    public Channel getChannel() {
+    public TextChannel getChannel() {
         return channel;
     }
 
     @Override
     public boolean equals(ContactInfo info) {
-        return info instanceof KOOKGroup otherGroup && otherGroup.channel.equals(channel);
+        return info instanceof KOOKTextChannel otherGroup && otherGroup.channel.equals(channel);
     }
 
     @Override

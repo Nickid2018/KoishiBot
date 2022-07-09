@@ -29,6 +29,10 @@ public class KOOKUser implements UserInfo {
         return group;
     }
 
+    public User getUser() {
+        return user;
+    }
+
     @Override
     public void nudge(ContactInfo contact) {
         // Unsupported
