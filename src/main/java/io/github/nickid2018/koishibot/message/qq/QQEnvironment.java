@@ -84,13 +84,13 @@ public class QQEnvironment implements Environment {
 
     @Override
     public UserInfo getUser(String id, boolean isStranger) {
-        return new QQUser(isStranger ? bot.getStranger(Long.parseLong(id.substring(7))) :
-                bot.getFriend(Long.parseLong(id.substring(7))), isStranger, false);
+        return id.startsWith("qq.user") ? (new QQUser(isStranger ? bot.getStranger(Long.parseLong(id.substring(7))) :
+                bot.getFriend(Long.parseLong(id.substring(7))), isStranger, false)) : null;
     }
 
     @Override
     public GroupInfo getGroup(String id) {
-        return new QQGroup(bot.getGroup(Long.parseLong(id.substring(8))));
+        return id.startsWith("qq.group") ? new QQGroup(bot.getGroup(Long.parseLong(id.substring(8)))) : null;
     }
 
     @Override
@@ -115,6 +115,11 @@ public class QQEnvironment implements Environment {
 
     @Override
     public boolean forwardMessageSupported() {
+        return true;
+    }
+
+    @Override
+    public boolean audioSupported() {
         return true;
     }
 

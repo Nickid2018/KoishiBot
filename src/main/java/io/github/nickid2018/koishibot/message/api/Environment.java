@@ -42,6 +42,8 @@ public interface Environment {
 
     boolean forwardMessageSupported();
 
+    boolean audioSupported();
+
     void close();
 
     default AtMessage newAt(UserInfo user) {

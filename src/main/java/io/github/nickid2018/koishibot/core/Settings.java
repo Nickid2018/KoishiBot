@@ -52,7 +52,9 @@ public class Settings {
         for (Map.Entry<String, JsonElement> en : bots.entrySet()) {
             JsonObject loginData = en.getValue().getAsJsonObject();
             BOT_DATA.put(en.getKey(), new BotLoginData(
-                    JsonUtil.getStringOrNull(loginData, "uid"), JsonUtil.getStringOrNull(loginData, "password")));
+                    JsonUtil.getStringOrNull(loginData, "uid"),
+                    JsonUtil.getStringOrNull(loginData, "password"),
+                    JsonUtil.getStringOrNull(loginData, "token")));
         }
 
         LOCAL_IP = JsonUtil.getStringOrNull(settingsRoot, "local_ip");

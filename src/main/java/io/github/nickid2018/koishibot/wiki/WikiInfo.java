@@ -127,7 +127,7 @@ public class WikiInfo {
         }
     }
 
-    public PageInfo parsePageInfo(String title, int pageID, String prefix) throws Exception {
+    public PageInfo parsePageInfo(String title, int pageID, String prefix, boolean allowAudio) throws Exception {
         if (title != null && title.isEmpty())
             throw new IOException("无效的wiki查询");
 
@@ -159,12 +159,12 @@ public class WikiInfo {
             if (interWikiMap.containsKey(namespace)) {
                 WikiInfo skip = STORED_WIKI_INFO.get(interWikiMap.get(namespace));
                 return skip.parsePageInfo(title.split(":", 2)[1], 0,
-                        (prefix == null ? "" : prefix + ":") + namespace);
+                        (prefix == null ? "" : prefix + ":") + namespace, allowAudio);
             }
         }
 
         if (title != null && title.equalsIgnoreCase("~rd"))
-            return random(prefix);
+            return random(prefix, allowAudio);
         if (title != null && title.equalsIgnoreCase("~iw"))
             return interwikiList();
 
@@ -247,9 +247,12 @@ public class WikiInfo {
                     else if (NEED_TRANSFORM_IMAGE.contains(suffix))
                         pageInfo.imageStream = FormatTransformer.transformImageToPNG(link.openStream(), suffix);
                     else if (NEED_TRANSFORM_AUDIO.contains(suffix)) {
-                        pageInfo.shortDescription = "音频信息，将分割后发送";
-                        pageInfo.audioFiles = AsyncUtil.submit(() -> FormatTransformer.transformWebAudioToSilks(
-                                suffix, link));
+                        if (allowAudio) {
+                            pageInfo.shortDescription = "音频信息，将分割后发送";
+                            pageInfo.audioFiles = AsyncUtil.submit(() -> FormatTransformer.transformWebAudioToSilks(
+                                    suffix, link));
+                        } else
+                            pageInfo.shortDescription = "音频信息，但平台不支持音频发送";
                     }
                 }
             }
@@ -261,10 +264,10 @@ public class WikiInfo {
         return pageInfo;
     }
 
-    private PageInfo random(String prefix) throws Exception {
+    private PageInfo random(String prefix, boolean allowAudio) throws Exception {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_RANDOM)).getAsJsonObject();
         PageInfo info =  parsePageInfo(Objects.requireNonNull(
-                JsonUtil.getStringInPathOrNull(data, "query.random.0.title")), 0, prefix);
+                JsonUtil.getStringInPathOrNull(data, "query.random.0.title")), 0, prefix, allowAudio);
         info.isRandom = true;
         return info;
     }

@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.message;
 import io.github.nickid2018.koishibot.core.BotLoginData;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.kook.KOOKEnvironment;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,5 +57,6 @@ public class Environments {
 
     static {
         ENVIRONMENT_PROVIDER.put("qq", QQEnvironment::new);
+        ENVIRONMENT_PROVIDER.put("kook", KOOKEnvironment::new);
     }
 }

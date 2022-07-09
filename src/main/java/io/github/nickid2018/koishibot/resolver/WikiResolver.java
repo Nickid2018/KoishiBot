@@ -49,7 +49,7 @@ public class WikiResolver extends MessageResolver {
     private static void requestWikiPage(
             WikiInfo wiki, String namespace, String title, MessageContext context, String searchTitle, Environment environment)
             throws Exception {
-        PageInfo page = wiki.parsePageInfo(title, 0, namespace);
+        PageInfo page = wiki.parsePageInfo(title, 0, namespace, environment.audioSupported());
         StringBuilder data = new StringBuilder();
         if (page.isSearched) {
             if (page.title != null) {

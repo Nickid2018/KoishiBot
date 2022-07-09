@@ -1,13 +1,27 @@
 package io.github.nickid2018.koishibot.message.kook;
 
+import io.github.nickid2018.koishibot.core.BotLoginData;
 import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.MessageSender;
 import io.github.nickid2018.koishibot.message.api.*;
+import io.github.zly2006.kookybot.JavaBaseClass;
+import io.github.zly2006.kookybot.client.Client;
+import io.github.zly2006.kookybot.contract.Self;
 
 public class KOOKEnvironment implements Environment {
 
-    public KOOKEnvironment() {
+    private final Client kookClient;
+    private final Self self;
 
+    private final MessageSender sender;
+    private final MessageManager manager;
+
+    public KOOKEnvironment(BotLoginData data) {
+        kookClient = new Client(data.token());
+        self = JavaBaseClass.utils.connectWebsocket(kookClient);
+
+        sender = new MessageSender(this, false);
+        manager = new MessageManager(this);
     }
 
     @Override
@@ -27,6 +41,7 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public AudioMessage newAudio() {
+        // Unsupported
         return null;
     }
 
@@ -37,11 +52,13 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public ForwardMessage newForwards() {
+        // Unsupported
         return null;
     }
 
     @Override
     public MessageEntry newMessageEntry() {
+        // Unsupported
         return null;
     }
 
@@ -52,22 +69,23 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public ServiceMessage newService() {
+        // Unsupported
         return null;
     }
 
     @Override
     public UserInfo getUser(String id, boolean isStranger) {
-        return null;
+        return id.startsWith("kook.user") ? new KOOKUser(self.getUser(id.substring(9)), isStranger) : null;
     }
 
     @Override
     public GroupInfo getGroup(String id) {
-        return null;
+        return id.startsWith("kook.group") ? new KOOKGroup(self.getChannel(id.substring(10))) : null;
     }
 
     @Override
     public String getBotId() {
-        return null;
+        return "kook.user" + self.getId();
     }
 
     @Override
@@ -77,12 +95,12 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public MessageSender getMessageSender() {
-        return null;
+        return sender;
     }
 
     @Override
     public MessageManager getManager() {
-        return null;
+        return manager;
     }
 
     @Override
@@ -91,7 +109,12 @@ public class KOOKEnvironment implements Environment {
     }
 
     @Override
-    public void close() {
+    public boolean audioSupported() {
+        return false;
+    }
 
+    @Override
+    public void close() {
+        kookClient.close();
     }
 }
