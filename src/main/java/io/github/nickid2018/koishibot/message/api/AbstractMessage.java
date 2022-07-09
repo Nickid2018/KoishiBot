@@ -11,4 +11,6 @@ public interface AbstractMessage {
     void recall();
 
     long getSentTime();
+
+    MessageFrom getSource();
 }

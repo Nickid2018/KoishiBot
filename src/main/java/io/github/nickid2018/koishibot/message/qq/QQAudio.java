@@ -1,7 +1,6 @@
 package io.github.nickid2018.koishibot.message.qq;
 
 import io.github.nickid2018.koishibot.message.api.AudioMessage;
-import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import net.mamoe.mirai.message.data.Audio;
 import net.mamoe.mirai.message.data.Message;
@@ -32,7 +31,7 @@ public class QQAudio extends QQMessage implements AudioMessage {
     }
 
     @Override
-    protected Message getQQMessage() {
+    public Message getQQMessage() {
         return audio;
     }
 }

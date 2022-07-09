@@ -1,9 +1,6 @@
 package io.github.nickid2018.koishibot.message;
 
-import io.github.nickid2018.koishibot.message.api.AbstractMessage;
-import io.github.nickid2018.koishibot.message.api.ChainMessage;
-import io.github.nickid2018.koishibot.message.api.GroupInfo;
-import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import kotlin.Pair;
 
@@ -24,7 +21,7 @@ public class MessageReplyData {
         lock.unlock();
     }
 
-    public static void onMessage(GroupInfo group, UserInfo user, ChainMessage reply) {
+    public static void onMessage(GroupInfo group, UserInfo user, QuoteMessage reply, ChainMessage chain) {
         Pair<MessageData, Boolean> find = null;
         lock.lock();
         for (Pair<MessageData, Boolean> data : REPLIES.keySet()) {
@@ -33,6 +30,8 @@ public class MessageReplyData {
             if (group != null && !group.equals(data.getFirst().group))
                 continue;
             if (group == null && !user.equals(data.getFirst().user))
+                continue;
+            if (!data.getFirst().sent.getSource().equals(reply.getQuoteFrom()))
                 continue;
             find = data;
             break;
@@ -45,6 +44,6 @@ public class MessageReplyData {
         dataConsumer = find.getSecond() ? REPLIES.remove(find) :  REPLIES.get(find);
         lock.unlock();
         MessageData finalFind = find.getFirst();
-        AsyncUtil.execute(() -> dataConsumer.accept(finalFind.sent, reply));
+        AsyncUtil.execute(() -> dataConsumer.accept(finalFind.sent, chain));
     }
 }

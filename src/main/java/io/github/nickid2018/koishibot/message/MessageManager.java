@@ -108,7 +108,7 @@ public class MessageManager {
         }
 
         if (replyMe != null)
-            MessageReplyData.onMessage(group, user, replyMe.getQuoteMessage());
+            MessageReplyData.onMessage(group, user, replyMe, message);
 
         MutableBoolean bool = new MutableBoolean(false);
         if (service == null) {

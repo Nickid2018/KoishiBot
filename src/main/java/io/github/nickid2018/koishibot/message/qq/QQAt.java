@@ -41,7 +41,7 @@ public class QQAt extends QQMessage implements AtMessage {
     }
 
     @Override
-    protected Message getQQMessage() {
+    public Message getQQMessage() {
         return at;
     }
 }

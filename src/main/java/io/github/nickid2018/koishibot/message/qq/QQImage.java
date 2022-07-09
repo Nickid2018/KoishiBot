@@ -34,7 +34,7 @@ public class QQImage extends QQMessage implements ImageMessage {
     }
 
     @Override
-    protected Message getQQMessage() {
+    public Message getQQMessage() {
         return image;
     }
 }

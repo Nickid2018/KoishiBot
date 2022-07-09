@@ -22,7 +22,7 @@ public class QQQuote extends QQMessage implements QuoteMessage {
     }
 
     @Override
-    protected Message getQQMessage() {
+    public Message getQQMessage() {
         return quoteReply;
     }
 
@@ -47,6 +47,11 @@ public class QQQuote extends QQMessage implements QuoteMessage {
     @Override
     public ChainMessage getQuoteMessage() {
         return new QQChain(environment, quoteReply.getSource().getOriginalMessage());
+    }
+
+    @Override
+    public MessageFrom getQuoteFrom() {
+        return new QQMessageFrom(quoteReply.getSource());
     }
 
     @Override

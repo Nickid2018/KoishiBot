@@ -32,7 +32,7 @@ public class QQForward extends QQMessage implements ForwardMessage {
     }
 
     @Override
-    protected Message getQQMessage() {
+    public Message getQQMessage() {
         return forward;
     }
 }

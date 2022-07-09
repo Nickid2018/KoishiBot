@@ -15,6 +15,8 @@ public interface QuoteMessage extends AbstractMessage {
 
     ChainMessage getQuoteMessage();
 
+    MessageFrom getQuoteFrom();
+
     default void send(GroupInfo group) {
         format().send(group);
     }

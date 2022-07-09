@@ -16,7 +16,6 @@ public class BotStart {
     public static final long START_TIME = System.currentTimeMillis();
 
     public static void main(String[] args) {
-
         try {
             start();
         } catch (Exception e) {

@@ -18,6 +18,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -26,12 +27,11 @@ public class GitHubAuthenticator implements HttpHandler {
 
     public static final GitHubAuthenticator AUTHENTICATOR = new GitHubAuthenticator();
 
-    private final Map<String, Consumer<String>> authSequence
-            = Collections.synchronizedMap(new HashMap<>());
+    private final Map<String, Consumer<String>> authSequence = new ConcurrentHashMap<>();
 
     private GitHubAuthenticator() {
         try {
-            ServerManager.addHandle("/github/redirect", this);
+            ServerManager.addHandle("/githubOAuth", this);
         } catch (Exception e) {
             GitHubListener.GITHUB_LOGGER.error("Cannot start GitHub OAuth 2.0 Service.", e);
         }
@@ -87,7 +87,7 @@ public class GitHubAuthenticator implements HttpHandler {
                         AUTHENTICATOR.authSequence.put(state, operation);
 
                         AsyncUtil.execute(() -> environment.getMessageSender().sendMessage(context, environment.newText(
-                                "本次需要使用OAuth验证，请点击下方链接。\n" + url
+                                "使用OAuth验证，请点击下方链接。\n" + url
                         )));
                     } catch (Exception e) {
                         environment.getMessageSender().onError(e, "github.oauth", context, false);
@@ -107,6 +107,7 @@ public class GitHubAuthenticator implements HttpHandler {
     public void handle(HttpExchange httpExchange) throws IOException {
         String query = httpExchange.getRequestURI().getQuery();
         httpExchange.sendResponseHeaders(204, -1);
+
         Map<String, String> args = Arrays.stream(query.split("&"))
                 .map(s -> s.split("=", 2)).collect(
                         HashMap::new, (map, strArray) -> map.put(strArray[0], strArray[1]), HashMap::putAll

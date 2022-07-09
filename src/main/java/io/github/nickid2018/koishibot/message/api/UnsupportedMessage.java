@@ -29,4 +29,9 @@ public class UnsupportedMessage implements AbstractMessage {
     public long getSentTime() {
         return -1;
     }
+
+    @Override
+    public MessageFrom getSource() {
+        return null;
+    }
 }

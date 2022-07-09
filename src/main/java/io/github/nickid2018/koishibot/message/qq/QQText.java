@@ -1,6 +1,5 @@
 package io.github.nickid2018.koishibot.message.qq;
 
-import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.TextMessage;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.PlainText;
@@ -30,7 +29,7 @@ public class QQText extends QQMessage implements TextMessage {
     }
 
     @Override
-    protected Message getQQMessage() {
+    public Message getQQMessage() {
         return text;
     }
 }

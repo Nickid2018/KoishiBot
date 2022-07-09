@@ -55,7 +55,7 @@ public class QQService extends QQMessage implements ServiceMessage {
     }
 
     @Override
-    protected Message getQQMessage() {
+    public Message getQQMessage() {
         return richMessage;
     }
 }

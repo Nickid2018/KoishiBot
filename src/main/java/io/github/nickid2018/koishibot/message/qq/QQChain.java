@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.message.qq;
 
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.ChainMessage;
+import io.github.nickid2018.koishibot.message.api.MessageFrom;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
@@ -31,6 +32,15 @@ public class QQChain extends QQMessage implements ChainMessage {
     }
 
     @Override
+    public MessageFrom getSource() {
+        MessageFrom source = super.getSource();
+        if (source != null)
+            return source;
+        MessageSource messageSource = chain.get(MessageSource.Key);
+        return messageSource == null ? null : new QQMessageFrom(messageSource);
+    }
+
+    @Override
     public ChainMessage fillChain(AbstractMessage... messages) {
         chain = MessageUtils.newChain(
                 Stream.of(messages).map(m -> ((QQMessage) m).getQQMessage()).toArray(Message[]::new)
@@ -44,7 +54,7 @@ public class QQChain extends QQMessage implements ChainMessage {
     }
 
     @Override
-    protected Message getQQMessage() {
+    public Message getQQMessage() {
         return chain;
     }
 }

@@ -1,9 +1,6 @@
 package io.github.nickid2018.koishibot.message.qq;
 
-import io.github.nickid2018.koishibot.message.api.AbstractMessage;
-import io.github.nickid2018.koishibot.message.api.Environment;
-import io.github.nickid2018.koishibot.message.api.GroupInfo;
-import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.message.api.*;
 import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.Message;
 import net.mamoe.mirai.message.data.MessageChain;
@@ -48,7 +45,16 @@ public abstract class QQMessage implements AbstractMessage {
         return environment;
     }
 
-    protected abstract Message getQQMessage();
+    @Override
+    public MessageFrom getSource() {
+        return receipt == null ? null : new QQMessageFrom(receipt.getSource());
+    }
+
+    public abstract Message getQQMessage();
+
+    public MessageReceipt<?> getReceipt() {
+        return receipt;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -57,10 +63,18 @@ public abstract class QQMessage implements AbstractMessage {
         Message other = ((QQMessage) o).getQQMessage();
         if (other instanceof MessageChain) {
             MessageChain chain = (MessageChain) other;
-            MessageSource source;
-            if ((source = chain.get(MessageSource.Key)) != null)
+            MessageSource source = null;
+            if (receipt != null && (source = chain.get(MessageSource.Key)) != null)
                 if (Arrays.equals(source.getIds(), receipt.getSource().getIds()))
                     return true;
+            Message thisMessage = getQQMessage();
+            if (thisMessage instanceof MessageChain) {
+                MessageChain thisChain = (MessageChain) thisMessage;
+                MessageSource thisSource;
+                if (source != null && (thisSource = thisChain.get(MessageSource.Key)) != null)
+                    if (Arrays.equals(source.getIds(), thisSource.getIds()))
+                        return true;
+            }
         }
         return getQQMessage().equals(other);
     }
