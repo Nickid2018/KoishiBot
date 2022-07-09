@@ -28,12 +28,10 @@ public class InfoResolver extends MessageResolver {
         if (key.isEmpty())
             printSystemData(context, environment);
         else {
-            AbstractMessage message = null;
-            switch (key) {
-                case "error":
-                    message = getError(environment);
-                    break;
-            }
+            AbstractMessage message = switch (key) {
+                case "error" -> getError(environment);
+                default -> null;
+            };
             environment.getMessageSender().sendMessage(context, message);
         }
         return true;

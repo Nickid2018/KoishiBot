@@ -54,7 +54,7 @@ public class WikiResolver extends MessageResolver {
         if (page.isSearched) {
             if (page.title != null) {
                 ChainMessage chain = environment.newChain(
-                        environment.newQuote(context.getMessage()),
+                        environment.newQuote(context.message()),
                         environment.newText("[[" + (namespace == null ? "" : namespace + ":") + title + "]]不存在，" +
                                 "你要查看的是否为[[" + (page.prefix == null ? "" : page.prefix + ":") + page.title + "]](打y确认)")
                 );
@@ -82,7 +82,7 @@ public class WikiResolver extends MessageResolver {
                 });
             } else {
                 environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                        environment.newQuote(context.getMessage()),
+                        environment.newQuote(context.message()),
                         environment.newText("没有搜索到有关于[[" + (namespace == null ? "" : namespace + ":") + title + "]]的页面")
                 ));
             }
@@ -112,18 +112,18 @@ public class WikiResolver extends MessageResolver {
 
             if (!st.isEmpty())
                 environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                      environment.newQuote(context.getMessage()), environment.newText(st)
+                      environment.newQuote(context.message()), environment.newText(st)
                 ));
             if (page.imageStream != null)
                 environment.getMessageSender().sendMessageRecallable(context, environment.newImage(page.imageStream));
-            if (page.audioFiles != null && context.getGroup() != null) {
+            if (page.audioFiles != null && context.group() != null) {
                 EXECUTOR.execute(() -> {
                     try {
                         File[] audios = page.audioFiles.get();
                         for (File file : audios) {
                             Thread.sleep(60_000);
                             environment.getMessageSender().sendMessage(
-                                    context, environment.newAudio(context.getGroup(), new FileInputStream(file)));
+                                    context, environment.newAudio(context.group(), new FileInputStream(file)));
                         }
                         Stream.of(audios).forEach(TempFileSystem::unlockFile);
                     } catch (Exception e) {

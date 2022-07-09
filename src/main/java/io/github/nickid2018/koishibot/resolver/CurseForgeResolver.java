@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -47,7 +48,7 @@ public class CurseForgeResolver extends MessageResolver {
 
     private static void displayFiles(String key, MessageContext context, Environment environment) throws IOException {
         JsonObject mod = WebUtil.fetchDataInJson(new HttpGet("https://api.cfwidget.com/minecraft/mc-mods/"
-                + URLEncoder.encode(key.replace(" ", "-"), "UTF-8"))).getAsJsonObject();
+                + URLEncoder.encode(key.replace(" ", "-"), StandardCharsets.UTF_8))).getAsJsonObject();
 
         StringBuilder builder = new StringBuilder();
         JsonObject gameVersions = mod.getAsJsonObject("versions");
@@ -67,14 +68,14 @@ public class CurseForgeResolver extends MessageResolver {
         });
 
         environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                environment.newQuote(context.getMessage()),
+                environment.newQuote(context.message()),
                 environment.newText(builder.toString().trim())
         ));
     }
 
     private static void displayMod(String id, MessageContext context, Environment environment) throws IOException {
         JsonObject mod = WebUtil.fetchDataInJson(new HttpGet("https://api.cfwidget.com/minecraft/mc-mods/"
-                + URLEncoder.encode(id.replace(" ", "-"), "UTF-8"))).getAsJsonObject();
+                + URLEncoder.encode(id.replace(" ", "-"), StandardCharsets.UTF_8))).getAsJsonObject();
 
         String modName = JsonUtil.getStringOrNull(mod, "title");
         StringBuilder builder = new StringBuilder();
@@ -117,7 +118,7 @@ public class CurseForgeResolver extends MessageResolver {
             builder.append("(原文过长截断，完整信息请访问主条目URL)");
 
         environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                environment.newQuote(context.getMessage()),
+                environment.newQuote(context.message()),
                 environment.newText(builder.toString().trim())
         ));
     }

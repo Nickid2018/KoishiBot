@@ -36,7 +36,7 @@ public class GitHubSubscribeResolver extends MessageResolver {
     private void addRepo(String repo, MessageContext context, Environment environment) {
         AsyncUtil.execute(() -> {
             try {
-                GitHubListener.LISTENER.addRepo(context.getGroup().getGroupId(), repo);
+                GitHubListener.LISTENER.addRepo(context.group().getGroupId(), repo);
                 environment.getMessageSender().sendMessage(context, environment.newText("已填加仓库"));
             } catch (Exception e) {
                 environment.getMessageSender().onError(e, "github.add", context, false);
@@ -47,7 +47,7 @@ public class GitHubSubscribeResolver extends MessageResolver {
     private void removeRepo(String repo, MessageContext context, Environment environment) {
         AsyncUtil.execute(() -> {
             try {
-                GitHubListener.LISTENER.removeRepo(context.getGroup().getGroupId(), repo);
+                GitHubListener.LISTENER.removeRepo(context.group().getGroupId(), repo);
                 environment.getMessageSender().sendMessage(context, environment.newText("已移除仓库"));
             } catch (Exception e) {
                 environment.getMessageSender().onError(e, "github.remove", context, false);

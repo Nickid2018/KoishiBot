@@ -24,7 +24,7 @@ public class QQEnvironment implements Environment {
     private final MessageManager manager;
 
     public QQEnvironment(BotLoginData loginData) {
-        bot = BotFactory.INSTANCE.newBot(Long.parseLong(loginData.uid), loginData.password, new BotConfiguration() {{
+        bot = BotFactory.INSTANCE.newBot(Long.parseLong(loginData.uid()), loginData.password(), new BotConfiguration() {{
             setHeartbeatStrategy(HeartbeatStrategy.STAT_HB);
             setWorkingDir(new File("qq"));
             fileBasedDeviceInfo();

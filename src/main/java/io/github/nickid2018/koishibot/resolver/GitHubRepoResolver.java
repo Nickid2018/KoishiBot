@@ -41,10 +41,9 @@ public class GitHubRepoResolver extends MessageResolver {
                     doRepoInfoGet(data[0], context, environment);
                 if (data.length == 3) {
                     switch (data[1].toLowerCase(Locale.ROOT)) {
-                        case "issue":
-                            doRepoIssueGet(data[0], data[2], context, environment);
-                            break;
-                        default:
+                        case "issue" -> doRepoIssueGet(data[0], data[2], context, environment);
+                        default -> {
+                        }
                     }
                 }
             } catch (Exception e) {
@@ -129,16 +128,12 @@ public class GitHubRepoResolver extends MessageResolver {
         String[] split = command.split(" ", 2);
         AsyncUtil.execute(() -> {
             switch (split[0].toLowerCase(Locale.ROOT)) {
-                case "~star":
-                    doAuthenticatedOperation(new HttpPut("https://api.github.com/user/starred/" + repo),
-                            environment, context, WebUtil::sendReturnNoContent,
-                            environment.newText("已star仓库"), "github.repo.star", "repo");
-                    break;
-                case "~unstar":
-                    doAuthenticatedOperation(new HttpDelete("https://api.github.com/user/starred/" + repo),
-                            environment, context, WebUtil::sendReturnNoContent,
-                            environment.newText("已取消star仓库"), "github.repo.unstar", "repo");
-                    break;
+                case "~star" -> doAuthenticatedOperation(new HttpPut("https://api.github.com/user/starred/" + repo),
+                        environment, context, WebUtil::sendReturnNoContent,
+                        environment.newText("已star仓库"), "github.repo.star", "repo");
+                case "~unstar" -> doAuthenticatedOperation(new HttpDelete("https://api.github.com/user/starred/" + repo),
+                        environment, context, WebUtil::sendReturnNoContent,
+                        environment.newText("已取消star仓库"), "github.repo.unstar", "repo");
             }
         });
     }

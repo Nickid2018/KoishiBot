@@ -94,7 +94,7 @@ public class BugTrackerResolver extends MessageResolver {
         } else
             builder.append("未搜索到任何结果");
         environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                environment.newQuote(context.getMessage()),
+                environment.newQuote(context.message()),
                 environment.newText(builder.toString().trim())
         ));
     }
@@ -209,13 +209,13 @@ public class BugTrackerResolver extends MessageResolver {
                 imageSend.fillImage(stream);
             }
             chain = environment.newChain(
-                    environment.newQuote(context.getMessage()),
+                    environment.newQuote(context.message()),
                     environment.newText(builder.toString()),
                     imageSend
             );
         } else
             chain = environment.newChain(
-                    environment.newQuote(context.getMessage()),
+                    environment.newQuote(context.message()),
                     environment.newText(builder.toString())
             );
         environment.getMessageSender().sendMessage(context, chain);

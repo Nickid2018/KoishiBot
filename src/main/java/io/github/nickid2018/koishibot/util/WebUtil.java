@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class WebUtil {
@@ -191,7 +192,7 @@ public class WebUtil {
     }
 
     public static String encode(String str) throws UnsupportedEncodingException {
-        return URLEncoder.encode(str, "UTF-8").replace(".", "%2E");
+        return URLEncoder.encode(str, StandardCharsets.UTF_8).replace(".", "%2E");
     }
 
     public static String getAsMarkdownClean(String str) {

@@ -1,7 +1,7 @@
 import java.lang.String.join
 
 plugins {
-    val kotlinVersion = "1.5.30"
+    val kotlinVersion = "1.7.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 }
@@ -9,6 +9,9 @@ plugins {
 dependencies {
     // QQ Backend
     api("net.mamoe:mirai-core:2.9.2")
+
+    // KOOK Backend
+    api("com.github.KookyBot:KookyBot:0.1.1")
 
     // Logging
     api("org.apache.logging.log4j:log4j-api:2.17.2")
@@ -32,8 +35,10 @@ group = "io.github.nickid2018"
 version = "1.0"
 
 repositories {
-    maven("https://maven.aliyun.com/repository/public")
     mavenCentral()
+    maven("https://maven.aliyun.com/repository/public")
+    maven("https://jitpack.io")
+    maven("https://libraries.minecraft.net")
 }
 
 tasks.jar.configure {

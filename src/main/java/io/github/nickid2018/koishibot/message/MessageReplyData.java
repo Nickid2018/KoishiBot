@@ -25,13 +25,13 @@ public class MessageReplyData {
         Pair<MessageData, Boolean> find = null;
         lock.lock();
         for (Pair<MessageData, Boolean> data : REPLIES.keySet()) {
-            if (group == null ^ data.getFirst().group == null)
+            if (group == null ^ data.getFirst().group() == null)
                 continue;
-            if (group != null && !group.equals(data.getFirst().group))
+            if (group != null && !group.equals(data.getFirst().group()))
                 continue;
-            if (group == null && !user.equals(data.getFirst().user))
+            if (group == null && !user.equals(data.getFirst().user()))
                 continue;
-            if (!data.getFirst().sent.getSource().equals(reply.getQuoteFrom()))
+            if (!data.getFirst().sent().getSource().equals(reply.getQuoteFrom()))
                 continue;
             find = data;
             break;
@@ -44,6 +44,6 @@ public class MessageReplyData {
         dataConsumer = find.getSecond() ? REPLIES.remove(find) :  REPLIES.get(find);
         lock.unlock();
         MessageData finalFind = find.getFirst();
-        AsyncUtil.execute(() -> dataConsumer.accept(finalFind.sent, chain));
+        AsyncUtil.execute(() -> dataConsumer.accept(finalFind.sent(), chain));
     }
 }

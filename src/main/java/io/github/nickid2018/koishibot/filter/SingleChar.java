@@ -4,7 +4,7 @@ import java.util.List;
 
 public class SingleChar implements Comparable<SingleChar> {
 
-    public char character;
+    public final char character;
     public List<SingleChar> next = null;
 
     public SingleChar(char c) {

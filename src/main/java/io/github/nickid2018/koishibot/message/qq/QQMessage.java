@@ -61,15 +61,13 @@ public abstract class QQMessage implements AbstractMessage {
         if (!(o instanceof QQMessage))
             return false;
         Message other = ((QQMessage) o).getQQMessage();
-        if (other instanceof MessageChain) {
-            MessageChain chain = (MessageChain) other;
+        if (other instanceof MessageChain chain) {
             MessageSource source = null;
             if (receipt != null && (source = chain.get(MessageSource.Key)) != null)
                 if (Arrays.equals(source.getIds(), receipt.getSource().getIds()))
                     return true;
             Message thisMessage = getQQMessage();
-            if (thisMessage instanceof MessageChain) {
-                MessageChain thisChain = (MessageChain) thisMessage;
+            if (thisMessage instanceof MessageChain thisChain) {
                 MessageSource thisSource;
                 if (source != null && (thisSource = thisChain.get(MessageSource.Key)) != null)
                     if (Arrays.equals(source.getIds(), thisSource.getIds()))

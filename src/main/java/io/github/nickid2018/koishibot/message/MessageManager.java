@@ -129,7 +129,7 @@ public class MessageManager {
             String name = service.getName();
             Either<JsonObject, String> data = service.getData();
             if (data.isLeft() && JSON_SERVICE_MAP.containsKey(name))
-                JSON_SERVICE_MAP.get(name).resolveService(data.getLeft(), context, environment);
+                JSON_SERVICE_MAP.get(name).resolveService(data.left(), context, environment);
         }
 
         if (bool.getValue() || (inGroup && att)) {

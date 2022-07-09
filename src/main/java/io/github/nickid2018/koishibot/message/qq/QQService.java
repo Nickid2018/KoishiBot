@@ -27,9 +27,9 @@ public class QQService extends QQMessage implements ServiceMessage {
     @Override
     public ServiceMessage fillService(String name, Either<JsonObject, String> data) {
         if (data.isLeft())
-            richMessage = new LightApp(data.getLeft().toString());
+            richMessage = new LightApp(data.left().toString());
         else
-            richMessage = new SimpleServiceMessage(60, data.getRight());
+            richMessage = new SimpleServiceMessage(60, data.right());
         return this;
     }
 
@@ -37,9 +37,9 @@ public class QQService extends QQMessage implements ServiceMessage {
     public String getName() {
         Either<JsonObject, String> data = getData();
         if (data.isLeft()) {
-            String name =  JsonUtil.getStringInPathOrNull(data.getLeft(), "meta.news.tag");
+            String name =  JsonUtil.getStringInPathOrNull(data.left(), "meta.news.tag");
             if (name == null)
-                name = JsonUtil.getStringInPathOrNull(data.getLeft(), "desc");
+                name = JsonUtil.getStringInPathOrNull(data.left(), "desc");
             return name == null ? "<Unknown>" : name;
         }
         return "<Unknown>";

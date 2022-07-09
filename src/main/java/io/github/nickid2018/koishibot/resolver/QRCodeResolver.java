@@ -74,7 +74,7 @@ public class QRCodeResolver extends MessageResolver {
 
     private boolean decode(MessageContext context, Environment environment) {
         ImageMessage image = null;
-        for (AbstractMessage message : context.getMessage().getMessages()) {
+        for (AbstractMessage message : context.message().getMessages()) {
             if (message instanceof ImageMessage) {
                 image = (ImageMessage) message;
                 break;
@@ -91,12 +91,12 @@ public class QRCodeResolver extends MessageResolver {
                                 null, 0, qrcode.getWidth()));
                 Result result = READER.decode(new BinaryBitmap(new HybridBinarizer(source)));
                 environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                        environment.newQuote(context.getMessage()),
+                        environment.newQuote(context.message()),
                         environment.newText(result.getText())
                 ));
             } catch (NotFoundException e) {
                 environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                        environment.newQuote(context.getMessage()),
+                        environment.newQuote(context.message()),
                         environment.newText("图片内找不到有效的二维码")
                 ));
             } catch (Exception e) {

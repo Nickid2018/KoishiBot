@@ -58,7 +58,7 @@ public class HelpResolver extends MessageResolver {
             if (key.isEmpty() || !HELP_DATA.containsKey(key))
                 environment.getMessageSender().sendMessage(context, environment.newText(UNIVERSAL_HELP.get()));
             else {
-                if (environment.forwardMessageSupported() && !context.getUser().isStranger()) {
+                if (environment.forwardMessageSupported() && !context.user().isStranger()) {
                     BufferedReader reader = new BufferedReader(new StringReader(HELP_DATA.get(key).get()));
                     ForwardMessage forwards = environment.newForwards();
                     ContactInfo contact = environment.getUser(environment.getBotId(), false);
@@ -79,7 +79,7 @@ public class HelpResolver extends MessageResolver {
                     });
                     forwards.fillForwards(contact, messageEntries.toArray(new MessageEntry[0]));
                     environment.getMessageSender().sendMessage(context, forwards);
-                } else if (context.getUser().isStranger()) {
+                } else if (context.user().isStranger()) {
                     BufferedReader reader = new BufferedReader(new StringReader(HELP_DATA.get(key).get()));
                     List<String> lines = reader.lines().collect(Collectors.toList());
                     String title = lines.get(0);

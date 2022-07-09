@@ -88,12 +88,12 @@ public class MessageSender {
     }
 
     public void sendMessageAwait(MessageContext context, AbstractMessage message, BiConsumer<AbstractMessage, ChainMessage> consumer) {
-        UserAwaitData.add(context.getGroup(), context.getUser(), send(context, message, true), consumer);
+        UserAwaitData.add(context.group(), context.user(), send(context, message, true), consumer);
     }
 
     public void sendMessageReply(MessageContext context, AbstractMessage message, boolean once,
                                  BiConsumer<AbstractMessage, ChainMessage> consumer) {
-        MessageReplyData.add(context.getGroup(), context.getUser(), send(context, message, false), consumer, once);
+        MessageReplyData.add(context.group(), context.user(), send(context, message, false), consumer, once);
     }
 
     public void onError(Throwable t, String module, MessageContext context, boolean recall) {
@@ -108,13 +108,13 @@ public class MessageSender {
                     image.fillImage(is);
                 }
                 chain = environment.newChain(
-                        environment.newQuote(context.getMessage()),
+                        environment.newQuote(context.message()),
                         environment.newText(choose + ": 状态码" + code),
                         image
                 );
             } catch (IOException e) {
                 chain = environment.newChain(
-                        environment.newQuote(context.getMessage()),
+                        environment.newQuote(context.message()),
                         environment.newText(choose + ": 状态码" + code)
                 );
             }
@@ -125,7 +125,7 @@ public class MessageSender {
                     message = message.replace(url.getValue(), url.getKey());
             }
             chain = environment.newChain(
-                    environment.newQuote(context.getMessage()),
+                    environment.newQuote(context.message()),
                     environment.newText(choose + ": " + (message.length() > 100 ? t.getClass().getName() : message))
             );
         }
@@ -160,11 +160,11 @@ public class MessageSender {
         try {
             List<Pair<MessageContext, AbstractMessage>> messagesToRecall = new ArrayList<>();
             for (Pair<MessageContext, AbstractMessage> entry : sentQueue) {
-                GroupInfo nowGroup = entry.component1().getGroup();
-                UserInfo nowUser = entry.component1().getUser();
+                GroupInfo nowGroup = entry.component1().group();
+                UserInfo nowUser = entry.component1().user();
                 if (((groupInfo == null && nowGroup == null)
                         || (groupInfo != null && nowGroup != null && groupInfo.equals(nowGroup))) &&
-                        user.equals(nowUser) && time == entry.component1().getSentTime())
+                        user.equals(nowUser) && time == entry.component1().sentTime())
                     messagesToRecall.add(entry);
             }
             messagesToRecall.forEach(en -> {

@@ -27,14 +27,12 @@ public class JsonUtil {
         JsonElement last = root;
         for (int i = 0; i < paths.length - 1; i++) {
             String key = paths[i];
-            if (last instanceof JsonArray) {
+            if (last instanceof JsonArray array) {
                 int num = Integer.parseInt(key);
-                JsonArray array = (JsonArray) last;
                 if (num >= array.size())
                     return Optional.empty();
                 last = array.get(num);
-            } else if (last instanceof JsonObject) {
-                JsonObject object = (JsonObject) last;
+            } else if (last instanceof JsonObject object) {
                 if (!object.has(key))
                     return Optional.empty();
                 last = object.get(key);
@@ -43,13 +41,11 @@ public class JsonUtil {
         }
         String name = paths[paths.length - 1];
         JsonElement get = null;
-        if (last instanceof JsonObject) {
-            JsonObject now = (JsonObject) last;
+        if (last instanceof JsonObject now) {
             if (!now.has(name))
                 return Optional.empty();
             get = now.get(name);
-        } else if (last instanceof JsonArray){
-            JsonArray now = (JsonArray) last;
+        } else if (last instanceof JsonArray now){
             int num = Integer.parseInt(name);
             if (num >= now.size())
                 return Optional.empty();

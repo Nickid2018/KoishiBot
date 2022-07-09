@@ -17,6 +17,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -82,7 +83,7 @@ public class GitHubAuthenticator implements HttpHandler {
                         String name = texts.get(0).getText();
                         String state = randomState();
                         String url = "https://github.com/login/oauth/authorize?client_id=" + Settings.GITHUB_OAUTH2_CLIENT_ID
-                                + "&login=" + name + "&scope=" + URLEncoder.encode(String.join(" ", needScopes), "UTF-8")
+                                + "&login=" + name + "&scope=" + URLEncoder.encode(String.join(" ", needScopes), StandardCharsets.UTF_8)
                                 + "&state=" + state;
                         AUTHENTICATOR.authSequence.put(state, operation);
 

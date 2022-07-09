@@ -43,7 +43,7 @@ public class TranslateResolver extends MessageResolver {
                 ErrorRecord.enqueueError("translation", e);
             }
             environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                    environment.newQuote(context.getMessage()),
+                    environment.newQuote(context.message()),
                     environment.newText(data)
             ));
         });

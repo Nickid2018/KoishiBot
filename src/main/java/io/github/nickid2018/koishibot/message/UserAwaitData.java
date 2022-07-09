@@ -26,13 +26,13 @@ public class UserAwaitData {
         MessageData find = null;
         lock.lock();
         for (MessageData data : AWAIT_MAP.keySet()) {
-            if (group == null ^ data.group == null)
+            if (group == null ^ data.group() == null)
                 continue;
-            if (group != null && !group.equals(data.group))
+            if (group != null && !group.equals(data.group()))
                 continue;
-            if (user == null ^ data.user == null)
+            if (user == null ^ data.user() == null)
                 continue;
-            if (user != null && !user.equals(data.user))
+            if (user != null && !user.equals(data.user()))
                 continue;
             find = data;
             break;
@@ -45,7 +45,7 @@ public class UserAwaitData {
         dataConsumer = AWAIT_MAP.remove(find);
         lock.unlock();
         MessageData finalFind = find;
-        AsyncUtil.execute(() -> dataConsumer.accept(finalFind.sent, reply));
+        AsyncUtil.execute(() -> dataConsumer.accept(finalFind.sent(), reply));
     }
 }
 

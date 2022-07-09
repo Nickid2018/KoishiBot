@@ -87,7 +87,7 @@ public class ModrinthResolver extends MessageResolver {
         }
 
         environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                environment.newQuote(context.getMessage()),
+                environment.newQuote(context.message()),
                 environment.newText(builder.toString().trim())
         ));
     }
@@ -124,7 +124,7 @@ public class ModrinthResolver extends MessageResolver {
         }
 
         environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                environment.newQuote(context.getMessage()),
+                environment.newQuote(context.message()),
                 environment.newText(builder.toString().trim())
         ));
     }
@@ -180,7 +180,7 @@ public class ModrinthResolver extends MessageResolver {
             builder.append("(原文过长截断，完整信息请访问主条目URL)");
 
         environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                environment.newQuote(context.getMessage()),
+                environment.newQuote(context.message()),
                 environment.newText(builder.toString().trim())
         ));
     }

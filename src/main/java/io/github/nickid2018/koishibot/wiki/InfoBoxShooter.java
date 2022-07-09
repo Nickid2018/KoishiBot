@@ -124,10 +124,11 @@ public class InfoBoxShooter {
         doc.body().appendChild(element);
         doc.body().addClass("heimu_toggle_on");
         doc.head().prependChild(new Element("base").attr("href", baseURI));
-        Element heimuToggle = new Element("style").text(
-                        "body.heimu_toggle_on .heimu, body.heimu_toggle_on .heimu rt {\n" +
-                        "  background-color: rgba(37,37,37,0.13) !important;\n" +
-                        "}");
+        Element heimuToggle = new Element("style").text("""
+                        body.heimu_toggle_on .heimu, body.heimu_toggle_on .heimu rt {
+                          background-color: rgba(37,37,37,0.13) !important;
+                        }
+                        """);
         doc.head().appendChild(heimuToggle);
 
         File html = TempFileSystem.createTmpFileAndCreate("htm", "html");

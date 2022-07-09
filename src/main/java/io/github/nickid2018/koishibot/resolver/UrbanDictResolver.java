@@ -29,7 +29,7 @@ public class UrbanDictResolver extends MessageResolver {
                         new HttpGet(URBAN_API + WebUtil.encode(term))).getAsJsonArray();
                 if (object.size() == 0)
                     environment.getMessageSender().sendMessage(context, environment.newChain(
-                            environment.newQuote(context.getMessage()),
+                            environment.newQuote(context.message()),
                             environment.newText("未查找到该词语")
                     ));
                 else {
@@ -38,7 +38,7 @@ public class UrbanDictResolver extends MessageResolver {
                         builder.append("查找出").append(object.size()).append("个结果，仅显示第一条\n");
                     builder.append(JsonUtil.getStringOrNull(object.get(0).getAsJsonObject(), "definition"));
                     environment.getMessageSender().sendMessage(context, environment.newChain(
-                            environment.newQuote(context.getMessage()),
+                            environment.newQuote(context.message()),
                             environment.newText(builder.toString().trim())
                     ));
                 }

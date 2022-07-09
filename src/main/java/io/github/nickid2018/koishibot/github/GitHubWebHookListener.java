@@ -173,19 +173,15 @@ public class GitHubWebHookListener implements HttpHandler {
 
     @ReflectTarget
     public String fork(JsonObject object, String repo) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(JsonUtil.getStringInPathOrNull(object, "sender.login")).append("进行了Fork。\n");
-        builder.append("Fork仓库: ").append(JsonUtil.getStringInPathOrNull(object, "forkee.full_name"));
-        return builder.toString();
+        return JsonUtil.getStringInPathOrNull(object, "sender.login") + "进行了Fork。\n" +
+                "Fork仓库: " + JsonUtil.getStringInPathOrNull(object, "forkee.full_name");
     }
 
     @ReflectTarget
     public String star(JsonObject object, String repo) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(JsonUtil.getStringInPathOrNull(object, "sender.login"));
-        builder.append(Objects.equals(JsonUtil.getStringOrNull(object, "action"), "created")
-                ? " star了此仓库" : " 取消star了此仓库");
-        return builder.toString();
+        return JsonUtil.getStringInPathOrNull(object, "sender.login") +
+                (Objects.equals(JsonUtil.getStringOrNull(object, "action"), "created")
+                        ? " star了此仓库" : " 取消star了此仓库");
     }
 
     @ReflectTarget
