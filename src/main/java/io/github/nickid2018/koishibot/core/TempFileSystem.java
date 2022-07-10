@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.core;
 
+import io.github.nickid2018.koishibot.util.InternalStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Stream;
 
+@InternalStack
 public class TempFileSystem {
 
     public static final Logger TEMP_LOGGER = LoggerFactory.getLogger("Temp File System");

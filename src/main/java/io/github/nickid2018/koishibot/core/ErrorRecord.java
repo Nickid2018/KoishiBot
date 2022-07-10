@@ -4,6 +4,7 @@ import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.message.api.MessageEntry;
+import io.github.nickid2018.koishibot.util.InternalStack;
 import io.github.nickid2018.koishibot.util.value.MutableInt;
 import kotlin.Triple;
 import org.slf4j.Logger;
@@ -42,8 +43,18 @@ public class ErrorRecord {
             builder.append("错误描述: ").append(entry.getThird().getMessage()).append("\n");
             StackTraceElement[] stacks = entry.getThird().getStackTrace();
             int depth = 0;
-            while (!stacks[depth].getClassName().contains("nickid2018"))
+            while (depth < stacks.length) {
+                try {
+                    StackTraceElement stack = stacks[depth];
+                    Class<?> cls = Class.forName(stack.getClassName());
+                    if (cls.getName().contains("nickid2018") && !cls.isAnnotationPresent(InternalStack.class) &&
+                            !cls.getPackage().isAnnotationPresent(InternalStack.class))
+                        break;
+                } catch (Exception e) {
+                    ERROR_LOGGER.warn("Error in generating message.", e);
+                }
                 depth++;
+            }
             if (depth == stacks.length)
                 depth = 0;
             builder.append("用户栈顶层: ").append(stacks[depth]);
