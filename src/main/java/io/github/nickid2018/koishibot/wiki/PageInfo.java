@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.wiki;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.List;
 import java.util.concurrent.Future;
 
 public class PageInfo {
@@ -23,4 +24,6 @@ public class PageInfo {
 
     public boolean isSearched;
     public boolean isRandom;
+
+    public List<String> searchTitles;
 }

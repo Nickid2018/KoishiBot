@@ -26,7 +26,7 @@ public class WikiInfo {
                                             "exsectionformat=plain&exchars=200&redirects";
     public static final String QUERY_PAGE_NOE = "action=query&format=json&inprop=url&iiprop=url&prop=info%7Cimageinfo&redirects";
     public static final String QUERY_PAGE_TEXT = "action=parse&format=json&prop=text";
-    public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text&srlimit=1&srenablerewrite";
+    public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text";
     public static final String WIKI_RANDOM = "action=query&format=json&list=random";
 
     public static final String EDIT_URI_STR = "<link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"";
@@ -167,6 +167,11 @@ public class WikiInfo {
             return random(prefix, allowAudio);
         if (title != null && title.equalsIgnoreCase("~iw"))
             return interwikiList();
+        if (title != null && title.toLowerCase(Locale.ROOT).startsWith("~search")) {
+            String[] split = title.split(" ", 2);
+            if (split.length == 2)
+                return searches(split[1], prefix);
+        }
 
         String section = null;
         if (title != null && title.contains("#")) {
@@ -274,14 +279,27 @@ public class WikiInfo {
 
     private PageInfo search(String key, String prefix) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(
-                url + WIKI_SEARCH + "&srsearch=" + WebUtil.encode(key))).getAsJsonObject();
+                url + WIKI_SEARCH + "&srlimit=1&srsearch=" + WebUtil.encode(key))).getAsJsonObject();
         JsonArray search = data.getAsJsonObject("query").getAsJsonArray("search");
         PageInfo info = new PageInfo();
         info.prefix = prefix;
         info.info = this;
         info.isSearched = true;
         if (search.size() != 0)
-            info.title = search.get(0).getAsJsonObject().get("title").getAsString();
+            info.title = JsonUtil.getStringOrNull(search.get(0).getAsJsonObject(), "title");
+        return info;
+    }
+
+    private PageInfo searches(String key, String prefix) throws IOException {
+        JsonObject data = WebUtil.fetchDataInJson(getWithHeader(
+                url + WIKI_SEARCH + "&srlimit=5&srsearch=" + WebUtil.encode(key))).getAsJsonObject();
+        JsonArray search = data.getAsJsonObject("query").getAsJsonArray("search");
+        PageInfo info = new PageInfo();
+        info.prefix = prefix;
+        info.info = this;
+        info.searchTitles = new ArrayList<>();
+        for (JsonElement element : search)
+            info.searchTitles.add(JsonUtil.getStringOrNull(element.getAsJsonObject(), "title"));
         return info;
     }
 

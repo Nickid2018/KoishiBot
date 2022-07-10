@@ -86,6 +86,35 @@ public class WikiResolver extends MessageResolver {
                         environment.newText("没有搜索到有关于[[" + (namespace == null ? "" : namespace + ":") + title + "]]的页面")
                 ));
             }
+        } else if (page.searchTitles != null) {
+            data.append("对于[[").append(title).append("]]的搜索结果:\n");
+            for (int i = 0; i < page.searchTitles.size(); i++)
+                data.append(i).append(": ").append(page.searchTitles.get(i)).append("\n");
+            data.append("[对本条消息引用回复数字查看详情]");
+            environment.getMessageSender().sendMessageReply(context, environment.newChain(
+                    environment.newQuote(context.message()),
+                    environment.newText(data.toString())
+            ), false, (source, reply) -> {
+                String number = null;
+                for (AbstractMessage message : reply.getMessages()) {
+                    if (message instanceof TextMessage text) {
+                        number = text.getText();
+                        break;
+                    }
+                }
+                if (number == null)
+                    return;
+                try {
+                    int exact = Integer.parseInt(number);
+                    if (exact >= page.searchTitles.size() || exact < 0)
+                        return;
+                    requestWikiPage(page.info, page.prefix, page.searchTitles.get(exact), context,
+                            (namespace == null ? "" : namespace + ":") + title, environment);
+                } catch (NumberFormatException ignored) {
+                } catch (Exception e) {
+                    environment.getMessageSender().onError(e, "wiki.search", context, true);
+                }
+            });
         } else {
             if (page.redirected)
                 data.append("(重定向[[").append(page.prefix == null ? "" : page.prefix + ":").append(page.titlePast)
