@@ -2,15 +2,22 @@ package io.github.nickid2018.koishibot.message.kook;
 
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.util.value.Either;
+import io.github.zly2006.kookybot.contract.GuildUser;
 import io.github.zly2006.kookybot.contract.User;
 
 public class KOOKUser implements UserInfo {
 
-    private final User user;
+    private final Either<User, GuildUser> user;
     private final boolean group;
 
     public KOOKUser(User user, boolean group) {
-        this.user = user;
+        this.user = Either.left(user);
+        this.group = group;
+    }
+
+    public KOOKUser(GuildUser user, boolean group) {
+        this.user = Either.right(user);
         this.group = group;
     }
 
@@ -21,7 +28,7 @@ public class KOOKUser implements UserInfo {
 
     @Override
     public String getUserId() {
-        return "kook.user" + user.getId();
+        return "kook.user" + (user.isLeft() ? user.left() : user.right()).getId();
     }
 
     @Override
@@ -29,7 +36,7 @@ public class KOOKUser implements UserInfo {
         return group;
     }
 
-    public User getUser() {
+    public Either<User, GuildUser> getUser() {
         return user;
     }
 

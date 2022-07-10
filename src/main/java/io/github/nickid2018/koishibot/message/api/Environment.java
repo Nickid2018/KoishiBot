@@ -44,10 +44,12 @@ public interface Environment {
 
     boolean audioSupported();
 
+    boolean quoteSupported();
+
     void close();
 
-    default AtMessage newAt(UserInfo user) {
-        return newAt().fillAt(user);
+    default AtMessage newAt(GroupInfo group, UserInfo user) {
+        return newAt().fillAt(group, user);
     }
 
     default ChainMessage newChain(AbstractMessage... messages) {

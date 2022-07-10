@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 public interface AtMessage extends AbstractMessage {
 
-    AtMessage fillAt(UserInfo contact);
+    AtMessage fillAt(GroupInfo group, UserInfo contact);
 
     @Nullable
     UserInfo getUser(GroupInfo group);

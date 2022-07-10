@@ -16,28 +16,35 @@ public class KOOKEnvironment implements Environment {
 
     private final MessageSender sender;
     private final MessageManager manager;
+    private final KOOKMessagePublisher publisher;
 
     public KOOKEnvironment(BotLoginData data) {
         kookClient = new Client(data.token());
         self = JavaBaseClass.utils.connectWebsocket(kookClient);
 
+        publisher = new KOOKMessagePublisher(this);
         sender = new MessageSender(this, false);
         manager = new MessageManager(this);
     }
 
     @Override
     public AtMessage newAt() {
-        return null;
+        return new KOOKAt(this);
     }
 
     @Override
     public ChainMessage newChain() {
-        return null;
+        return new KOOKChain(this);
     }
 
     @Override
     public TextMessage newText() {
-        return null;
+        return new KOOKText(this);
+    }
+
+    @Override
+    public ImageMessage newImage() {
+        return new KOOKImage(this);
     }
 
     @Override
@@ -47,13 +54,7 @@ public class KOOKEnvironment implements Environment {
     }
 
     @Override
-    public ImageMessage newImage() {
-        return null;
-    }
-
-    @Override
     public ForwardMessage newForwards() {
-
         // Unsupported
         return null;
     }
@@ -66,6 +67,7 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public QuoteMessage newQuote() {
+        // Unsupported
         return null;
     }
 
@@ -93,7 +95,7 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public MessageEventPublisher getEvents() {
-        return null;
+        return publisher;
     }
 
     @Override
@@ -113,6 +115,11 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public boolean audioSupported() {
+        return false;
+    }
+
+    @Override
+    public boolean quoteSupported() {
         return false;
     }
 

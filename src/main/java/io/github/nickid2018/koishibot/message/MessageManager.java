@@ -83,7 +83,7 @@ public class MessageManager {
         if (MemberFilter.shouldNotResponse(user, ban)) {
             if (ban.getValue())
                 environment.getMessageSender().sendMessage(context, environment.newChain(
-                        environment.newAt(user), environment.newText(" 被自动封禁一小时，原因: 过于频繁的操作")
+                        environment.newAt(group, user), environment.newText(" 被自动封禁一小时，原因: 过于频繁的操作")
                 ));
             return;
         }
@@ -145,7 +145,7 @@ public class MessageManager {
         user.nudge(group);
         environment.getMessageSender().sendMessage(
                 new MessageContext(group, null, null, -1), environment.newChain().fillChain(
-                environment.newAt(user),
+                environment.newAt(group, user),
                 environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
         ));
     }

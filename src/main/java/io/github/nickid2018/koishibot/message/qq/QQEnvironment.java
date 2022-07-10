@@ -123,6 +123,11 @@ public class QQEnvironment implements Environment {
         return true;
     }
 
+    @Override
+    public boolean quoteSupported() {
+        return true;
+    }
+
     public void close() {
         bot.close();
     }
