@@ -6,7 +6,6 @@ import com.overzealous.remark.Remark;
 import com.overzealous.remark.convert.AbstractNodeHandler;
 import com.overzealous.remark.convert.DocumentConverter;
 import com.overzealous.remark.convert.NodeHandler;
-import io.github.nickid2018.koishibot.core.Settings;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -40,6 +39,7 @@ public class WebUtil {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62"
     };
+    public static final Map<String, String> MIRROR = new HashMap<>();
 
     private static final Remark REMARK;
     private static final Random UA_RANDOM = new Random();
@@ -171,7 +171,7 @@ public class WebUtil {
     public static String mirror(String url) {
         if (url.startsWith("//"))
             url = "https:" + url;
-        for (Map.Entry<String, String> en : Settings.MIRROR.entrySet()) {
+        for (Map.Entry<String, String> en : MIRROR.entrySet()) {
             String prefix = en.getKey();
             if (url.startsWith(prefix))
                 return url.replace(prefix, en.getValue());
@@ -210,5 +210,14 @@ public class WebUtil {
                 converter.walkNodes(parent, node);
             }
         }, "a,i,em,b,strong,font,span,code");
+    }
+
+    @ReflectTarget
+    public static void loadMirror(JsonObject settingsRoot) {
+        MIRROR.clear();
+        JsonUtil.getData(settingsRoot, "mirrors", JsonObject.class).ifPresent(mirrors -> {
+                    for (Map.Entry<String, JsonElement> en : mirrors.entrySet())
+                        MIRROR.put(en.getKey(), en.getValue().getAsString());
+                });
     }
 }

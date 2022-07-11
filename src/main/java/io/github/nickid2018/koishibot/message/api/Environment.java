@@ -76,7 +76,7 @@ public interface Environment {
         return newMessageEntry().fillMessageEntry(id, name, message, time);
     }
 
-    default QuoteMessage newQuote(AbstractMessage message) {
+    default QuoteMessage newQuote(ChainMessage message) {
         return newQuote().fill(message);
     }
 

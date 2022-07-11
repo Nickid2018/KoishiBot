@@ -3,10 +3,12 @@ package io.github.nickid2018.koishibot.github;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.GroupDataReader;
-import io.github.nickid2018.koishibot.util.ErrorCodeException;
-import io.github.nickid2018.koishibot.util.value.MutableBoolean;
-import io.github.nickid2018.koishibot.util.WebUtil;
 import io.github.nickid2018.koishibot.server.ServerManager;
+import io.github.nickid2018.koishibot.util.ErrorCodeException;
+import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.ReflectTarget;
+import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +21,22 @@ import java.util.Set;
 
 public class GitHubListener {
 
-    public static void clinit() {
-    }
-
     public static final Logger GITHUB_LOGGER = LoggerFactory.getLogger("GitHub");
 
     public static final GitHubListener LISTENER;
+
+    public static String GITHUB_TOKEN;
+    public static String GITHUB_OAUTH2_CLIENT_ID;
+    public static String GITHUB_OAUTH2_CLIENT_SECRET;
+
+    @ReflectTarget
+    public static void loadGitHub(JsonObject settingsRoot) {
+        GITHUB_TOKEN = JsonUtil.getString(settingsRoot, "github_token").orElse("");
+        JsonUtil.getData(settingsRoot, "github_oauth2", JsonObject.class).ifPresent(oauth -> {
+            GITHUB_OAUTH2_CLIENT_ID = JsonUtil.getStringOrNull(oauth, "client_id");
+            GITHUB_OAUTH2_CLIENT_SECRET = JsonUtil.getStringOrNull(oauth, "client_secret");
+        });
+    }
 
     static {
         GitHubListener tmp;

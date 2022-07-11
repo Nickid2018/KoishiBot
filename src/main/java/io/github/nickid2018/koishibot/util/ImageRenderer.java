@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.util;
 
-import io.github.nickid2018.koishibot.core.Settings;
+import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.util.value.MutableInt;
 
 import java.awt.*;
@@ -16,14 +16,29 @@ import java.util.TreeMap;
 
 public class ImageRenderer {
 
+    public static Font IMAGE_FONT;
+    public static Font IMAGE_FONT_BOLD;
+
+    @ReflectTarget
+    public static void loadImageSettings(JsonObject settingsRoot) {
+        IMAGE_FONT = new Font(null, Font.PLAIN, 20);
+        IMAGE_FONT_BOLD = new Font(null, Font.BOLD, 20);
+        JsonUtil.getData(settingsRoot, "image", JsonObject.class).ifPresent(image -> {
+            IMAGE_FONT = new Font(JsonUtil.getStringOrNull(image, "family"), Font.PLAIN,
+                    JsonUtil.getIntOrZero(image, "size"));
+            IMAGE_FONT_BOLD = new Font(JsonUtil.getStringOrNull(image, "family"), Font.BOLD,
+                    JsonUtil.getIntOrZero(image, "size"));
+        });
+    }
+
     public static BufferedImage renderMap(Map<String, String> map, String key, String value) {
         return renderMap(map, key, value, Alignment.CENTER, Alignment.CENTER);
     }
 
     public static BufferedImage renderMap(Map<String, String> map, String key, String value,
                                           Alignment keyAlign, Alignment valueAlign) {
-        Font font = Settings.IMAGE_FONT;
-        Font fontBold = Settings.IMAGE_FONT_BOLD;
+        Font font = IMAGE_FONT;
+        Font fontBold = IMAGE_FONT_BOLD;
 
         int margin = font.getSize() / 2;
         FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, false);
@@ -81,8 +96,8 @@ public class ImageRenderer {
     }
 
     public static BufferedImage renderText(String title, List<String> lines) {
-        Font font = Settings.IMAGE_FONT;
-        Font fontBold = Settings.IMAGE_FONT_BOLD;
+        Font font = IMAGE_FONT;
+        Font fontBold = IMAGE_FONT_BOLD;
 
         int margin = font.getSize() / 2;
         FontRenderContext frc = new FontRenderContext(new AffineTransform(), true, false);

@@ -1,7 +1,10 @@
 package io.github.nickid2018.koishibot.wiki;
 
+import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
+import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -15,7 +18,6 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
-import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +27,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -33,38 +34,30 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 
 public class InfoBoxShooter {
 
     public static final Logger INFOBOX_LOGGER = LoggerFactory.getLogger("Wiki Infobox");
 
-    static {
-        try {
-            Class<?> remoteDriverClass = RemoteWebDriver.class;
-            Field field = remoteDriverClass.getDeclaredField("logger");
-            field.setAccessible(true);
-            ((java.util.logging.Logger) field.get(null)).setLevel(Level.OFF);
-        } catch (Exception e) {
-            INFOBOX_LOGGER.error("Cannot turn off logger.", e);
-        }
-
+    @ReflectTarget
+    public static void loadWebDriver(JsonObject settingsRoot) {
+        close();
+        JsonUtil.getString(settingsRoot, "webdriver").ifPresent(web -> {
+            System.setProperty("webdriver.gecko.driver", web);
+            FirefoxOptions firefoxOptions = new FirefoxOptions();
+            firefoxOptions.addArguments("--headless");
+            firefoxOptions.addArguments("--no-sandbox");
+            driver = new FirefoxDriver(firefoxOptions);
+            driver.manage().window().setSize(new Dimension(0, 0));
+            executor = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().uncaughtExceptionHandler(
+                    (t, e) -> ErrorRecord.enqueueError("wiki.infoboxshoot", e)
+            ).daemon(true).namingPattern("Infobox Shooter").build());
+            INFOBOX_LOGGER.info("Infobox Shooter initialized.");
+        });
     }
 
     private static FirefoxDriver driver;
     private static ExecutorService executor;
-
-    public static void loadWebDriver() {
-        FirefoxOptions firefoxOptions = new FirefoxOptions();
-        firefoxOptions.addArguments("--headless");
-        firefoxOptions.addArguments("--no-sandbox");
-        driver = new FirefoxDriver(firefoxOptions);
-        driver.manage().window().setSize(new Dimension(0, 0));
-        executor = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().uncaughtExceptionHandler(
-                (t, e) -> ErrorRecord.enqueueError("wiki.infoboxshoot", e)
-        ).daemon(true).namingPattern("Infobox Shooter %d").build());
-        INFOBOX_LOGGER.info("Infobox Shooter initialized.");
-    }
 
     public static final String[] SUPPORT_INFOBOX = new String[] {
             "notaninfobox", "infoboxtable", "infoboxSpecial", "infotemplatebox", "infobox2",

@@ -1,10 +1,10 @@
 package io.github.nickid2018.koishibot.message;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
-import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
+import io.github.nickid2018.koishibot.util.WebUtil;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import kotlin.Pair;
 
@@ -120,7 +120,7 @@ public class MessageSender {
             }
         } else {
             String message = t.getMessage();
-            for (Map.Entry<String, String> url : Settings.MIRROR.entrySet()) {
+            for (Map.Entry<String, String> url : WebUtil.MIRROR.entrySet()) {
                 if (message.contains(url.getValue()))
                     message = message.replace(url.getValue(), url.getKey());
             }

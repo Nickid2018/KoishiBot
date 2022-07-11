@@ -1,5 +1,8 @@
 package io.github.nickid2018.koishibot.filter;
 
+import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,5 +143,18 @@ public final class SensitiveWordFilter {
                 left = key + 1;
         }
         return null;
+    }
+
+    @ReflectTarget
+    public static void loadSensitiveWordsSettings(JsonObject settingsRoot) {
+        JsonUtil.getString(settingsRoot, "sensitives").ifPresent(
+                s -> {
+                    try {
+                        loadWordFromFile(s);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+        );
     }
 }

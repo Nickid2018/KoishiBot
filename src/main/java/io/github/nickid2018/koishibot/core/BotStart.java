@@ -1,11 +1,6 @@
 package io.github.nickid2018.koishibot.core;
 
-import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.message.Environments;
-import io.github.nickid2018.koishibot.message.MemberFilter;
-import io.github.nickid2018.koishibot.util.AsyncUtil;
-import io.github.nickid2018.koishibot.server.ServerManager;
-import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -42,19 +37,15 @@ public class BotStart {
     }
 
     private static void start() throws IOException {
+        PluginProcessor.initProcess();
         Settings.load();
-        AsyncUtil.start();
         Environments.loadEnvironments();
-        MemberFilter.init();
-        GitHubListener.clinit();
+        PluginProcessor.init();
     }
 
     private static void terminate() {
         Environments.closeEnvironments();
-        AsyncUtil.terminate();
-        TempFileSystem.close();
-        InfoBoxShooter.close();
-        ServerManager.stop();
+        PluginProcessor.exit();
         System.exit(0);
     }
 }

@@ -3,7 +3,6 @@ package io.github.nickid2018.koishibot.github;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
@@ -39,8 +38,8 @@ public class GitHubAuthenticator implements HttpHandler {
     }
 
     public static HttpUriRequest authenticate(HttpUriRequest request) {
-        if (Settings.GITHUB_TOKEN != null && !Settings.GITHUB_TOKEN.isEmpty())
-            request.addHeader("Authorization", "token " + Settings.GITHUB_TOKEN);
+        if (GitHubListener.GITHUB_TOKEN != null && !GitHubListener.GITHUB_TOKEN.isEmpty())
+            request.addHeader("Authorization", "token " + GitHubListener.GITHUB_TOKEN);
         return request;
     }
 
@@ -57,7 +56,7 @@ public class GitHubAuthenticator implements HttpHandler {
 
     public static void authenticateOperation(Consumer<String> operation,
                                              MessageContext context, Environment environment, String... needScopes) {
-        if (Settings.GITHUB_OAUTH2_CLIENT_ID == null) {
+        if (GitHubListener.GITHUB_OAUTH2_CLIENT_ID == null) {
             AbstractMessage message = environment.newText(
                     "警告: 此操作需要授权，请发送私人访问令牌用于授权。\n" +
                             "本次操作需要" + String.join(", ", needScopes) + "权限。"
@@ -82,7 +81,7 @@ public class GitHubAuthenticator implements HttpHandler {
                     try {
                         String name = texts.get(0).getText();
                         String state = randomState();
-                        String url = "https://github.com/login/oauth/authorize?client_id=" + Settings.GITHUB_OAUTH2_CLIENT_ID
+                        String url = "https://github.com/login/oauth/authorize?client_id=" + GitHubListener.GITHUB_OAUTH2_CLIENT_ID
                                 + "&login=" + name + "&scope=" + URLEncoder.encode(String.join(" ", needScopes), StandardCharsets.UTF_8)
                                 + "&state=" + state;
                         AUTHENTICATOR.authSequence.put(state, operation);
@@ -117,7 +116,7 @@ public class GitHubAuthenticator implements HttpHandler {
         if (authSequence.containsKey(state)) {
             String code = args.get("code");
             HttpPost post = new HttpPost("https://github.com/login/oauth/access_token?client_id="
-                    + Settings.GITHUB_OAUTH2_CLIENT_ID + "&client_secret=" + Settings.GITHUB_OAUTH2_CLIENT_SECRET
+                    + GitHubListener.GITHUB_OAUTH2_CLIENT_ID + "&client_secret=" + GitHubListener.GITHUB_OAUTH2_CLIENT_SECRET
                     + "&code=" + code);
             post.setHeader("Accept", "application/json");
             JsonObject object = WebUtil.fetchDataInJson(post).getAsJsonObject();

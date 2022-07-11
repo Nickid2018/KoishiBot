@@ -40,9 +40,11 @@ public class WikiInfo {
     public static final Set<String> NEED_TRANSFORM_AUDIO = new HashSet<>(
             Arrays.asList("oga", "ogg", "flac", "mp3", "wav")
     );
+    public static final Map<String, WikiInfo> SUPPORT_WIKIS = new HashMap<>();
 
     private static final Map<String, WikiInfo> STORED_WIKI_INFO = new HashMap<>();
     private static final Map<WikiInfo, String> STORED_INTERWIKI_SOURCE_URL = new HashMap<>();
+    public static String BASE_WIKI;
 
     private final Map<String, String> additionalHeaders;
     private String url;
@@ -64,6 +66,27 @@ public class WikiInfo {
         this.url = url;
         this.additionalHeaders = additionalHeaders;
         STORED_WIKI_INFO.put(url, this);
+    }
+
+    @ReflectTarget
+    public static void loadWiki(JsonObject settingsRoot) {
+        JsonUtil.getData(settingsRoot, "wiki", JsonObject.class).ifPresent(wikiRoot -> {
+            JsonObject wikisArray = wikiRoot.getAsJsonObject("wikis");
+            for (Map.Entry<String, JsonElement> en : wikisArray.entrySet())
+                if (!SUPPORT_WIKIS.containsKey(en.getKey())) {
+                    if (en.getValue() instanceof JsonPrimitive)
+                        SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(en.getValue().getAsString() + "?"));
+                    else {
+                        JsonObject wikiData = en.getValue().getAsJsonObject();
+                        JsonObject headers = wikiData.getAsJsonObject("headers");
+                        Map<String, String> header = new HashMap<>();
+                        for (Map.Entry<String, JsonElement> headerEntry : headers.entrySet())
+                            header.put(headerEntry.getKey(), headerEntry.getValue().getAsString());
+                        SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(JsonUtil.getStringOrNull(wikiData, "url") + "?", header));
+                    }
+                }
+            BASE_WIKI = wikiRoot.get("base").getAsString();
+        });
     }
 
     public void checkAvailable() throws IOException {

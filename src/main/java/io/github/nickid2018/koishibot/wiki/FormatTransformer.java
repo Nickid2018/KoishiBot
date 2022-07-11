@@ -1,7 +1,9 @@
 package io.github.nickid2018.koishibot.wiki;
 
-import io.github.nickid2018.koishibot.core.Settings;
+import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
+import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.ReflectTarget;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -18,7 +20,20 @@ public class FormatTransformer {
 
     public static final Logger TRANSFORMER_LOGGER = LoggerFactory.getLogger("Format Transformer");
 
+    public static String FFMPEG_LOCATION;
+    public static String ENCODER_LOCATION;
+
+    @ReflectTarget
+    public static void loadFFmpeg(JsonObject settingsRoot) {
+        JsonUtil.getData(settingsRoot, "audio", JsonObject.class).ifPresent(audio -> {
+            FFMPEG_LOCATION = JsonUtil.getStringOrNull(audio, "ffmpeg");
+            ENCODER_LOCATION = JsonUtil.getStringOrNull(audio, "encoder");
+        });
+    }
+
     public static File[] transformWebAudioToSilks(String suffix, URL source) throws Exception {
+        if (FFMPEG_LOCATION == null)
+            return null;
         File sourceFile = TempFileSystem.createTmpFileAndCreate("as", suffix);
         IOUtils.copy(source, sourceFile);
         return transformAsSilk(sourceFile);
@@ -26,7 +41,7 @@ public class FormatTransformer {
 
     public static int getAudioLength(File source) throws Exception {
         ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-        executeCommand(dataStream, Settings.FFMPEG_LOCATION, "-i", source.getAbsolutePath());
+        executeCommand(dataStream, FFMPEG_LOCATION, "-i", source.getAbsolutePath());
         String buffer = IOUtils.toString(dataStream.toByteArray(), "UTF-8");
         int offset = buffer.indexOf("Duration:") + 10;
         String str = buffer.substring(offset).split(",")[0];
@@ -44,7 +59,7 @@ public class FormatTransformer {
         TRANSFORMER_LOGGER.info("Start transforming {} to silk files, length = {}s.", sourceFile, length);
         while (length > 50) {
             File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
-            executeCommand(null, Settings.FFMPEG_LOCATION, "-i",
+            executeCommand(null, FFMPEG_LOCATION, "-i",
                     sourceFile.getAbsolutePath(), "-ss", offset + "", "-t", "50", "-f", "s16le", "-ar", "24000", "-ac", "1",
                     "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
             silks.add(transformPCMtoSILK(pcm));
@@ -52,7 +67,7 @@ public class FormatTransformer {
             length -= 50;
         }
         File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
-        executeCommand(null, Settings.FFMPEG_LOCATION, "-i",
+        executeCommand(null, FFMPEG_LOCATION, "-i",
                 sourceFile.getAbsolutePath(), "-ss", offset + "", "-f", "s16le", "-ar", "24000", "-ac", "1",
                 "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
         silks.add(transformPCMtoSILK(pcm));
@@ -63,7 +78,7 @@ public class FormatTransformer {
 
     public static File transformPCMtoSILK(File sourceFile) throws Exception {
         File silk = TempFileSystem.createTmpFile("slk", "silk");
-        executeCommand(null, Settings.ENCODER_LOCATION,
+        executeCommand(null, ENCODER_LOCATION,
                 sourceFile.getAbsolutePath(), silk.getAbsolutePath(),
                 "-Fs_API", "24000", "-tencent");
         TempFileSystem.unlockFileAndDelete(sourceFile);
@@ -71,12 +86,14 @@ public class FormatTransformer {
     }
 
     public static InputStream transformImageToPNG(InputStream input, String format) throws Exception {
+        if (FFMPEG_LOCATION == null)
+            return null;
         File inputImage = TempFileSystem.createTmpFile("image", format);
         try (FileOutputStream fos = new FileOutputStream(inputImage)) {
             IOUtils.copy(input, fos);
         }
         File output = TempFileSystem.createTmpFile("imageO", "png");
-        executeCommand(null, Settings.FFMPEG_LOCATION,
+        executeCommand(null, FFMPEG_LOCATION,
                 "-i", inputImage.getAbsolutePath(), output.getAbsolutePath());
         TempFileSystem.unlockFileAndDelete(inputImage);
         TRANSFORMER_LOGGER.info("Transformed a {} image to PNG.", format);

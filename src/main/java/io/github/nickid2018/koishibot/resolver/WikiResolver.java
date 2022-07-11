@@ -1,10 +1,10 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
+import io.github.nickid2018.koishibot.util.WebUtil;
 import io.github.nickid2018.koishibot.wiki.PageInfo;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 
@@ -33,11 +33,11 @@ public class WikiResolver extends MessageResolver {
         AsyncUtil.execute(() -> {
             String[] splits = finalKey.split(":", 2);
             try {
-                if (splits.length == 1 || !Settings.SUPPORT_WIKIS.containsKey(splits[0].toLowerCase(Locale.ROOT)))
-                    requestWikiPage(Settings.SUPPORT_WIKIS.get(Settings.BASE_WIKI), null,
+                if (splits.length == 1 || !WikiInfo.SUPPORT_WIKIS.containsKey(splits[0].toLowerCase(Locale.ROOT)))
+                    requestWikiPage(WikiInfo.SUPPORT_WIKIS.get(WikiInfo.BASE_WIKI), null,
                             finalKey, context, null, environment);
                 else
-                    requestWikiPage(Settings.SUPPORT_WIKIS.get(splits[0].toLowerCase(Locale.ROOT)), splits[0].toLowerCase(Locale.ROOT),
+                    requestWikiPage(WikiInfo.SUPPORT_WIKIS.get(splits[0].toLowerCase(Locale.ROOT)), splits[0].toLowerCase(Locale.ROOT),
                             splits[1], context, null, environment);
             } catch (Exception e) {
                 environment.getMessageSender().onError(e, "wiki", context, true);
@@ -127,7 +127,7 @@ public class WikiResolver extends MessageResolver {
 
             boolean shouldHide = false;
             if (page.url != null)
-                for (String prefix : Settings.MIRROR.values())
+                for (String prefix : WebUtil.MIRROR.values())
                    if (page.url.contains(prefix)) {
                         shouldHide = true;
                         break;

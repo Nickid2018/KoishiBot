@@ -2,7 +2,8 @@ package io.github.nickid2018.koishibot.translation;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.core.Settings;
+import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -23,6 +24,17 @@ public class YoudaoTranslation implements TranslationProvider {
     private static final String YOUDAO_URL = "https://openapi.youdao.com/api";
     private static final char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
+    public static String YOUDAO_APP_KEY;
+    public static String YOUDAO_APP_SECRET;
+
+    @ReflectTarget
+    public static void loadYouDaoAppKeyAndSecrets(JsonObject settingsRoot) {
+        JsonUtil.getData(settingsRoot, "youdao", JsonObject.class).ifPresent(youdao -> {
+            YOUDAO_APP_KEY = JsonUtil.getStringOrNull(youdao, "app_key");
+            YOUDAO_APP_SECRET = JsonUtil.getStringOrNull(youdao, "app_secret");
+        });
+    }
+
     @Override
     public String translate(String text, String from, String to) throws IOException {
         // Parameters
@@ -35,9 +47,9 @@ public class YoudaoTranslation implements TranslationProvider {
         params.put("signType", "v3");
         String curtime = String.valueOf(System.currentTimeMillis() / 1000);
         params.put("curtime", curtime);
-        String signStr = Settings.YOUDAO_APP_KEY + truncate(text) + salt + curtime + Settings.YOUDAO_APP_SECRET;
+        String signStr = YOUDAO_APP_KEY + truncate(text) + salt + curtime + YOUDAO_APP_SECRET;
         String sign = getDigest(signStr);
-        params.put("appKey", Settings.YOUDAO_APP_KEY);
+        params.put("appKey", YOUDAO_APP_KEY);
         params.put("q", text);
         params.put("salt", salt);
         params.put("sign", sign);

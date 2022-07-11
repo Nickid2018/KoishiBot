@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 
 public interface QuoteMessage extends AbstractMessage {
 
-    QuoteMessage fill(AbstractMessage message);
+    QuoteMessage fill(ChainMessage message);
 
     @Nullable
     UserInfo getReplyTo();

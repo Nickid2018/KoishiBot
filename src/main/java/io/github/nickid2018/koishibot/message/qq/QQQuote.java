@@ -27,7 +27,7 @@ public class QQQuote extends QQMessage implements QuoteMessage {
     }
 
     @Override
-    public QuoteMessage fill(AbstractMessage message) {
+    public QuoteMessage fill(ChainMessage message) {
         quoteReply = new QuoteReply((MessageChain) ((QQChain) message).getQQMessage());
         return this;
     }
