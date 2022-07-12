@@ -6,7 +6,6 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 public class GitHubSubscribeResolver extends MessageResolver {
 
@@ -16,7 +15,7 @@ public class GitHubSubscribeResolver extends MessageResolver {
 
     @Override
     // ~github subscribe add/del <repo>
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         key = key.trim();
         String[] split = key.split(" ", 2);
         if (split.length != 2)

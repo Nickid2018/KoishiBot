@@ -7,7 +7,6 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 
 import java.io.IOException;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 public class GitHubWebHookResolver extends MessageResolver {
 
@@ -27,7 +26,7 @@ public class GitHubWebHookResolver extends MessageResolver {
 
     @Override
     // ~github webhook add/del <repo>
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         key = key.trim();
         String[] split = key.split(" ", 2);
         if (split.length != 2)

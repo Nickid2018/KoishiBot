@@ -21,7 +21,7 @@ public class TranslateResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         AsyncUtil.execute(() -> {
             String[] splits = key.split(":", 3);
             String from = null, to = null;

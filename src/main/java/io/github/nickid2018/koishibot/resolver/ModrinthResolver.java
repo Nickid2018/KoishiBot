@@ -38,12 +38,12 @@ public class ModrinthResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         AsyncUtil.execute(() -> {
             try {
-                if (pattern == MOD_SEARCH_PATTERN)
+                if (resolvedArguments == MOD_SEARCH_PATTERN)
                     displaySearch(key.substring(12, key.length() - 1), context, environment);
-                else if (pattern == MOD_FILES_PATTERN)
+                else if (resolvedArguments == MOD_FILES_PATTERN)
                     displayFiles(key.substring(11, key.length() - 1), context, environment);
                 else
                     displayMod(key.substring(5, key.length() - 1), context, environment);

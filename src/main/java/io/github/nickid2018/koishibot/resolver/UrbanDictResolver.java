@@ -8,8 +8,6 @@ import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
 
-import java.util.regex.Pattern;
-
 public class UrbanDictResolver extends MessageResolver {
 
     public static final String URBAN_API = "https://api.urbandictionary.com/v0/define?term=";
@@ -19,7 +17,7 @@ public class UrbanDictResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         String term = key.trim();
         if (term.isEmpty())
             return false;

@@ -35,7 +35,7 @@ public class BugTrackerResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         String resolve = key.substring(5, key.length() - 1);
         boolean isDisplay = RegexUtil.match(BUG_NAME_PATTERN, resolve);
         boolean isSearch = RegexUtil.match(BUG_SEARCH_PATTERN, resolve);

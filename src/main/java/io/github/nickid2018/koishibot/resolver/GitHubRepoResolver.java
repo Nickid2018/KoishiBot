@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 public class GitHubRepoResolver extends MessageResolver {
 
@@ -31,7 +30,7 @@ public class GitHubRepoResolver extends MessageResolver {
 
     // ~github repo <name> [issue <issue>]
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         key = key.trim();
         String[] data = key.split(" ");
         AsyncUtil.execute(() -> {

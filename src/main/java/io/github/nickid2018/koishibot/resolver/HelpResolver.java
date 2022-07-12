@@ -16,7 +16,6 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class HelpResolver extends MessageResolver {
@@ -52,7 +51,7 @@ public class HelpResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         key = key.trim();
         try {
             if (key.isEmpty() || !HELP_DATA.containsKey(key))

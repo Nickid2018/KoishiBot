@@ -22,7 +22,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 
 public class LaTeXResolver extends MessageResolver {
 
@@ -39,7 +38,7 @@ public class LaTeXResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         AsyncUtil.execute(() -> {
             String latex = key;
             Transcoder use = transcoder;

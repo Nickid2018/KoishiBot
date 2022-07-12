@@ -27,7 +27,7 @@ public class WikiResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         key = key.substring(2, key.length() - 2);
         String finalKey = key;
         AsyncUtil.execute(() -> {

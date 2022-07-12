@@ -9,7 +9,6 @@ import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.Date;
 import java.util.Locale;
-import java.util.regex.Pattern;
 
 public class InfoResolver extends MessageResolver {
 
@@ -23,7 +22,7 @@ public class InfoResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         key = key.trim().toLowerCase(Locale.ROOT);
         if (key.isEmpty())
             printSystemData(context, environment);

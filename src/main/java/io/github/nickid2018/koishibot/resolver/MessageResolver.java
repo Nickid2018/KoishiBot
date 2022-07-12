@@ -4,22 +4,32 @@ import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public abstract class MessageResolver {
 
-    private final Pattern[] regex;
-    private final String prefix;
+    private final Function<String, Object> resolverTrigger;
 
-    public MessageResolver(Pattern... pattern) {
-        regex = pattern;
-        prefix = null;
+    public MessageResolver(Function<String, Object> resolverTrigger) {
+        this.resolverTrigger = resolverTrigger;
+    }
+
+    public MessageResolver(Pattern... patterns) {
+        resolverTrigger = s -> {
+            for (Pattern pattern : patterns) {
+                Matcher matcher = pattern.matcher(s);
+                if (matcher.find())
+                    return pattern;
+            }
+            return null;
+        };
     }
 
     public MessageResolver(String prefix) {
-        regex = null;
-        this.prefix = prefix.toLowerCase(Locale.ROOT);
+        String lowCased = prefix.toLowerCase(Locale.ROOT);
+        resolverTrigger = s -> s.toLowerCase(Locale.ROOT).startsWith(lowCased) ? prefix : null;
     }
 
     public boolean groupEnabled() {
@@ -40,17 +50,9 @@ public abstract class MessageResolver {
 
     public boolean resolve(String segment, MessageContext context, Environment environment) {
         segment = segment.trim();
-        if (prefix != null && segment.toLowerCase(Locale.ROOT).startsWith(prefix))
-            return resolveInternal(segment.substring(prefix.length()), context, null, environment);
-        else if (regex != null) {
-            for (Pattern pattern : regex) {
-                Matcher matcher = pattern.matcher(segment);
-                if (matcher.find())
-                    return resolveInternal(segment.substring(matcher.start(), matcher.end()), context, pattern, environment);
-            }
-        }
-        return false;
+        Object ret = resolverTrigger.apply(segment);
+        return ret != null && resolveInternal(segment, context, ret, environment);
     }
 
-    public abstract boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment);
+    public abstract boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment);
 }

@@ -48,18 +48,18 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         AsyncUtil.execute(() -> {
             try {
-                if (pattern == B_SHORT_LINK_PATTERN)
+                if (resolvedArguments == B_SHORT_LINK_PATTERN)
                     fromShortLink(key, context, environment);
-                else if (pattern == B_CV_ARTICLE_PATTERN)
+                else if (resolvedArguments == B_CV_ARTICLE_PATTERN)
                     doArticleDisplay(key, context, environment);
-                else if (pattern == B_SS_EPISODE_PATTERN)
+                else if (resolvedArguments == B_SS_EPISODE_PATTERN)
                     doEpisodeDisplay(key, context, true, environment);
-                else if (pattern == B_EP_EPISODE_PATTERN)
+                else if (resolvedArguments == B_EP_EPISODE_PATTERN)
                     doEpisodeDisplay(key, context, false, environment);
-                else if (pattern == B_AU_AUDIO_PATTERN)
+                else if (resolvedArguments == B_AU_AUDIO_PATTERN)
                     doAudioDisplay(key, context, environment);
                 else
                     doVideoDisplay(key, context, environment);

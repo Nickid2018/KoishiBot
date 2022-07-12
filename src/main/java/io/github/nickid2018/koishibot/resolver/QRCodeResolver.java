@@ -17,7 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class QRCodeResolver extends MessageResolver {
 
@@ -36,7 +35,7 @@ public class QRCodeResolver extends MessageResolver {
     }
 
     @Override
-    public boolean resolveInternal(String key, MessageContext context, Pattern pattern, Environment environment) {
+    public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         key = key.trim();
         String[] data = key.split(" ", 2);
         switch (data[0].toLowerCase(Locale.ROOT)) {
