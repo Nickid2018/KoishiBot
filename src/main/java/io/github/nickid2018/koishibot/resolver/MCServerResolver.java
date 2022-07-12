@@ -36,7 +36,7 @@ public class MCServerResolver extends MessageResolver {
                 StringBuilder sb = new StringBuilder();
 
                 sb.append("服务器: ").append(key).append("\n");
-                sb.append("延迟: ").append(JsonUtil.getIntOrZero(json, "ping")).append("\n");
+                sb.append("延迟: ").append(JsonUtil.getIntOrZero(json, "ping")).append("ms\n");
                 sb.append("版本: ").append(JsonUtil.getStringInPathOrNull(json, "version.name"));
                 sb.append("(协议版本 ").append(JsonUtil.getIntInPathOrElse(json, "version.protocol", -1)).append(")\n");
 
