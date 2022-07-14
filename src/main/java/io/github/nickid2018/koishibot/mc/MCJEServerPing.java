@@ -10,7 +10,7 @@ import java.net.Socket;
 /*
  * @author zh32 <zh32 at zh32.de>, modified by Nickid2018
  */
-public record ServerPing(InetSocketAddress host) {
+public record MCJEServerPing(InetSocketAddress host) {
 
     public static final int TIMEOUT = 10000;
 
@@ -67,7 +67,6 @@ public record ServerPing(InetSocketAddress host) {
         writeVarInt(dataOutputStream, b.size()); // prepend size
         dataOutputStream.write(b.toByteArray()); // write handshake packet
 
-
         dataOutputStream.writeByte(0x01); // size is only 1
         dataOutputStream.writeByte(0x00); // packet id for ping
         DataInputStream dataInputStream = new DataInputStream(inputStream);
@@ -77,7 +76,7 @@ public record ServerPing(InetSocketAddress host) {
         if (id == -1)
             throw new IOException("Premature end of stream.");
         if (id != 0x00) // we want a status response
-            throw new IOException("Invalid packetID");
+            throw new IOException("Invalid packetID: expect 0, but found " + id);
 
         int length = readVarInt(dataInputStream); // length of json string
 
@@ -100,7 +99,7 @@ public record ServerPing(InetSocketAddress host) {
         if (id == -1)
             throw new IOException("Premature end of stream.");
         if (id != 0x01)
-            throw new IOException("Invalid packetID");
+            throw new IOException("Invalid packetID: expect 1, but found " + id);
 
         long pingTime = dataInputStream.readLong(); // read response
 
