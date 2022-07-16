@@ -31,7 +31,9 @@ public class DataReader<E> {
             return data = (E) is.readObject();
         } catch (Exception e) {
             ErrorRecord.enqueueError("data." + file.getName(), e);
-            return data = empty.get();
+            data = empty.get();
+            saveData();
+            return data;
         }
     }
 

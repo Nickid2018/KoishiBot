@@ -3,9 +3,11 @@ package io.github.nickid2018.koishibot.mc.chat;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import nl.vv32.rcon.Rcon;
+import nl.vv32.rcon.RconBuilder;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.function.BiConsumer;
 
 public class DirectChatBridgeProvider implements ChatBridgeProvider {
@@ -22,10 +24,11 @@ public class DirectChatBridgeProvider implements ChatBridgeProvider {
 
     private boolean tryLinkAndAuthenticate() {
         try {
-            rcon = Rcon.open(addr);
+            rcon = new RconBuilder().withCharset(StandardCharsets.UTF_8).withChannel(SocketChannel.open(addr)).build();
             rcon.authenticate(password);
             return true;
-        } catch (IOException e) {
+        } catch (Exception e) {
+            MCChatBridge.CHAT_BRIDGE_LOGGER.error("Can't connect RCON", e);
             return false;
         }
     }
@@ -37,9 +40,9 @@ public class DirectChatBridgeProvider implements ChatBridgeProvider {
         commandBuilder.append("tellraw @e[type=player] ");
         commandBuilder.append("[{\"color\":\"aqua\",\"text\":\"[");
         commandBuilder.append(group.getEnvironment().getEnvironmentName());
-        commandBuilder.append("]\"},{\"color\":\"white\",\"text\":\"<");
-        commandBuilder.append(user.getName());
-        commandBuilder.append(">\"},{\"color\":\"white\",\"text\":\"");
+        commandBuilder.append("] \"},{\"color\":\"white\",\"text\":\"<");
+        commandBuilder.append(user.getNameInGroup(group));
+        commandBuilder.append("> \"},{\"color\":\"white\",\"text\":\"");
         commandBuilder.append(text);
         commandBuilder.append("\"}]");
         do {
@@ -47,7 +50,7 @@ public class DirectChatBridgeProvider implements ChatBridgeProvider {
             try {
                 rcon.sendCommand(commandBuilder.toString());
                 break;
-            } catch (IOException ignored) {
+            } catch (Exception ignored) {
             }
         } while (tryLinkAndAuthenticate() && loop);
     }

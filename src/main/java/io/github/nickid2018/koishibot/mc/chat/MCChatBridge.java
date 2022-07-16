@@ -61,6 +61,7 @@ public class MCChatBridge {
     public void groupAddLink(GroupInfo group, InetSocketAddress addr) throws Exception {
         groupChatBridges.updateData(group.getGroupId(), set -> {
             set.add(addr);
+            groupMap.computeIfAbsent(group.getGroupId(), s -> new HashSet<>()).add(providerMap.get(addr));
             return set;
         });
     }
@@ -68,6 +69,7 @@ public class MCChatBridge {
     public void groupRemoveLink(GroupInfo group, InetSocketAddress addr) throws Exception {
         groupChatBridges.updateData(group.getGroupId(), set -> {
             set.remove(addr);
+            groupMap.computeIfAbsent(group.getGroupId(), s -> new HashSet<>()).remove(providerMap.get(addr));
             return set;
         });
     }

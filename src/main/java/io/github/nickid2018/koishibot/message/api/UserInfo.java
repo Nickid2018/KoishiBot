@@ -7,4 +7,6 @@ public interface UserInfo extends ContactInfo {
     boolean isStranger();
 
     void nudge(ContactInfo contact);
+
+    String getNameInGroup(GroupInfo group);
 }

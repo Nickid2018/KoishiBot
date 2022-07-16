@@ -2,7 +2,9 @@ package io.github.nickid2018.koishibot.message.qq;
 
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
+import net.mamoe.mirai.contact.Member;
 import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.contact.User;
 
@@ -43,6 +45,16 @@ public class QQUser implements UserInfo {
             user.nudge().sendTo(((QQUser) contact).getUser());
         else
             user.nudge().sendTo(((QQGroup) contact).getGroup());
+    }
+
+    @Override
+    public String getNameInGroup(GroupInfo group) {
+        if (group instanceof QQGroup qq) {
+            Member member = qq.getGroup().getMembers().get(user.getId());
+            String name = member == null ? null : member.getNameCard();
+            return name == null ? getName() : name;
+        } else
+            return null;
     }
 
     @Override
