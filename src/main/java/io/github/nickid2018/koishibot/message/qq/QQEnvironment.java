@@ -84,13 +84,13 @@ public class QQEnvironment implements Environment {
 
     @Override
     public UserInfo getUser(String id, boolean isStranger) {
-        return id.startsWith("qq.user") ? (new QQUser(isStranger ? bot.getStranger(Long.parseLong(id.substring(7))) :
+        return id.startsWith("qq.user") ? (new QQUser(this, isStranger ? bot.getStranger(Long.parseLong(id.substring(7))) :
                 bot.getFriend(Long.parseLong(id.substring(7))), isStranger, false)) : null;
     }
 
     @Override
     public GroupInfo getGroup(String id) {
-        return id.startsWith("qq.group") ? new QQGroup(bot.getGroup(Long.parseLong(id.substring(8)))) : null;
+        return id.startsWith("qq.group") ? new QQGroup(this, bot.getGroup(Long.parseLong(id.substring(8)))) : null;
     }
 
     @Override
@@ -126,6 +126,11 @@ public class QQEnvironment implements Environment {
     @Override
     public boolean quoteSupported() {
         return true;
+    }
+
+    @Override
+    public String getEnvironmentName() {
+        return "QQ";
     }
 
     public void close() {

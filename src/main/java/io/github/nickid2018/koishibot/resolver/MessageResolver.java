@@ -50,6 +50,10 @@ public abstract class MessageResolver {
         return false;
     }
 
+    public boolean friendEnabled() {
+        return true;
+    }
+
     public boolean resolve(String segment, MessageContext context, Environment environment) {
         segment = segment.trim();
         Pair<String, Object> ret = resolverTrigger.apply(segment);

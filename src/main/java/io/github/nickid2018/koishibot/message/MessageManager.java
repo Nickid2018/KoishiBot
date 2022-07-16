@@ -22,6 +22,7 @@ public class MessageManager {
     public static final Map<String, JSONServiceResolver> JSON_SERVICE_MAP = new HashMap<>();
 
     static {
+        RESOLVERS.add(new MCChatListen());
         RESOLVERS.add(new HelpResolver());
         RESOLVERS.add(new InfoResolver());
         RESOLVERS.add(new LaTeXResolver());
@@ -34,6 +35,8 @@ public class MessageManager {
         RESOLVERS.add(new TranslateResolver());
         RESOLVERS.add(new MCServerResolver());
         RESOLVERS.add(new UrbanDictResolver());
+        RESOLVERS.add(new MCChatBridgeServerResolver());
+        RESOLVERS.add(new MCChatBridgeResolver());
         RESOLVERS.add(new GitHubRepoResolver());
         RESOLVERS.add(new GitHubWebHookResolver());
         RESOLVERS.add(new GitHubSubscribeResolver());
@@ -63,7 +66,8 @@ public class MessageManager {
     }
 
     private void onFriendMessage(Pair<UserInfo, ChainMessage> message, long sentTime) {
-        dealMessage(null, message.component1(), message.component2(), s -> true, false, sentTime);
+        dealMessage(null, message.component1(), message.component2(),
+                MessageResolver::friendEnabled, false, sentTime);
     }
 
     private void onTempMessage(Pair<UserInfo, ChainMessage> message, long sentTime) {

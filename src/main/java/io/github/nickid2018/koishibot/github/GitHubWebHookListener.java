@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.github.nickid2018.koishibot.util.DataReader;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.Environments;
@@ -49,25 +50,16 @@ public class GitHubWebHookListener implements HttpHandler {
     }
 
     final GitHubListener listener;
-    final Map<String, Integer> webHooks;
 
-    @SuppressWarnings("unchecked")
-    public GitHubWebHookListener(GitHubListener listener) throws IOException, ClassNotFoundException {
+    final DataReader<Map<String, Integer>> webHooks;
+
+    public GitHubWebHookListener(GitHubListener listener) {
         this.listener = listener;
-        if (listener.webhook.exists())
-            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(listener.webhook))) {
-                webHooks = (Map<String, Integer>) ois.readObject();
-            }
-        else {
-            webHooks = new HashMap<>();
-            listener.webhook.createNewFile();
-            saveHooks();
-        }
-        GITHUB_WEBHOOK_LOGGER.info("Successfully loaded github webhook data.");
+        webHooks = new DataReader<>(listener.webhook, HashMap::new);
     }
 
     public void addHook(String repo, String token) throws IOException {
-        if (webHooks.containsKey(repo))
+        if (webHooks.getData().containsKey(repo))
             throw new IOException("已经添加过此库的Web Hook");
         JsonObject object = new JsonObject();
         object.addProperty("name", "web");
@@ -88,24 +80,18 @@ public class GitHubWebHookListener implements HttpHandler {
         post.setEntity(entity);
         JsonObject json = WebUtil.fetchDataInJson(GitHubAuthenticator.acceptGitHubJSON(post, token)).getAsJsonObject();
         int id = JsonUtil.getIntOrZero(json, "id");
-        webHooks.put(repo, id);
-        saveHooks();
+        webHooks.getData().put(repo, id);
+        webHooks.saveData();
         GITHUB_WEBHOOK_LOGGER.info("Successfully added github webhook to {}.", repo);
     }
 
     public void deleteHook(String repo, String token) throws IOException {
         HttpDelete delete = new HttpDelete(
-                GitHubListener.GITHUB_API + "/repos/" + repo + "/hooks/" + webHooks.get(repo));
+                GitHubListener.GITHUB_API + "/repos/" + repo + "/hooks/" + webHooks.getData().get(repo));
         WebUtil.sendReturnNoContent(GitHubAuthenticator.acceptGitHubJSON(delete, token));
-        webHooks.remove(repo);
+        webHooks.getData().remove(repo);
+        webHooks.saveData();
         GITHUB_WEBHOOK_LOGGER.info("Successfully deleted github webhook to {}.", repo);
-        saveHooks();
-    }
-
-    private void saveHooks() throws IOException {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(listener.webhook))) {
-            oos.writeObject(webHooks);
-        }
     }
 
     @Override

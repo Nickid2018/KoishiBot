@@ -9,5 +9,9 @@ public interface ContactInfo {
             message.send((UserInfo) this);
     }
 
+    Environment getEnvironment();
+
     boolean equals(ContactInfo info);
+
+    String getName();
 }

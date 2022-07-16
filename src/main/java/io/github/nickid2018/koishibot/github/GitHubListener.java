@@ -2,7 +2,7 @@ package io.github.nickid2018.koishibot.github;
 
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
-import io.github.nickid2018.koishibot.core.GroupDataReader;
+import io.github.nickid2018.koishibot.util.GroupDataReader;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.JsonUtil;
@@ -23,7 +23,7 @@ public class GitHubListener {
 
     public static final Logger GITHUB_LOGGER = LoggerFactory.getLogger("GitHub");
 
-    public static final GitHubListener LISTENER;
+    public static GitHubListener LISTENER;
 
     public static String GITHUB_TOKEN;
     public static String GITHUB_OAUTH2_CLIENT_ID;
@@ -36,17 +36,12 @@ public class GitHubListener {
             GITHUB_OAUTH2_CLIENT_ID = JsonUtil.getStringOrNull(oauth, "client_id");
             GITHUB_OAUTH2_CLIENT_SECRET = JsonUtil.getStringOrNull(oauth, "client_secret");
         });
-    }
-
-    static {
-        GitHubListener tmp;
-        try {
-            tmp = new GitHubListener();
-        } catch (Exception e) {
-            e.printStackTrace();
-            tmp = null;
-        }
-        LISTENER = tmp;
+        if (LISTENER == null)
+            try {
+                LISTENER = new GitHubListener();
+            } catch (Exception e) {
+                GITHUB_LOGGER.error("Can't create github listener instance.");
+            }
     }
 
     public static final String GITHUB_API = "https://api.github.com";
@@ -59,7 +54,7 @@ public class GitHubListener {
     final GitHubWebHookListener webHookListener;
 
     @SuppressWarnings("unchecked")
-    public GitHubListener() throws Exception {
+    private GitHubListener() throws Exception {
         groupData = new GroupDataReader<>("github",
                 reader -> (Set<String>) new ObjectInputStream(reader).readObject(),
                 (writer, data) -> new ObjectOutputStream(writer).writeObject(data),
@@ -136,7 +131,7 @@ public class GitHubListener {
     }
 
     public void addRepo(String group, String repo) throws Exception {
-        if (!pushData.containsKey(repo) && !webHookListener.webHooks.containsKey(repo))
+        if (!pushData.containsKey(repo) && !webHookListener.webHooks.getData().containsKey(repo))
             throw new IOException("仓库源不存在，请使用github repo进行添加");
         groupData.updateData(group, set -> {
             set.add(repo);

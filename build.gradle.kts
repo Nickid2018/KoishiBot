@@ -29,6 +29,7 @@ dependencies {
     api("org.apache.xmlgraphics:batik-codec:1.14")
     api("com.google.zxing:core:3.5.0")
     api("org.seleniumhq.selenium:selenium-java:4.2.1")
+    api("nl.vv32.rcon:rcon:1.2.0")
 }
 
 group = "io.github.nickid2018"

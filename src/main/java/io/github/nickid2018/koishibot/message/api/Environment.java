@@ -46,6 +46,8 @@ public interface Environment {
 
     boolean quoteSupported();
 
+    String getEnvironmentName();
+
     void close();
 
     default AtMessage newAt(GroupInfo group, UserInfo user) {

@@ -10,6 +10,7 @@ import io.github.nickid2018.koishibot.message.api.TextMessage;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.MessageUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -62,12 +63,10 @@ public class GitHubAuthenticator implements HttpHandler {
                             "本次操作需要" + String.join(", ", needScopes) + "权限。"
             );
             AsyncUtil.execute(() -> environment.getMessageSender().sendMessageAwait(context, message, (sent, reply) -> {
-                List<TextMessage> texts = Stream.of(reply.getMessages())
-                        .filter(m -> m instanceof TextMessage).map(m -> (TextMessage) m).collect(Collectors.toList());
-                if (texts.size() == 1 && !texts.get(0).getText().equalsIgnoreCase("N")) {
-                    String token = texts.get(0).getText();
+                String token = MessageUtil.getFirstText(reply);
+                if (token != null && !token.equalsIgnoreCase("N"))
                     AsyncUtil.execute(() -> operation.accept(token));
-                } else
+                else
                     environment.getMessageSender().sendMessage(context, environment.newText("已取消授权"));
             }));
         } else {

@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.core;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.github.GitHubListener;
+import io.github.nickid2018.koishibot.mc.chat.MCChatBridge;
 import io.github.nickid2018.koishibot.message.MemberFilter;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.translation.YoudaoTranslation;
@@ -43,6 +44,7 @@ public class PluginProcessor {
             LOGGER.info("No plugin description data found. Using default config.");
             try {
                 INIT_PROCESS.add(MemberFilter.class.getMethod("init"));
+                INIT_PROCESS.add(MCChatBridge.class.getMethod("init"));
                 EXIT_PROCESS.add(0, InfoBoxShooter.class.getMethod("close"));
                 SETTING_LOAD.add(SensitiveWordFilter.class.getMethod("loadSensitiveWordsSettings", JsonObject.class));
                 SETTING_LOAD.add(WikiInfo.class.getMethod("loadWiki", JsonObject.class));

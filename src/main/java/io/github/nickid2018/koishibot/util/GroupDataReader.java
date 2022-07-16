@@ -1,7 +1,6 @@
-package io.github.nickid2018.koishibot.core;
+package io.github.nickid2018.koishibot.util;
 
-import io.github.nickid2018.koishibot.util.BiConsumerE;
-import io.github.nickid2018.koishibot.util.FunctionE;
+import io.github.nickid2018.koishibot.core.ErrorRecord;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 import java.io.*;
@@ -30,7 +29,7 @@ public class GroupDataReader<E> {
        this.empty = empty;
        folder = new File("data", name);
        if (!folder.isDirectory())
-           folder.mkdir();
+           folder.mkdirs();
     }
 
     public void loadAll() {
