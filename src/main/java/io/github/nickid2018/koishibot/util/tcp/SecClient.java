@@ -36,7 +36,6 @@ public class SecClient {
             KeyPair pair = CryptUtil.generateRSAKey();
             PublicKey minePublic = pair.getPublic();
             PrivateKey minePrivate = pair.getPrivate();
-            System.out.println("Send Public");
 
             // Swap Public
             byte[] otherPublic = readInternal(null);
@@ -46,14 +45,12 @@ public class SecClient {
             sendInternal(minePublic.getEncoded(), null);
 
             // Verify
-            System.out.println("Verify");
             byte[] nonce = readInternal(minePrivate);
             sendInternal(nonce, remotePublic);
 
             // AES Key
             byte[] key = readInternal(minePrivate);
             aes = new SecretKeySpec(key, "AES");
-            System.out.println("Client link established");
 
             while (true)
                 dataListener.accept(readInternal(aes));

@@ -54,7 +54,6 @@ public class IndirectChatBridgeProvider implements ChatBridgeProvider {
             loop = !loop;
             try {
                 client.send(data);
-                MCChatBridge.CHAT_BRIDGE_LOGGER.info("SENT!");
                 break;
             } catch (Exception ignored) {
             }

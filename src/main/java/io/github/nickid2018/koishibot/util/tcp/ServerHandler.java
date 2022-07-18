@@ -37,8 +37,6 @@ public class ServerHandler implements Runnable {
             PublicKey minePublic = pair.getPublic();
             PrivateKey minePrivate = pair.getPrivate();
 
-            System.out.println("Send Public");
-
             // Swap Public
             sendInternal(minePublic.getEncoded(), null);
             byte[] otherPublic = readInternal(null);
@@ -48,7 +46,6 @@ public class ServerHandler implements Runnable {
             PublicKey remotePublic = keyFactory.generatePublic(encodedKeySpec);
 
             // Verify Client
-            System.out.println("Verify");
             byte[] nonce = new byte[4];
             new Random().nextBytes(nonce);
             sendInternal(nonce, remotePublic);
@@ -59,9 +56,6 @@ public class ServerHandler implements Runnable {
             // Send AES Key
             aes = CryptUtil.generateAESKey();
             sendInternal(aes.getEncoded(), remotePublic);
-            System.out.println("Send AES");
-
-            System.out.println("Client link established");
 
             // Start Listen
             while (true)
