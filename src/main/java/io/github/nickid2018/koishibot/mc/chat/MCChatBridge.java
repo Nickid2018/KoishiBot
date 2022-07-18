@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class MCChatBridge {
 
@@ -91,7 +92,10 @@ public class MCChatBridge {
     }
 
     public void onReceiveGroupText(GroupInfo group, UserInfo user, String text) {
-        groupMap.computeIfAbsent(group.getGroupId(), s -> new HashSet<>()).forEach(
-                provider -> provider.sendMessage(group, user, text));
+        String[] textArray = text.split("\n");
+        Stream.of(textArray).limit(5)
+                .map(s -> s.length() > 100 ? s.substring(0, 100) + "..." : s)
+                .forEach(t -> groupMap.computeIfAbsent(group.getGroupId(), s -> new HashSet<>())
+                        .forEach(provider -> provider.sendMessage(group, user, t)));
     }
 }
