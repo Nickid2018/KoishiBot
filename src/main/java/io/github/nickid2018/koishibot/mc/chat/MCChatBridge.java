@@ -95,6 +95,7 @@ public class MCChatBridge {
         String[] textArray = text.split("\n");
         Stream.of(textArray).limit(5)
                 .map(s -> s.length() > 100 ? s.substring(0, 100) + "..." : s)
+                .map(s -> s.replace("\"", "\\\""))
                 .forEach(t -> groupMap.computeIfAbsent(group.getGroupId(), s -> new HashSet<>())
                         .forEach(provider -> provider.sendMessage(group, user, t)));
     }
