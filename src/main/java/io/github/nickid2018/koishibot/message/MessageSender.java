@@ -120,6 +120,7 @@ public class MessageSender {
             }
         } else {
             String message = t.getMessage();
+            message = message == null ? "" : message;
             for (Map.Entry<String, String> url : WebUtil.MIRROR.entrySet()) {
                 if (message.contains(url.getValue()))
                     message = message.replace(url.getValue(), url.getKey());
