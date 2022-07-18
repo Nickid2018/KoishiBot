@@ -49,7 +49,7 @@ public class MCChatBridge {
         settings.getData().forEach(chatBridgeSetting -> {
             ChatBridgeProvider provider = switch (chatBridgeSetting.type) {
                 case DIRECT -> new DirectChatBridgeProvider(chatBridgeSetting.remote, chatBridgeSetting.password);
-                default -> null;
+                case INDIRECT -> new IndirectChatBridgeProvider(chatBridgeSetting.remote);
             };
             providerMap.put(chatBridgeSetting.remote, provider);
         });
@@ -79,7 +79,7 @@ public class MCChatBridge {
         settings.saveData();
         ChatBridgeProvider provider = switch (setting.type) {
             case DIRECT -> new DirectChatBridgeProvider(setting.remote, setting.password);
-            default -> null;
+            case INDIRECT -> new IndirectChatBridgeProvider(setting.remote);
         };
         providerMap.put(setting.remote, provider);
     }

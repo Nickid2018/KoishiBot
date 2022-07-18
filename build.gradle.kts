@@ -52,3 +52,22 @@ tasks.register<Sync>("exportApi") {
     from(configurations.runtimeClasspath)
     into(layout.buildDirectory.dir("apis"))
 }
+
+tasks.register<Delete>("cleanTransfer") {
+    delete("lib/transfer-${version}.jar")
+}
+
+tasks.register<Jar>("jarTransfer") {
+    archiveBaseName.set("transfer")
+    from("build/classes/java/main/") {
+        include("io/github/nickid2018/koishibot/mc/trans/*.class")
+        include("io/github/nickid2018/koishibot/util/tcp/*.class")
+    }
+    from(configurations.runtimeClasspath.get()
+        .filter { it.name.contains("rcon", true) }
+        .map { zipTree(it) })
+    manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.mc.trans.TransMain"
+}
+
+tasks["jarTransfer"].dependsOn(tasks["cleanTransfer"], tasks["build"])
+tasks["build"].dependsOn(tasks["exportApi"])
