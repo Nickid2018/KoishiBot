@@ -20,6 +20,8 @@ public class FormatTransformer {
 
     public static final Logger TRANSFORMER_LOGGER = LoggerFactory.getLogger("Format Transformer");
 
+    public static final int VOICE_TRANSFORM_MAX_LENGTH = 110;
+
     public static String FFMPEG_LOCATION;
     public static String ENCODER_LOCATION;
 
@@ -57,14 +59,15 @@ public class FormatTransformer {
         int length = getAudioLength(sourceFile);
         int offset = 0;
         TRANSFORMER_LOGGER.info("Start transforming {} to silk files, length = {}s.", sourceFile, length);
-        while (length > 50) {
+        while (length > VOICE_TRANSFORM_MAX_LENGTH) {
             File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
             executeCommand(null, FFMPEG_LOCATION, "-i",
-                    sourceFile.getAbsolutePath(), "-ss", offset + "", "-t", "50", "-f", "s16le", "-ar", "24000", "-ac", "1",
+                    sourceFile.getAbsolutePath(), "-ss", offset + "", "-t", VOICE_TRANSFORM_MAX_LENGTH + "",
+                    "-f", "s16le", "-ar", "24000", "-ac", "1",
                     "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
             silks.add(transformPCMtoSILK(pcm));
-            offset += 50;
-            length -= 50;
+            offset += VOICE_TRANSFORM_MAX_LENGTH;
+            length -= VOICE_TRANSFORM_MAX_LENGTH;
         }
         File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
         executeCommand(null, FFMPEG_LOCATION, "-i",

@@ -5,6 +5,7 @@ import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.wiki.FormatTransformer;
 import io.github.nickid2018.koishibot.wiki.PageInfo;
 import io.github.nickid2018.koishibot.wiki.WikiInfo;
 
@@ -150,7 +151,7 @@ public class WikiResolver extends MessageResolver {
                     try {
                         File[] audios = page.audioFiles.get();
                         for (File file : audios) {
-                            Thread.sleep(60_000);
+                            Thread.sleep((FormatTransformer.VOICE_TRANSFORM_MAX_LENGTH + 10) * 1000);
                             environment.getMessageSender().sendMessage(
                                     context, environment.newAudio(context.group(), new FileInputStream(file)));
                         }
