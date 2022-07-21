@@ -1,7 +1,6 @@
-package io.github.nickid2018.koishibot.message;
+package io.github.nickid2018.koishibot.filter;
 
-import io.github.nickid2018.koishibot.filter.PostFilter;
-import io.github.nickid2018.koishibot.filter.PreFilter;
+import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import org.jetbrains.annotations.NotNull;
@@ -57,6 +56,8 @@ public class MemberFilter implements PreFilter, PostFilter {
     @NotNull
     @Override
     public AbstractMessage filterMessagePost(AbstractMessage input, MessageContext context, Environment environment) {
+        if (context.user() == null)
+            return input;
         refreshRequestTime(context.user());
         if (Math.random() < 0.2)
             context.user().nudge(context.group() != null ? context.group() : context.user());

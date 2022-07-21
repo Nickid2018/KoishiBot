@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.message;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.filter.AntiFilter;
+import io.github.nickid2018.koishibot.filter.MemberFilter;
 import io.github.nickid2018.koishibot.filter.PostFilter;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.message.api.*;

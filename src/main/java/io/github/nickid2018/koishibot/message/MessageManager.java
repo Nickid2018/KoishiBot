@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.message;
 
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.filter.MCChatBridgeFilter;
+import io.github.nickid2018.koishibot.filter.MemberFilter;
 import io.github.nickid2018.koishibot.filter.PreFilter;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.resolver.*;

@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.mc.chat.MCChatBridge;
-import io.github.nickid2018.koishibot.message.MemberFilter;
+import io.github.nickid2018.koishibot.filter.MemberFilter;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.translation.YoudaoTranslation;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
