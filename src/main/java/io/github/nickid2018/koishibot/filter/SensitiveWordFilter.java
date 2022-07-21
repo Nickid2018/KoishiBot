@@ -1,9 +1,11 @@
 package io.github.nickid2018.koishibot.filter;
 
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public final class SensitiveWordFilter {
+public final class SensitiveWordFilter implements PostFilter {
 
     public static final Logger SENSITIVE_LOGGER = LoggerFactory.getLogger("Sensitive Filter");
 
@@ -156,5 +158,27 @@ public final class SensitiveWordFilter {
                     }
                 }
         );
+    }
+
+    @NotNull
+    @Override
+    public AbstractMessage filterMessagePost(AbstractMessage input, MessageContext context, Environment environment) {
+        MutableBoolean filtered = new MutableBoolean(false);
+        if (input instanceof ChainMessage) {
+            List<AbstractMessage> messages = new ArrayList<>();
+            for (AbstractMessage mess : ((ChainMessage) input).getMessages()) {
+                if (mess instanceof TextMessage text)
+                    mess = environment.newText(filter(text.getText(), filtered));
+                messages.add(mess);
+            }
+            input = environment.newChain(messages.toArray(new AbstractMessage[0]));
+        } else if (input instanceof TextMessage text)
+            input = environment.newText(filter(text.getText(), filtered));
+        if (filtered.getValue())
+            input = environment.newChain(
+                    input,
+                    environment.newText("\n<已经过关键词过滤>")
+            );
+        return input;
     }
 }

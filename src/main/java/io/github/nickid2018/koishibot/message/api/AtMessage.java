@@ -1,13 +1,12 @@
 package io.github.nickid2018.koishibot.message.api;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 public interface AtMessage extends AbstractMessage {
 
     AtMessage fillAt(GroupInfo group, UserInfo contact);
 
-    @Nullable
+    @Nonnull
     UserInfo getUser(GroupInfo group);
 
     @Nonnull

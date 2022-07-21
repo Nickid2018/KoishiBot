@@ -7,7 +7,7 @@ import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.Message;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 
 public class QQAt extends QQMessage implements AtMessage {
 
@@ -28,7 +28,7 @@ public class QQAt extends QQMessage implements AtMessage {
         return this;
     }
 
-    @Nullable
+    @Nonnull
     @Override
     public UserInfo getUser(GroupInfo group) {
         return new QQUser(environment, ((QQGroup) group).getGroup().get(at.getTarget()), false, true);

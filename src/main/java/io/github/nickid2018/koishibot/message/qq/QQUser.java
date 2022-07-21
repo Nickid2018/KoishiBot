@@ -52,7 +52,7 @@ public class QQUser implements UserInfo {
         if (group instanceof QQGroup qq) {
             Member member = qq.getGroup().getMembers().get(user.getId());
             String name = member == null ? null : member.getNameCard();
-            return name == null ? getName() : name;
+            return name == null || name.isEmpty() ? getName() : name;
         } else
             return null;
     }

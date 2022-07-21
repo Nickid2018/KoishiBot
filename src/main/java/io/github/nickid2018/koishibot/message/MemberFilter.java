@@ -1,14 +1,17 @@
 package io.github.nickid2018.koishibot.message;
 
-import io.github.nickid2018.koishibot.message.api.Environment;
-import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.filter.PostFilter;
+import io.github.nickid2018.koishibot.filter.PreFilter;
+import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MemberFilter {
+public class MemberFilter implements PreFilter, PostFilter {
 
     private static final Map<UserInfo, Long> USER_REQUEST_TIME = Collections.synchronizedMap(new HashMap<>());
     private static final Map<UserInfo, Integer> USER_REQUEST_FAIL = Collections.synchronizedMap(new HashMap<>());
@@ -49,5 +52,34 @@ public class MemberFilter {
 
     public static void refreshRequestTime(UserInfo member) {
         USER_REQUEST_TIME.put(member, System.currentTimeMillis());
+    }
+
+    @NotNull
+    @Override
+    public AbstractMessage filterMessagePost(AbstractMessage input, MessageContext context, Environment environment) {
+        refreshRequestTime(context.user());
+        if (Math.random() < 0.2)
+            context.user().nudge(context.group() != null ? context.group() : context.user());
+        return input;
+    }
+
+    @Nullable
+    @Override
+    public ChainMessage filterMessagePre(ChainMessage input, MessageContext context, Environment environment) {
+        MutableBoolean ban = new MutableBoolean(false);
+        if (shouldNotResponse(context.user(), ban)) {
+            if (ban.getValue()) {
+                if (context.group() != null)
+                    environment.getMessageSender().sendMessage(context, environment.newChain(
+                            environment.newAt(context.group(), context.user()),
+                            environment.newText(" 被自动封禁一小时，原因: 过于频繁的操作")
+                    ));
+                else
+                    environment.getMessageSender().sendMessage(context,
+                            environment.newText("被自动封禁一小时，原因: 过于频繁的操作"));
+            }
+            return null;
+        }
+        return input;
     }
 }

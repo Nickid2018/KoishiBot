@@ -1,6 +1,8 @@
 package io.github.nickid2018.koishibot.message;
 
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.filter.MCChatBridgeFilter;
+import io.github.nickid2018.koishibot.filter.PreFilter;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.resolver.*;
 import io.github.nickid2018.koishibot.util.value.Either;
@@ -21,8 +23,12 @@ public class MessageManager {
     public static final List<MessageResolver> RESOLVERS = new ArrayList<>();
     public static final Map<String, JSONServiceResolver> JSON_SERVICE_MAP = new HashMap<>();
 
+    public static final List<PreFilter> GROUP_PREFILTER = new ArrayList<>();
+    public static final List<PreFilter> FRIEND_PREFILTER = new ArrayList<>();
+    public static final List<PreFilter> TEMP_PREFILTER = new ArrayList<>();
+    public static final List<PreFilter> STRANGER_PREFILTER = new ArrayList<>();
+
     static {
-        RESOLVERS.add(new MCChatListen());
         RESOLVERS.add(new HelpResolver());
         RESOLVERS.add(new InfoResolver());
         RESOLVERS.add(new LaTeXResolver());
@@ -42,6 +48,12 @@ public class MessageManager {
         RESOLVERS.add(new GitHubSubscribeResolver());
 
         JSON_SERVICE_MAP.put("哔哩哔哩", new BilibiliDataResolver());
+
+        GROUP_PREFILTER.add(new MemberFilter());
+        FRIEND_PREFILTER.add(new MemberFilter());
+        TEMP_PREFILTER.add(new MemberFilter());
+        STRANGER_PREFILTER.add(new MemberFilter());
+        GROUP_PREFILTER.add(new MCChatBridgeFilter());
     }
 
     public MessageManager(Environment environment) {
@@ -62,36 +74,34 @@ public class MessageManager {
 
     private void onGroupMessage(Triple<GroupInfo, UserInfo, ChainMessage> messageTriple, long sentTime) {
         dealMessage(messageTriple.component1(), messageTriple.component2(), messageTriple.component3(),
-                MessageResolver::groupEnabled, true, sentTime);
+                GROUP_PREFILTER, MessageResolver::groupEnabled, true, sentTime);
     }
 
     private void onFriendMessage(Pair<UserInfo, ChainMessage> message, long sentTime) {
         dealMessage(null, message.component1(), message.component2(),
-                MessageResolver::friendEnabled, false, sentTime);
+                FRIEND_PREFILTER, MessageResolver::friendEnabled, false, sentTime);
     }
 
     private void onTempMessage(Pair<UserInfo, ChainMessage> message, long sentTime) {
         dealMessage(null, message.component1(), message.component2(),
-                MessageResolver::groupTempChat, false, sentTime);
+                TEMP_PREFILTER, MessageResolver::groupTempChat, false, sentTime);
     }
 
     private void onStrangerMessage(Pair<UserInfo, ChainMessage> message, long sentTime) {
         dealMessage(null, message.component1(), message.component2(),
-                MessageResolver::strangerChat, false, sentTime);
+                STRANGER_PREFILTER, MessageResolver::strangerChat, false, sentTime);
     }
 
-    private void dealMessage(GroupInfo group, UserInfo user, ChainMessage message,
+    private void dealMessage(GroupInfo group, UserInfo user, ChainMessage message, List<PreFilter> preFilters,
                              Predicate<MessageResolver> predicate, boolean inGroup, long sentTime) {
         MessageContext context = new MessageContext(group, user, message, sentTime);
 
-        MutableBoolean ban = new MutableBoolean(false);
-        if (MemberFilter.shouldNotResponse(user, ban)) {
-            if (ban.getValue())
-                environment.getMessageSender().sendMessage(context, environment.newChain(
-                        environment.newAt(group, user), environment.newText(" 被自动封禁一小时，原因: 过于频繁的操作")
-                ));
-            return;
+        for (PreFilter filter : preFilters) {
+            message = filter.filterMessagePre(message, context, environment);
+            if (message == null)
+                return;
         }
+
         UserAwaitData.onMessage(group, user, message);
 
         List<String> strings = new ArrayList<>();
@@ -135,12 +145,6 @@ public class MessageManager {
             Either<JsonObject, String> data = service.getData();
             if (data.isLeft() && JSON_SERVICE_MAP.containsKey(name))
                 JSON_SERVICE_MAP.get(name).resolveService(data.left(), context, environment);
-        }
-
-        if (bool.getValue() || (inGroup && att)) {
-            MemberFilter.refreshRequestTime(user);
-            if (Math.random() < 0.2)
-                user.nudge(inGroup ? group : user);
         }
     }
 

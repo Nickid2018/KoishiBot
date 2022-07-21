@@ -1,11 +1,12 @@
 package io.github.nickid2018.koishibot.message;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
+import io.github.nickid2018.koishibot.filter.AntiFilter;
+import io.github.nickid2018.koishibot.filter.PostFilter;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import kotlin.Pair;
 
 import java.io.IOException;
@@ -19,10 +20,6 @@ import java.util.function.BiConsumer;
 
 public class MessageSender {
 
-    public static final String[] ANTI_AUTO_FILTER = new String[]{
-            "[ffk]", ">anti-auto_filter<", "~防止风向操控~", "=_禁止符卡攻击_="
-    };
-
     public static final String[] ERROR_MESSAGES = new String[] {
             "发生了错误", "bot发生了异常", "bot陷入无意识之中"
     };
@@ -30,53 +27,20 @@ public class MessageSender {
     public static final int SEND_INTERVAL = 1000;
 
     private final Random random = new Random();
-    private final AtomicLong messageCounter = new AtomicLong(0);
     private final ReentrantLock sendLock = new ReentrantLock();
     private final AtomicLong lastSentTime = new AtomicLong(System.currentTimeMillis());
     private final Queue<Pair<MessageContext, AbstractMessage>> sentQueue = new ConcurrentLinkedDeque<>();
 
     private final Environment environment;
-    private final boolean needAntiFilter;
+    private final List<PostFilter> postFilters = new ArrayList<>();
 
     public MessageSender(Environment environment, boolean needAntiFilter) {
         this.environment = environment;
-        this.needAntiFilter = needAntiFilter;
-    }
 
-    private AbstractMessage countAntiAutoFilter(AbstractMessage message) {
-        if (!needAntiFilter)
-            return message;
-        if (message instanceof ForwardMessage || message instanceof AudioMessage || message instanceof ImageMessage)
-            return message;
-        if (messageCounter.getAndIncrement() % 10 == 0)
-            return environment.newChain().fillChain(
-                    message,
-                    environment.newText().fillText("\n" + ANTI_AUTO_FILTER[random.nextInt(ANTI_AUTO_FILTER.length)])
-            );
-        return message;
-    }
-
-    private AbstractMessage useSensitiveFilter(AbstractMessage message) {
-        MutableBoolean filtered = new MutableBoolean(false);
-        if (message instanceof ChainMessage) {
-            List<AbstractMessage> messages = new ArrayList<>();
-            for (AbstractMessage mess : ((ChainMessage) message).getMessages()) {
-                if (mess instanceof TextMessage)
-                    mess = environment.newText().fillText(
-                            SensitiveWordFilter.filter(((TextMessage) mess).getText(), filtered));
-                messages.add(mess);
-            }
-            message = environment.newChain().fillChain(messages.toArray(new AbstractMessage[0]));
-        }
-        if (message instanceof TextMessage)
-            message = environment.newText().fillText(
-                    SensitiveWordFilter.filter(((TextMessage) message).getText(), filtered));
-        if (filtered.getValue())
-            message = environment.newChain().fillChain(
-                    message,
-                    environment.newText().fillText("\n<已经过关键词过滤>")
-            );
-        return message;
+        postFilters.add(new SensitiveWordFilter());
+        if (needAntiFilter)
+            postFilters.add(new AntiFilter());
+        postFilters.add(new MemberFilter());
     }
 
     public void sendMessage(MessageContext context, AbstractMessage message) {
@@ -87,7 +51,8 @@ public class MessageSender {
         send(context, message, true);
     }
 
-    public void sendMessageAwait(MessageContext context, AbstractMessage message, BiConsumer<AbstractMessage, ChainMessage> consumer) {
+    public void sendMessageAwait(MessageContext context, AbstractMessage message,
+                                 BiConsumer<AbstractMessage, ChainMessage> consumer) {
         UserAwaitData.add(context.group(), context.user(), send(context, message, true), consumer);
     }
 
@@ -134,8 +99,8 @@ public class MessageSender {
     }
 
     public AbstractMessage send(MessageContext context, AbstractMessage message, boolean recall) {
-        message = useSensitiveFilter(message);
-        message = countAntiAutoFilter(message);
+        for (PostFilter filter : postFilters)
+            message = filter.filterMessagePost(message, context, environment);
         sendLock.lock();
         try {
             long sleepTime = SEND_INTERVAL - (System.currentTimeMillis() - lastSentTime.get());
