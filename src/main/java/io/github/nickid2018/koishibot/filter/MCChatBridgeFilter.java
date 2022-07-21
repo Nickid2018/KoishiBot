@@ -35,6 +35,8 @@ public class MCChatBridgeFilter implements PreFilter {
             return quote.getReplyTo() != null ?
                     "@" + quote.getReplyTo().getNameInGroup(context.group()) :
                     "[回复信息]";
+        else if (message instanceof UnsupportedMessage)
+            return "";
         else
             return "[不支持的消息类型]";
     }
