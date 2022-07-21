@@ -20,7 +20,10 @@ public class MCChatBridgeFilter implements PreFilter {
 
     private String messageToString(AbstractMessage message, MessageContext context) {
         if (message instanceof ChainMessage chain)
-            return Stream.of(chain.getMessages()).map(m -> messageToString(m, context)).collect(Collectors.joining(" "));
+            return Stream.of(chain.getMessages())
+                    .filter(m -> !(m instanceof UnsupportedMessage))
+                    .map(m -> messageToString(m, context))
+                    .collect(Collectors.joining(" "));
         else if (message instanceof TextMessage text)
             return text.getText();
         else if (message instanceof ImageMessage)
@@ -31,12 +34,8 @@ public class MCChatBridgeFilter implements PreFilter {
             return "[转发信息]";
         else if (message instanceof AtMessage at)
             return "@" + at.getUser(context.group()).getNameInGroup(context.group());
-        else if (message instanceof QuoteMessage quote)
-            return quote.getReplyTo() != null ?
-                    "@" + quote.getReplyTo().getNameInGroup(context.group()) :
-                    "[回复信息]";
-        else if (message instanceof UnsupportedMessage)
-            return "";
+        else if (message instanceof QuoteMessage)
+            return "[回复信息]";
         else
             return "[不支持的消息类型]";
     }
