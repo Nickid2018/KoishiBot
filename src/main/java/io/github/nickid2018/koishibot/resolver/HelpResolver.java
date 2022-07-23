@@ -35,6 +35,7 @@ public class HelpResolver extends MessageResolver {
         HELP_DATA.put("qrcode", new LazyLoadValue<>(loadMessage("qrcode")));
         HELP_DATA.put("github", new LazyLoadValue<>(loadMessage("github")));
         HELP_DATA.put("server", new LazyLoadValue<>(loadMessage("server")));
+        HELP_DATA.put("mcchat", new LazyLoadValue<>(loadMessage("mcchat")));
     }
 
     public HelpResolver() {
