@@ -11,7 +11,7 @@ dependencies {
     api("net.mamoe:mirai-core:2.9.2")
 
     // KOOK Backend
-    api("com.github.KookyBot:KookyBot:0.1.2")
+    api("com.github.KookyBot:KookyBot:0.2.1")
 
     // Logging
     api("org.apache.logging.log4j:log4j-api:2.17.2")
