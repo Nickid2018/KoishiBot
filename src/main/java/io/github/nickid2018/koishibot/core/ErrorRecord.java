@@ -42,22 +42,24 @@ public class ErrorRecord {
             builder.append("错误模块: ").append(entry.getSecond()).append("\n");
             builder.append("错误描述: ").append(entry.getThird().getMessage()).append("\n");
             StackTraceElement[] stacks = entry.getThird().getStackTrace();
-            int depth = 0;
-            while (depth < stacks.length) {
-                try {
-                    StackTraceElement stack = stacks[depth];
-                    Class<?> cls = Class.forName(stack.getClassName());
-                    if (cls.getName().contains("nickid2018") && !cls.isAnnotationPresent(InternalStack.class) &&
-                            !cls.getPackage().isAnnotationPresent(InternalStack.class))
-                        break;
-                } catch (Exception e) {
-                    ERROR_LOGGER.warn("Error in generating message.", e);
+            if (stacks.length > 0) {
+                int depth = 0;
+                while (depth < stacks.length) {
+                    try {
+                        StackTraceElement stack = stacks[depth];
+                        Class<?> cls = Class.forName(stack.getClassName());
+                        if (cls.getName().contains("nickid2018") && !cls.isAnnotationPresent(InternalStack.class) &&
+                                !cls.getPackage().isAnnotationPresent(InternalStack.class))
+                            break;
+                    } catch (Exception e) {
+                        ERROR_LOGGER.warn("Error in generating message.", e);
+                    }
+                    depth++;
                 }
-                depth++;
+                if (depth == stacks.length)
+                    depth = 0;
+                builder.append("用户栈顶层: ").append(stacks[depth]);
             }
-            if (depth == stacks.length)
-                depth = 0;
-            builder.append("用户栈顶层: ").append(stacks[depth]);
             MutableInt val = new MutableInt(Constants.TIME_OF_514);
             entries.add(environment.newMessageEntry(
                     environment.getBotId(),
