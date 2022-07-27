@@ -2,7 +2,7 @@ package io.github.nickid2018.koishibot.message;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.filter.AntiFilter;
-import io.github.nickid2018.koishibot.filter.MemberFilter;
+import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
 import io.github.nickid2018.koishibot.filter.PostFilter;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.message.api.*;
@@ -41,7 +41,7 @@ public class MessageSender {
         postFilters.add(new SensitiveWordFilter());
         if (needAntiFilter)
             postFilters.add(new AntiFilter());
-        postFilters.add(new MemberFilter());
+        postFilters.add(new RequestFrequencyFilter());
     }
 
     public void sendMessage(MessageContext context, AbstractMessage message) {

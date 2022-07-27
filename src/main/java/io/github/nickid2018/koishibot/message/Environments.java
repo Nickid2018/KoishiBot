@@ -3,15 +3,13 @@ package io.github.nickid2018.koishibot.message;
 import io.github.nickid2018.koishibot.core.BotLoginData;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.message.kook.KOOKEnvironment;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public class Environments {
@@ -53,6 +51,11 @@ public class Environments {
 
     public static void closeEnvironments() {
         ENVIRONMENT_MAP.values().forEach(Environment::close);
+    }
+
+    public static Optional<UserInfo> getUser(String id, boolean stranger) {
+        return getEnvironments().stream().map(env -> env.getUser(id, stranger))
+                .filter(Objects::nonNull).findFirst();
     }
 
     static {

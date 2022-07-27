@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.permission.PermissionLevel;
 import kotlin.Pair;
 
 import java.util.Locale;
@@ -52,6 +53,10 @@ public abstract class MessageResolver {
 
     public boolean friendEnabled() {
         return true;
+    }
+
+    public PermissionLevel getPermissionLevel() {
+        return PermissionLevel.TRUSTED;
     }
 
     public boolean resolve(String segment, MessageContext context, Environment environment) {

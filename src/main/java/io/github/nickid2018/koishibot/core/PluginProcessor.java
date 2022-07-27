@@ -4,7 +4,8 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.github.GitHubListener;
 import io.github.nickid2018.koishibot.mc.chat.MCChatBridge;
-import io.github.nickid2018.koishibot.filter.MemberFilter;
+import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
+import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.translation.YoudaoTranslation;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
@@ -43,7 +44,7 @@ public class PluginProcessor {
         if (!PLUGIN_FILE.exists()) {
             LOGGER.info("No plugin description data found. Using default config.");
             try {
-                INIT_PROCESS.add(MemberFilter.class.getMethod("init"));
+                INIT_PROCESS.add(RequestFrequencyFilter.class.getMethod("init"));
                 INIT_PROCESS.add(MCChatBridge.class.getMethod("init"));
                 EXIT_PROCESS.add(0, InfoBoxShooter.class.getMethod("close"));
                 SETTING_LOAD.add(SensitiveWordFilter.class.getMethod("loadSensitiveWordsSettings", JsonObject.class));
@@ -53,6 +54,7 @@ public class PluginProcessor {
                 SETTING_LOAD.add(InfoBoxShooter.class.getMethod("loadWebDriver", JsonObject.class));
                 SETTING_LOAD.add(GitHubListener.class.getMethod("loadGitHub", JsonObject.class));
                 SETTING_LOAD.add(YoudaoTranslation.class.getMethod("loadYouDaoAppKeyAndSecrets", JsonObject.class));
+                SETTING_LOAD.add(PermissionManager.class.getMethod("init", JsonObject.class));
             } catch (NoSuchMethodException ignored) {
             }
         }

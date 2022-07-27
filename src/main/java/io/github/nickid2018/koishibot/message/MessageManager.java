@@ -2,9 +2,10 @@ package io.github.nickid2018.koishibot.message;
 
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.filter.MCChatBridgeFilter;
-import io.github.nickid2018.koishibot.filter.MemberFilter;
+import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
 import io.github.nickid2018.koishibot.filter.PreFilter;
 import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.resolver.*;
 import io.github.nickid2018.koishibot.util.value.Either;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
@@ -50,10 +51,10 @@ public class MessageManager {
 
         JSON_SERVICE_MAP.put("哔哩哔哩", new BilibiliDataResolver());
 
-        GROUP_PREFILTER.add(new MemberFilter());
-        FRIEND_PREFILTER.add(new MemberFilter());
-        TEMP_PREFILTER.add(new MemberFilter());
-        STRANGER_PREFILTER.add(new MemberFilter());
+        GROUP_PREFILTER.add(new RequestFrequencyFilter());
+        FRIEND_PREFILTER.add(new RequestFrequencyFilter());
+        TEMP_PREFILTER.add(new RequestFrequencyFilter());
+        STRANGER_PREFILTER.add(new RequestFrequencyFilter());
         GROUP_PREFILTER.add(new MCChatBridgeFilter());
     }
 
@@ -129,9 +130,12 @@ public class MessageManager {
         MutableBoolean bool = new MutableBoolean(false);
         if (service == null) {
             boolean finalAtt = att;
-            RESOLVERS.stream().filter(predicate.and(s -> !inGroup || !s.needAt() || finalAtt))
-                    .forEach(messageResolver -> strings.forEach(string -> {
-                        if (!bool.getValue() && messageResolver.resolve(string, context, environment))
+            RESOLVERS.stream()
+                    .filter(predicate)
+                    .filter(resolver -> !inGroup || !resolver.needAt() || finalAtt)
+                    .filter(resolver -> PermissionManager.getLevel(user.getUserId()).levelGreaterOrEquals(resolver.getPermissionLevel()))
+                    .forEach(resolver -> strings.forEach(string -> {
+                        if (!bool.getValue() && resolver.resolve(string, context, environment))
                             bool.setValue(true);
                     }));
             if (!bool.getValue() && att && inGroup && replyMe == null) {
@@ -150,14 +154,14 @@ public class MessageManager {
     }
 
     private void onMemberAdd(GroupInfo group, UserInfo user) {
-        if (MemberFilter.shouldNotResponse(user, new MutableBoolean(false)))
+        if (RequestFrequencyFilter.shouldNotResponse(user, new MutableBoolean(false)))
             return;
         user.nudge(group);
         environment.getMessageSender().sendMessage(
-                new MessageContext(group, null, null, -1), environment.newChain().fillChain(
-                environment.newAt(group, user),
-                environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
-        ));
+                new MessageContext(group, user, environment.newChain().fillChain(), -1), environment.newChain().fillChain(
+                        environment.newAt(group, user),
+                        environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
+                ));
     }
 
     private void onGroupRecall(Triple<GroupInfo, UserInfo, Long> info) {

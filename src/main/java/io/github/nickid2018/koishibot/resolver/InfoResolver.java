@@ -5,6 +5,7 @@ import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.permission.PermissionLevel;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.Date;
@@ -34,6 +35,11 @@ public class InfoResolver extends MessageResolver {
             environment.getMessageSender().sendMessage(context, message);
         }
         return true;
+    }
+
+    @Override
+    public PermissionLevel getPermissionLevel() {
+        return PermissionLevel.UNTRUSTED;
     }
 
     private void printSystemData(MessageContext context, Environment environment) {

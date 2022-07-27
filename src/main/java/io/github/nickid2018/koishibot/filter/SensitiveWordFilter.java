@@ -2,6 +2,8 @@ package io.github.nickid2018.koishibot.filter;
 
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.permission.PermissionLevel;
+import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
@@ -174,11 +176,15 @@ public final class SensitiveWordFilter implements PostFilter {
             input = environment.newChain(messages.toArray(new AbstractMessage[0]));
         } else if (input instanceof TextMessage text)
             input = environment.newText(filter(text.getText(), filtered));
-        if (filtered.getValue())
+        if (filtered.getValue()) {
             input = environment.newChain(
                     input,
                     environment.newText("\n<已经过关键词过滤>")
             );
+            if (PermissionLevel.TRUSTED.levelGreaterOrEquals(PermissionManager.getLevel(context.user().getUserId())))
+                PermissionManager.setLevel(context.user().getUserId(), PermissionLevel.UNTRUSTED,
+                        System.currentTimeMillis() + 20_000, false);
+        }
         return input;
     }
 }

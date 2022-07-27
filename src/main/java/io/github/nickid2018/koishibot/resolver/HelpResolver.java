@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.core.Constants;
 import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.permission.PermissionLevel;
 import io.github.nickid2018.koishibot.util.ImageRenderer;
 import io.github.nickid2018.koishibot.util.value.LazyLoadValue;
 import io.github.nickid2018.koishibot.util.value.MutableInt;
@@ -50,6 +51,11 @@ public class HelpResolver extends MessageResolver {
     @Override
     public boolean needAt() {
         return true;
+    }
+
+    @Override
+    public PermissionLevel getPermissionLevel() {
+        return PermissionLevel.UNTRUSTED;
     }
 
     @Override
