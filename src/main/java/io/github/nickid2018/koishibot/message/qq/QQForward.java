@@ -21,8 +21,7 @@ public class QQForward extends QQMessage implements ForwardMessage {
 
     @Override
     public ForwardMessage fillForwards(ContactInfo contact, MessageEntry... entries) {
-        ForwardMessageBuilder builder = new ForwardMessageBuilder(
-                contact instanceof QQGroup ? ((QQGroup) contact).getGroup() : ((QQUser) contact).getUser());
+        ForwardMessageBuilder builder = new ForwardMessageBuilder(environment.getBot().getAsFriend());
         for (MessageEntry entry : entries) {
             QQMessageEntry qq = (QQMessageEntry) entry;
             builder.add(qq.id, qq.name, qq.message, qq.time);
