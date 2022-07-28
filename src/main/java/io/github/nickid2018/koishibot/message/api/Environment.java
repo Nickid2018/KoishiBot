@@ -48,6 +48,8 @@ public interface Environment {
 
     String getEnvironmentName();
 
+    String getEnvironmentUserPrefix();
+
     void close();
 
     default AtMessage newAt(GroupInfo group, UserInfo user) {

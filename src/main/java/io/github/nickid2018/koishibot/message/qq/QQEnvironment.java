@@ -133,6 +133,11 @@ public class QQEnvironment implements Environment {
         return "QQ";
     }
 
+    @Override
+    public String getEnvironmentUserPrefix() {
+        return "qq.user";
+    }
+
     public void close() {
         bot.close();
     }
