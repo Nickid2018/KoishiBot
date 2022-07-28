@@ -127,8 +127,11 @@ public class MessageManager {
         if (replyMe != null)
             MessageReplyData.onMessage(group, user, replyMe, message);
 
-        MutableBoolean bool = new MutableBoolean(false);
         if (service == null) {
+            if (strings.isEmpty() || strings.get(0).startsWith("!"))
+                return;
+
+            MutableBoolean bool = new MutableBoolean(false);
             boolean finalAtt = att;
             RESOLVERS.stream()
                     .filter(predicate)
@@ -145,7 +148,6 @@ public class MessageManager {
                 ));
             }
         } else {
-            bool.setValue(true);
             String name = service.getName();
             Either<JsonObject, String> data = service.getData();
             if (data.isLeft() && JSON_SERVICE_MAP.containsKey(name))
