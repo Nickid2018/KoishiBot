@@ -60,13 +60,13 @@ tasks.register<Delete>("cleanTransfer") {
 tasks.register<Jar>("jarTransfer") {
     archiveBaseName.set("transfer")
     from("build/classes/java/main/") {
-        include("io/github/nickid2018/koishibot/mc/trans/*.class")
+        include("io/github/nickid2018/koishibot/module/mc/trans/*.class")
         include("io/github/nickid2018/koishibot/util/tcp/*.class")
     }
     from(configurations.runtimeClasspath.get()
         .filter { it.name.contains("rcon", true) }
         .map { zipTree(it) })
-    manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.mc.trans.TransMain"
+    manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.module.mc.trans.TransMain"
 }
 
 tasks["jarTransfer"].dependsOn(tasks["cleanTransfer"], tasks["build"])

@@ -1,19 +1,15 @@
 package io.github.nickid2018.koishibot.core;
 
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
-import io.github.nickid2018.koishibot.github.GitHubListener;
-import io.github.nickid2018.koishibot.mc.chat.MCChatBridge;
 import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
+import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
+import io.github.nickid2018.koishibot.module.ModuleManager;
+import io.github.nickid2018.koishibot.module.wiki.FormatTransformer;
 import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.server.ServerManager;
-import io.github.nickid2018.koishibot.translation.YoudaoTranslation;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.ImageRenderer;
 import io.github.nickid2018.koishibot.util.WebUtil;
-import io.github.nickid2018.koishibot.wiki.FormatTransformer;
-import io.github.nickid2018.koishibot.wiki.InfoBoxShooter;
-import io.github.nickid2018.koishibot.wiki.WikiInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +41,15 @@ public class PluginProcessor {
             LOGGER.info("No plugin description data found. Using default config.");
             try {
                 INIT_PROCESS.add(RequestFrequencyFilter.class.getMethod("init"));
-                INIT_PROCESS.add(MCChatBridge.class.getMethod("init"));
-                EXIT_PROCESS.add(0, InfoBoxShooter.class.getMethod("close"));
+                INIT_PROCESS.add(ModuleManager.class.getMethod("start"));
+
+                EXIT_PROCESS.add(0, ModuleManager.class.getMethod("stop"));
+
                 SETTING_LOAD.add(SensitiveWordFilter.class.getMethod("loadSensitiveWordsSettings", JsonObject.class));
-                SETTING_LOAD.add(WikiInfo.class.getMethod("loadWiki", JsonObject.class));
                 SETTING_LOAD.add(ImageRenderer.class.getMethod("loadImageSettings", JsonObject.class));
                 SETTING_LOAD.add(FormatTransformer.class.getMethod("loadFFmpeg", JsonObject.class));
-                SETTING_LOAD.add(InfoBoxShooter.class.getMethod("loadWebDriver", JsonObject.class));
-                SETTING_LOAD.add(GitHubListener.class.getMethod("loadGitHub", JsonObject.class));
-                SETTING_LOAD.add(YoudaoTranslation.class.getMethod("loadYouDaoAppKeyAndSecrets", JsonObject.class));
                 SETTING_LOAD.add(PermissionManager.class.getMethod("init", JsonObject.class));
+                SETTING_LOAD.add(ModuleManager.class.getMethod("settingLoad", JsonObject.class));
             } catch (NoSuchMethodException ignored) {
             }
         }

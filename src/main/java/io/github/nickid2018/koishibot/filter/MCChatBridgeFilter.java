@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.filter;
 
-import io.github.nickid2018.koishibot.mc.chat.MCChatBridge;
+import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,7 @@ public class MCChatBridgeFilter implements PreFilter {
     @Nullable
     @Override
     public ChainMessage filterMessagePre(ChainMessage input, MessageContext context, Environment environment) {
-        AsyncUtil.execute(() -> MCChatBridge.INSTANCE.onReceiveGroupText(
+        AsyncUtil.execute(() -> MCChatBridgeModule.INSTANCE.onReceiveGroupText(
                 context.group(), context.user(), messageToString(input, context)));
         return input;
     }

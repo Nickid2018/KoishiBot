@@ -13,7 +13,7 @@ public class DataReader<E> {
     private E data;
 
     public DataReader(File file, Supplier<E> empty) {
-        this.file = file;
+        this.file = file.getAbsoluteFile();
         this.empty = empty;
     }
 
@@ -34,6 +34,14 @@ public class DataReader<E> {
             data = empty.get();
             saveData();
             return data;
+        }
+    }
+
+    public E getDataSilently() {
+        try {
+            return getData();
+        } catch (IOException e) {
+            return empty.get();
         }
     }
 

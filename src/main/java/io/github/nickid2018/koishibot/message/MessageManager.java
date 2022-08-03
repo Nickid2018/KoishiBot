@@ -2,9 +2,10 @@ package io.github.nickid2018.koishibot.message;
 
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.filter.MCChatBridgeFilter;
-import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
 import io.github.nickid2018.koishibot.filter.PreFilter;
+import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
 import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.module.ModuleManager;
 import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.resolver.*;
 import io.github.nickid2018.koishibot.util.value.Either;
@@ -31,23 +32,7 @@ public class MessageManager {
     public static final List<PreFilter> STRANGER_PREFILTER = new ArrayList<>();
 
     static {
-        RESOLVERS.add(new HelpResolver());
-        RESOLVERS.add(new InfoResolver());
-        RESOLVERS.add(new LaTeXResolver());
-        RESOLVERS.add(new QRCodeResolver());
-        RESOLVERS.add(new WikiResolver());
-        RESOLVERS.add(new BilibiliDataResolver());
-        RESOLVERS.add(new BugTrackerResolver());
-        RESOLVERS.add(new ModrinthResolver());
-        RESOLVERS.add(new CurseForgeResolver());
-        RESOLVERS.add(new TranslateResolver());
-        RESOLVERS.add(new MCServerResolver());
-        RESOLVERS.add(new UrbanDictResolver());
-        RESOLVERS.add(new MCChatBridgeServerResolver());
-        RESOLVERS.add(new MCChatBridgeResolver());
-        RESOLVERS.add(new GitHubRepoResolver());
-        RESOLVERS.add(new GitHubWebHookResolver());
-        RESOLVERS.add(new GitHubSubscribeResolver());
+        RESOLVERS.add(new PermissionResolver());
 
         JSON_SERVICE_MAP.put("哔哩哔哩", new BilibiliDataResolver());
 
@@ -133,7 +118,9 @@ public class MessageManager {
 
             MutableBoolean bool = new MutableBoolean(false);
             boolean finalAtt = att;
-            RESOLVERS.stream()
+
+            ModuleManager.getAvailableResolvers(context.getSendDest()).stream()
+//            RESOLVERS.stream()
                     .filter(predicate)
                     .filter(resolver -> !inGroup || !resolver.needAt() || finalAtt)
                     .filter(resolver -> PermissionManager.getLevel(user.getUserId()).levelGreaterOrEquals(resolver.getPermissionLevel()))
