@@ -47,7 +47,8 @@ public class RequestFrequencyFilter implements PreFilter, PostFilter {
     }
 
     public static void refreshRequestTime(UserInfo member) {
-        USER_REQUEST_TIME.put(member, System.currentTimeMillis());
+        if (member != null)
+            USER_REQUEST_TIME.put(member, System.currentTimeMillis());
     }
 
     @NotNull
