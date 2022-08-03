@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public record MessageContext(@Nullable GroupInfo group,
-                             @Nonnull UserInfo user,
+                             UserInfo user,
                              @Nonnull ChainMessage message, long sentTime) {
 
     public ContactInfo getSendDest() {

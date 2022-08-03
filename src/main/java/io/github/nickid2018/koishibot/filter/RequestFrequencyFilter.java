@@ -55,7 +55,7 @@ public class RequestFrequencyFilter implements PreFilter, PostFilter {
     @Override
     public AbstractMessage filterMessagePost(AbstractMessage input, MessageContext context, Environment environment) {
         refreshRequestTime(context.user());
-        if (Math.random() < 0.2)
+        if (Math.random() < 0.2 && context.user() != null)
             context.user().nudge(context.group() != null ? context.group() : context.user());
         return input;
     }
