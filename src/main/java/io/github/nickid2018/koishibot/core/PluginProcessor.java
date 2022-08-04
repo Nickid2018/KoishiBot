@@ -1,7 +1,6 @@
 package io.github.nickid2018.koishibot.core;
 
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.module.ModuleManager;
 import io.github.nickid2018.koishibot.module.wiki.FormatTransformer;
@@ -40,7 +39,6 @@ public class PluginProcessor {
         if (!PLUGIN_FILE.exists()) {
             LOGGER.info("No plugin description data found. Using default config.");
             try {
-                INIT_PROCESS.add(RequestFrequencyFilter.class.getMethod("init"));
                 INIT_PROCESS.add(ModuleManager.class.getMethod("start"));
 
                 EXIT_PROCESS.add(0, ModuleManager.class.getMethod("stop"));

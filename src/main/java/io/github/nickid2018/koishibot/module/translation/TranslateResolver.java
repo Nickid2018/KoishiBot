@@ -1,13 +1,17 @@
 package io.github.nickid2018.koishibot.module.translation;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.regex.Pattern;
 
+@ResolverName("translate")
+@Syntax(syntax = "trans:((源语言)->(目标语言)):[翻译内容](|)", help = "翻译一句话")
 public class TranslateResolver extends MessageResolver {
 
     public static final Pattern TRANSLATE_PATTERN = Pattern.compile(

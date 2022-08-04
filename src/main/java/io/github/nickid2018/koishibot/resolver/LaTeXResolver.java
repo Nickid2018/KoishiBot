@@ -1,5 +1,8 @@
 package io.github.nickid2018.koishibot.resolver;
 
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
@@ -23,6 +26,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
+@ResolverName("latex")
+@Syntax(syntax = "~latex [LaTeX表达式]", help = "渲染LaTeX公式")
+@Syntax(syntax = "~latex-a [LaTeX表达式]", help = "渲染LaTeX公式，使用透明背景")
 public class LaTeXResolver extends MessageResolver {
 
     private final Transcoder transcoder;
@@ -41,10 +47,11 @@ public class LaTeXResolver extends MessageResolver {
     public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
         AsyncUtil.execute(() -> {
             String latex = key;
+            String[] split = latex.split(" ", 2);
             Transcoder use = transcoder;
-            if (latex.startsWith("-a") || latex.startsWith("-A")) {
+            if (split[0].equalsIgnoreCase("-a") && split.length == 2) {
                 use = alphaTranscoder;
-                latex = latex.substring(2);
+                latex = split[1];
             }
             latex = latex.trim();
             try {

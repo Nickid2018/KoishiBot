@@ -1,14 +1,18 @@
 package io.github.nickid2018.koishibot.module.mc.chat;
 
 import com.google.common.net.HostAndPort;
-import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.net.InetSocketAddress;
 
+@ResolverName("mc-chat-listen")
+@Syntax(syntax = "~mcchat add [服务器地址]", help = "添加群和服务器聊天链接", rem = "需要先添加服务器连接")
+@Syntax(syntax = "~mcchat del [服务器地址]", help = "删除群和服务器聊天链接")
 public class MCChatBridgeResolver extends MessageResolver {
 
     public MCChatBridgeResolver() {

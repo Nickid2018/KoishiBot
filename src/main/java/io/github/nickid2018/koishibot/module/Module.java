@@ -1,7 +1,7 @@
 package io.github.nickid2018.koishibot.module;
 
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,4 +34,8 @@ public abstract class Module {
     public abstract void onStart() throws Exception;
     public abstract void onSettingReload(JsonObject settingRoot) throws Exception;
     public abstract void onTerminate() throws Exception;
+
+    public abstract String getDescription();
+
+    public abstract String getSummary();
 }

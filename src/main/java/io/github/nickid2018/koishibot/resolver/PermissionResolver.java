@@ -1,5 +1,8 @@
 package io.github.nickid2018.koishibot.resolver;
 
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.AtMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
@@ -12,6 +15,11 @@ import io.github.nickid2018.koishibot.util.MessageUtil;
 import java.util.Arrays;
 import java.util.Date;
 
+@ResolverName("permission")
+@Syntax(syntax = "~perm query", help = "查询权限等级", rem = "需要at要查询的人")
+@Syntax(syntax = "~perm query [用户号码]", help = "查询权限等级")
+@Syntax(syntax = "~perm set [等级] [到期时间]", help = "设置权限等级，时间为「+」代表无限期，「+数字」代表从现在开始数字毫秒后到期", rem = "需要at要查询的人")
+@Syntax(syntax = "~perm set [等级] [到期时间] [用户号码]", help = "设置权限等级，时间为「+」代表无限期，「+数字」代表从现在开始数字毫秒后到期")
 public class PermissionResolver extends MessageResolver {
 
     public PermissionResolver() {

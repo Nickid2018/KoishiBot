@@ -3,6 +3,10 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.JSONServiceResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
@@ -24,6 +28,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+@ResolverName("bilibili")
+@Syntax(syntax = "内联Bilibili短链接/作品编号", help = "获取Bilibili作品信息", rem = "支持av/bv/cv/au/ep/ss号")
+@Syntax(syntax = "B站小程序消息", help = "获取Bilibili作品信息", rem = "支持视频、专栏、番剧、音频")
 public class BilibiliDataResolver extends MessageResolver implements JSONServiceResolver {
 
     public static final Pattern B_AV_VIDEO_PATTERN = Pattern.compile("[aA][vV][1-9]\\d{0,9}");

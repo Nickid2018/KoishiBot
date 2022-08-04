@@ -4,6 +4,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
@@ -23,6 +26,12 @@ import java.util.stream.Collectors;
 /*
  * API Documentation: https://docs.modrinth.com/api-spec/
  */
+@ResolverName("mod-modrinth")
+@Syntax(syntax = "<mod:[模组名称]>", help = "查询Modrinth模组信息")
+@Syntax(syntax = "<mod:files:[模组名称]>", help = "查询Modrinth模组每个版本的最新文件")
+@Syntax(syntax = "<mod:search:[查询模组的信息]>", help = "查询Modrinth模组信息")
+@Syntax(syntax = "<mod:search:[页数],(候选数):[查询模组的信息]>", help = "指定页数和候选数查询Modrinth模组信息")
+@Syntax(syntax = "<mod:search:[页数],(候选数):[查询模组的信息]|[查询指令]>", help = "指定查询指令、页数和候选数查询Modrinth模组信息")
 public class ModrinthResolver extends MessageResolver {
 
     public static final Pattern MOD_PATTERN = Pattern.compile("<mod:.+?>");

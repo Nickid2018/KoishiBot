@@ -4,12 +4,12 @@ import com.google.common.net.HostAndPort;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.module.mc.MCBEServerPing;
-import io.github.nickid2018.koishibot.module.mc.MCJEServerPing;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import org.apache.commons.codec.binary.Base64;
@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@ResolverName("mc-server")
+@Syntax(syntax = "~server (je) [地址]", help = "查询JE服务器信息")
+@Syntax(syntax = "~server be [地址]", help = "查询BE服务器信息")
 public class MCServerResolver extends MessageResolver {
 
     public MCServerResolver() {

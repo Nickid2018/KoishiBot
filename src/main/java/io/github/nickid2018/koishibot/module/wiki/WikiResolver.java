@@ -2,8 +2,10 @@ package io.github.nickid2018.koishibot.module.wiki;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 
@@ -15,6 +17,11 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+@ResolverName("wiki")
+@Syntax(syntax = "[[查询页面]]", help = "查询wiki页面", rem = "允许使用跨wiki和章节，强制禁止进行跨wiki需要再加一层中括号，特殊页面查询如下")
+@Syntax(syntax = "~rd", help = "随机页面")
+@Syntax(syntax = "~iw", help = "查看跨wiki数据")
+@Syntax(syntax = "~search [查询内容]", help = "查询wiki页面")
 public class WikiResolver extends MessageResolver {
 
     public static final Pattern WIKI_PATTERN = Pattern.compile("\\[\\[.+?]{2,3}+");

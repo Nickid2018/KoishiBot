@@ -3,8 +3,10 @@ package io.github.nickid2018.koishibot.module.github;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.ConsumerE;
 import io.github.nickid2018.koishibot.util.JsonUtil;
@@ -19,6 +21,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+@ResolverName("github-repo")
+@Syntax(syntax = "~github repo [仓库]", help = "获取GitHub仓库信息", rem = "回复消息可以进行star(~star)/unstar(~unstar)/fork(~fork)")
+@Syntax(syntax = "~github repo [仓库] issue [issueID]", help = "获取事项信息", rem = "回复消息可以进行评论(~comment [评论])")
 public class GitHubRepoResolver extends MessageResolver {
 
     public static final String GITHUB_API = "https://api.github.com/";

@@ -1,17 +1,20 @@
 package io.github.nickid2018.koishibot.module.mc.chat;
 
 import com.google.common.net.HostAndPort;
-import io.github.nickid2018.koishibot.module.mc.chat.ChatBridgeSetting;
-import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.MessageUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+@ResolverName("mc-chat-hook")
+@Syntax(syntax = "~mcchat server add [服务器地址]", help = "添加服务器聊天链接", rem = "地址是RCON端口/转接器端口")
+@Syntax(syntax = "~mcchat sever del [服务器地址]", help = "删除服务器聊天链接")
 public class MCChatBridgeServerResolver extends MessageResolver {
 
     public MCChatBridgeServerResolver() {

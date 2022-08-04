@@ -1,12 +1,18 @@
 package io.github.nickid2018.koishibot.module.github;
 
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.permission.PermissionLevel;
 
 import java.io.IOException;
 import java.util.Locale;
 
+@ResolverName("github-webhook")
+@Syntax(syntax = "~github webhook add [仓库]", help = "添加仓库的WebHook")
+@Syntax(syntax = "~github webhook del [仓库]", help = "删除仓库的WebHook")
 public class GitHubWebHookResolver extends MessageResolver {
 
     public GitHubWebHookResolver() {
@@ -21,6 +27,11 @@ public class GitHubWebHookResolver extends MessageResolver {
     @Override
     public boolean groupTempChat() {
         return true;
+    }
+
+    @Override
+    public PermissionLevel getPermissionLevel() {
+        return PermissionLevel.ADMIN;
     }
 
     @Override

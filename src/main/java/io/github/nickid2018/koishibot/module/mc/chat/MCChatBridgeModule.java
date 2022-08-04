@@ -105,4 +105,19 @@ public class MCChatBridgeModule extends Module {
     @Override
     public void onTerminate() {
     }
+
+    @Override
+    public String getDescription() {
+        return "MC聊天连接相关模块";
+    }
+
+    @Override
+    public String getSummary() {
+        return """
+                提供与MC之间的聊天转发。
+                有两种方式可以提供转发，都需要使用RCON。
+                1. 直连RCON，如果bot和服务器不在一个服务器上不应该使用这个方式。
+                2. 经转发器转发，这时服务器地址要填入转发器接口地址。
+                """;
+    }
 }

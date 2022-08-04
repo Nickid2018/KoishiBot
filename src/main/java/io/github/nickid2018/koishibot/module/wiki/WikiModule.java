@@ -27,4 +27,17 @@ public class WikiModule extends Module {
     public void onTerminate() {
         InfoBoxShooter.close();
     }
+
+    @Override
+    public String getDescription() {
+        return "提供查询wiki的功能";
+    }
+
+    @Override
+    public String getSummary() {
+        return """
+                查询wiki。
+                可以调取wiki内的图片和音频，音频将以24000采样率转换为silk语音，分割为每段为110s的片段每2min发送一次。
+                """;
+    }
 }

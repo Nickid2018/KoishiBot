@@ -3,6 +3,9 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
@@ -20,6 +23,10 @@ import java.io.StringReader;
 import java.net.URL;
 import java.util.regex.Pattern;
 
+@ResolverName("mojira-bug")
+@Syntax(syntax = "<bug:[编号]>", help = "获取Mojira上的漏洞信息")
+@Syntax(syntax = "<bug:search:[JQL查询指令]>", help = "查询漏洞信息")
+@Syntax(syntax = "<bug:search:[页数],(候选数):[JQL查询指令]>", help = "指定页数和候选数查询漏洞信息")
 public class BugTrackerResolver extends MessageResolver {
 
     public static final Pattern BUG_TRACKER_PATTERN = Pattern.compile("<bug:.+?>");

@@ -1,6 +1,7 @@
 package io.github.nickid2018.koishibot.module;
 
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.module.github.GitHubModule;
@@ -36,31 +37,34 @@ public class ModuleManager {
 
     // Module List
     static {
-        addModule(new SingleResolverModule("help", true, NOP, NOP, new HelpResolver()));
-        addModule(new SingleResolverModule("info", true, NOP, NOP, new InfoResolver()));
+        addModule(new SingleResolverModule("help", true, NOP, NOP, "帮助模块", new HelpResolver()));
+        addModule(new SingleResolverModule("info", true, NOP, NOP, "信息模块", new InfoResolver()));
         addModule(new WikiModule());
-        addModule(new SingleResolverModule("bilibili", true, NOP, NOP, new BilibiliDataResolver()));
+        addModule(new SingleResolverModule("bilibili", true, NOP, NOP, "Bilibili模块", new BilibiliDataResolver()));
         addModule(new TranslateModule());
-        addModule(new SingleResolverModule("urban", true, NOP, NOP, new UrbanDictResolver()));
-        addModule(new SingleResolverModule("latex", true, NOP, NOP, new LaTeXResolver()));
-        addModule(new SingleResolverModule("qrcode", true, NOP, NOP, new QRCodeResolver()));
-        addModule(new SingleResolverModule("bugtracker", true, NOP, NOP, new BugTrackerResolver()));
-        addModule(new SingleResolverModule("mod", true, NOP, NOP, new CurseForgeResolver(), new ModrinthResolver()));
-        addModule(new SingleResolverModule("mc-server", true, NOP, NOP, new MCServerResolver()));
+        addModule(new SingleResolverModule("urban", true, NOP, NOP, "城市字典模块", new UrbanDictResolver()));
+        addModule(new SingleResolverModule("latex", true, NOP, NOP, "LaTeX渲染模块", new LaTeXResolver()));
+        addModule(new SingleResolverModule("qrcode", true, NOP, NOP, "二维码模块", new QRCodeResolver()));
+        addModule(new SingleResolverModule("mojira", true, NOP, NOP, "Mojira漏洞追踪器模块", new BugTrackerResolver()));
+        addModule(new SingleResolverModule("mod", true, NOP, NOP, "模组查询模块", new CurseForgeResolver(), new ModrinthResolver()));
+        addModule(new SingleResolverModule("mc-server", true, NOP, NOP, "MC服务器查询模块", new MCServerResolver()));
         addModule(new MCChatBridgeModule());
         addModule(new GitHubModule());
-        addModule(new SingleResolverModule("perm", false, NOP, NOP, new PermissionResolver()));
+        addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
     }
 
     public static void start() {
+        Set<String> toRemove = new HashSet<>();
         MODULE_MAP.forEach((name, module) -> {
             try {
                 module.onStart();
                 LOGGER.info("Started {}.", name);
             } catch (Exception e) {
-                LOGGER.error("Starting failure: " + name, e);
+                toRemove.add(name);
+                LOGGER.error("Starting failure: " + name + ". The module will be removed.", e);
             }
         });
+        toRemove.forEach(MODULE_MAP::remove);
     }
 
     public static void settingLoad(JsonObject setting) {
@@ -87,6 +91,14 @@ public class ModuleManager {
 
     public static void addModule(Module module) {
         MODULE_MAP.put(module.getName(), module);
+    }
+
+    public static Set<String> getModuleNames() {
+        return MODULE_MAP.keySet();
+    }
+
+    public static Collection<Module> getModules() {
+        return MODULE_MAP.values();
     }
 
     public static boolean isOpened(String group, String moduleName) {

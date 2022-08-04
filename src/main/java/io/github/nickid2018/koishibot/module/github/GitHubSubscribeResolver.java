@@ -1,12 +1,17 @@
 package io.github.nickid2018.koishibot.module.github;
 
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.resolver.MessageResolver;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 
 import java.util.Locale;
 
+@ResolverName("github-subscribe")
+@Syntax(syntax = "~github subscribe add [仓库]", help = "订阅仓库的信息", rem = "需要事先添加WebHook")
+@Syntax(syntax = "~github subscribe del [仓库]", help = "取消仓库的信息")
 public class GitHubSubscribeResolver extends MessageResolver {
 
     public GitHubSubscribeResolver() {

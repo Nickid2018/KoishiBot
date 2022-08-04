@@ -70,6 +70,16 @@ public class GitHubModule extends Module {
     public void onTerminate() {
     }
 
+    @Override
+    public String getDescription() {
+        return "GitHub相关模块";
+    }
+
+    @Override
+    public String getSummary() {
+        return "提供对GitHub仓库的访问和订阅服务。";
+    }
+
     public GitHubWebHookListener getWebHookListener() {
         return webHookListener;
     }

@@ -2,6 +2,9 @@ package io.github.nickid2018.koishibot.resolver;
 
 import io.github.nickid2018.koishibot.core.BotStart;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
@@ -11,6 +14,9 @@ import io.github.nickid2018.koishibot.util.AsyncUtil;
 import java.util.Date;
 import java.util.Locale;
 
+@ResolverName("info")
+@Syntax(syntax = "~info", help = "显示bot运行状态")
+@Syntax(syntax = "~info error", help = "显示bot错误记录")
 public class InfoResolver extends MessageResolver {
 
     public InfoResolver() {

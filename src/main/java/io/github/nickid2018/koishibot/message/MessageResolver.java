@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.resolver;
+package io.github.nickid2018.koishibot.message;
 
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
@@ -13,9 +13,11 @@ import java.util.regex.Pattern;
 public abstract class MessageResolver {
 
     private final Function<String, Pair<String, Object>> resolverTrigger;
+    private final boolean inline;
 
-    public MessageResolver(Function<String, Pair<String, Object>> resolverTrigger) {
+    public MessageResolver(Function<String, Pair<String, Object>> resolverTrigger, boolean inline) {
         this.resolverTrigger = resolverTrigger;
+        this.inline = inline;
     }
 
     public MessageResolver(Pattern... patterns) {
@@ -27,12 +29,14 @@ public abstract class MessageResolver {
             }
             return null;
         };
+        inline = true;
     }
 
     public MessageResolver(String prefix) {
         String lowCased = prefix.toLowerCase(Locale.ROOT);
         resolverTrigger = s ->
                 s.toLowerCase(Locale.ROOT).startsWith(lowCased) ? new Pair<>(s.substring(prefix.length()).trim(), null) : null;
+        inline = false;
     }
 
     public boolean groupEnabled() {
@@ -49,6 +53,10 @@ public abstract class MessageResolver {
 
     public boolean strangerChat() {
         return false;
+    }
+
+    public final boolean isInline() {
+        return inline;
     }
 
     public boolean friendEnabled() {

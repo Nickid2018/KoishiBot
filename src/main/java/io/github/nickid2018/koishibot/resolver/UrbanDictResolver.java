@@ -1,6 +1,9 @@
 package io.github.nickid2018.koishibot.resolver;
 
 import com.google.gson.JsonArray;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
@@ -8,6 +11,8 @@ import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.http.client.methods.HttpGet;
 
+@ResolverName("urban")
+@Syntax(syntax = "~urban [查询词语]", help = "使用Urban Dictionary查询词语")
 public class UrbanDictResolver extends MessageResolver {
 
     public static final String URBAN_API = "https://api.urbandictionary.com/v0/define?term=";

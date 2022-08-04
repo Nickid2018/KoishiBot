@@ -3,6 +3,9 @@ package io.github.nickid2018.koishibot.resolver;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
@@ -21,6 +24,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@ResolverName("mod-curseforge")
+@Syntax(syntax = "<cur:[模组名称]>", help = "查询CurseForge模组信息")
+@Syntax(syntax = "<cur:files:[模组名称]>", help = "查询CurseForge模组每个版本的最新文件")
 public class CurseForgeResolver extends MessageResolver {
 
     public static final Pattern MOD_PATTERN = Pattern.compile("<cur:.+?>");

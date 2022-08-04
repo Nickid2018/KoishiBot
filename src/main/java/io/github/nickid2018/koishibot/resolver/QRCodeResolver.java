@@ -4,6 +4,9 @@ import com.google.zxing.*;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
+import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.AbstractMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
@@ -18,6 +21,9 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+@ResolverName("qr-code")
+@Syntax(syntax = "~qrcode encode [文本]", help = "将文本转变成字符串")
+@Syntax(syntax = "~qrcode decode", help = "将图片内的二维码解析成字符串", rem = "需要信息中含至少一张图片")
 public class QRCodeResolver extends MessageResolver {
 
     private static final Map<EncodeHintType, Object> HINTS = new HashMap<>();

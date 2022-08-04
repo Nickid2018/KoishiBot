@@ -1,6 +1,5 @@
 package io.github.nickid2018.koishibot.filter;
 
-import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.permission.PermissionLevel;
 import io.github.nickid2018.koishibot.permission.PermissionManager;
@@ -19,14 +18,6 @@ public class RequestFrequencyFilter implements PreFilter, PostFilter {
     private static final int REQUEST_MAX_FAIL = 5;
     private static final long REQUEST_DURATION = 2000;
     private static final long AUTO_BAN_TIME = 3600_000;
-
-    public static void init() {
-        Environment qq = Environments.getEnvironment("qq");
-//        if (qq != null) {
-//            USER_BAN_TIME.put(qq.getUser("qq.user2854196306", true), Long.MAX_VALUE); // QQ小冰
-//            USER_BAN_TIME.put(qq.getUser("qq.user2854196310", true), Long.MAX_VALUE); // QQ管家
-//        }
-    }
 
     public static boolean shouldNotResponse(UserInfo member, MutableBoolean nowBan) {
         long nowTime = System.currentTimeMillis();
