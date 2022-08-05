@@ -8,7 +8,7 @@ import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.http.client.methods.HttpGet;
 
 @ResolverName("urban")

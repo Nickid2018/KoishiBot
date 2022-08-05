@@ -10,7 +10,7 @@ import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.MessageUtil;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 

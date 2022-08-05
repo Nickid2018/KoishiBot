@@ -10,7 +10,7 @@ import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.ConsumerE;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 

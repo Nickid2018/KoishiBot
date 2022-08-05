@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.util;
+package io.github.nickid2018.koishibot.util.web;
 
 import java.io.IOException;
 

@@ -8,8 +8,8 @@ import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.ImageRenderer;
-import io.github.nickid2018.koishibot.util.WebPageRenderer;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.WebPageRenderer;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -6,8 +6,8 @@ import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
 import io.github.nickid2018.koishibot.filter.PostFilter;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.util.ErrorCodeException;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.ErrorCodeException;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import kotlin.Pair;
 
 import java.io.IOException;

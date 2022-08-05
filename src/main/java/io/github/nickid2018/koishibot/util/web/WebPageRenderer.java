@@ -1,7 +1,8 @@
-package io.github.nickid2018.koishibot.util;
+package io.github.nickid2018.koishibot.util.web;
 
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.firefox.FirefoxDriver;

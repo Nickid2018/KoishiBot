@@ -13,6 +13,7 @@ import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;

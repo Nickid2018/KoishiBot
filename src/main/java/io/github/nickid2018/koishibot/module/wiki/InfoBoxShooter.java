@@ -1,8 +1,8 @@
 package io.github.nickid2018.koishibot.module.wiki;
 
 import io.github.nickid2018.koishibot.core.TempFileSystem;
-import io.github.nickid2018.koishibot.util.WebPageRenderer;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.WebPageRenderer;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

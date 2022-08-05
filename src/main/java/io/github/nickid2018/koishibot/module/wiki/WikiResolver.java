@@ -7,7 +7,7 @@ import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 
 import java.io.File;
 import java.io.FileInputStream;

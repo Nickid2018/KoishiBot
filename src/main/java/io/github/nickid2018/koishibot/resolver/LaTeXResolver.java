@@ -6,7 +6,7 @@ import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.batik.transcoder.SVGAbstractTranscoder;
 import org.apache.batik.transcoder.Transcoder;
 import org.apache.batik.transcoder.TranscoderInput;

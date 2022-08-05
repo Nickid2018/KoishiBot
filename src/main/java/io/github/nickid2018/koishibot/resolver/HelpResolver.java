@@ -11,8 +11,8 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.module.Module;
 import io.github.nickid2018.koishibot.module.ModuleManager;
 import io.github.nickid2018.koishibot.permission.PermissionLevel;
-import io.github.nickid2018.koishibot.util.WebPageRenderer;
-import io.github.nickid2018.koishibot.util.WebUtil;
+import io.github.nickid2018.koishibot.util.web.WebPageRenderer;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.openqa.selenium.By;
@@ -167,7 +167,8 @@ public class HelpResolver extends MessageResolver {
                             }
                         });
                     }
-                }
+                } else
+                    environment.getMessageSender().sendMessage(context, environment.newImage(new FileInputStream(helpImage)));
             }
         } catch (Exception e) {
             environment.getMessageSender().onError(e, "help", context, false);

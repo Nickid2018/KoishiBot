@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.module.wiki;
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.util.*;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.http.client.methods.HttpGet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

@@ -1,11 +1,16 @@
-package io.github.nickid2018.koishibot.util;
+package io.github.nickid2018.koishibot.util.web;
 
-import com.google.gson.*;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.overzealous.remark.Options;
 import com.overzealous.remark.Remark;
 import com.overzealous.remark.convert.AbstractNodeHandler;
 import com.overzealous.remark.convert.DocumentConverter;
 import com.overzealous.remark.convert.NodeHandler;
+import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.ReflectTarget;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -21,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -179,7 +183,7 @@ public class WebUtil {
         return url;
     }
 
-    public static String encode(String str) throws UnsupportedEncodingException {
+    public static String encode(String str) {
         return URLEncoder.encode(str, StandardCharsets.UTF_8).replace(".", "%2E");
     }
 
