@@ -8,6 +8,7 @@ import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.ImageRenderer;
+import io.github.nickid2018.koishibot.util.WebPageRenderer;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,11 +43,13 @@ public class PluginProcessor {
                 INIT_PROCESS.add(ModuleManager.class.getMethod("start"));
 
                 EXIT_PROCESS.add(0, ModuleManager.class.getMethod("stop"));
+                EXIT_PROCESS.add(WebPageRenderer.class.getMethod("close"));
 
                 SETTING_LOAD.add(SensitiveWordFilter.class.getMethod("loadSensitiveWordsSettings", JsonObject.class));
                 SETTING_LOAD.add(ImageRenderer.class.getMethod("loadImageSettings", JsonObject.class));
                 SETTING_LOAD.add(FormatTransformer.class.getMethod("loadFFmpeg", JsonObject.class));
                 SETTING_LOAD.add(PermissionManager.class.getMethod("init", JsonObject.class));
+                SETTING_LOAD.add(WebPageRenderer.class.getMethod("loadWebDriver", JsonObject.class));
                 SETTING_LOAD.add(ModuleManager.class.getMethod("settingLoad", JsonObject.class));
             } catch (NoSuchMethodException ignored) {
             }

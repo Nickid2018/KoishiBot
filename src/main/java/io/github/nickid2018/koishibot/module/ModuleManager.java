@@ -101,6 +101,10 @@ public class ModuleManager {
         return MODULE_MAP.values();
     }
 
+    public static Module getModule(String name) {
+        return MODULE_MAP.get(name);
+    }
+
     public static boolean isOpened(String group, String moduleName) {
         return DATA_READER.getData(group).contains(moduleName);
     }

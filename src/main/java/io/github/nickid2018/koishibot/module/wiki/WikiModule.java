@@ -20,12 +20,10 @@ public class WikiModule extends Module {
     @Override
     public void onSettingReload(JsonObject settingRoot) {
         WikiInfo.loadWiki(settingRoot);
-        InfoBoxShooter.loadWebDriver(settingRoot);
     }
 
     @Override
     public void onTerminate() {
-        InfoBoxShooter.close();
     }
 
     @Override

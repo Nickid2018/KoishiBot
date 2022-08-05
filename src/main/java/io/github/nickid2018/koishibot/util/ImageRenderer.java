@@ -48,17 +48,15 @@ public class ImageRenderer {
         List<String> names = new ArrayList<>(sorted.keySet());
         List<String> values = new ArrayList<>(sorted.values());
 
-        List<Rectangle2D> nameBound = names.stream().map(str -> font.getStringBounds(str, frc)).collect(
-                ArrayList::new, ArrayList::add, ArrayList::addAll);
-        List<Rectangle2D> valueBound = values.stream().map(str -> font.getStringBounds(str, frc)).collect(
-                ArrayList::new, ArrayList::add, ArrayList::addAll);
+        List<Rectangle2D> nameBound = names.stream().map(str -> font.getStringBounds(str, frc)).toList();
+        List<Rectangle2D> valueBound = values.stream().map(str -> font.getStringBounds(str, frc)).toList();
 
         int keyLength = (int) fontBold.getStringBounds(key, frc).getWidth();
         int valLength = (int) fontBold.getStringBounds(value, frc).getWidth();
         int nameLength = (int) (Math.max(nameBound.stream().mapToDouble(Rectangle2D::getWidth)
-                .max().getAsDouble(), keyLength) + margin * 2);
+                .max().orElse(0), keyLength) + margin * 2);
         int valueLength = (int) (Math.max(valueBound.stream().mapToDouble(Rectangle2D::getWidth)
-                .max().getAsDouble(), valLength) + margin * 2);
+                .max().orElse(0), valLength) + margin * 2);
 
         int charHeight = font.getSize();
         int cellHeight = charHeight + margin * 2;

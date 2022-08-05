@@ -1,13 +1,9 @@
 package io.github.nickid2018.koishibot.module.wiki;
 
-import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
-import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.ReflectTarget;
+import io.github.nickid2018.koishibot.util.WebPageRenderer;
 import io.github.nickid2018.koishibot.util.WebUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -16,8 +12,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,33 +25,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class InfoBoxShooter {
 
     public static final Logger INFOBOX_LOGGER = LoggerFactory.getLogger("Wiki Infobox");
 
-    @ReflectTarget
-    public static void loadWebDriver(JsonObject settingsRoot) {
-        close();
-        JsonUtil.getString(settingsRoot, "webdriver").ifPresent(web -> {
-            System.setProperty("webdriver.gecko.driver", web);
-            FirefoxOptions firefoxOptions = new FirefoxOptions();
-            firefoxOptions.addArguments("--headless");
-            firefoxOptions.addArguments("--no-sandbox");
-            driver = new FirefoxDriver(firefoxOptions);
-            driver.manage().window().setSize(new Dimension(0, 0));
-            executor = Executors.newSingleThreadExecutor(new BasicThreadFactory.Builder().uncaughtExceptionHandler(
-                    (t, e) -> ErrorRecord.enqueueError("wiki.infoboxshoot", e)
-            ).daemon(true).namingPattern("Infobox Shooter").build());
-            INFOBOX_LOGGER.info("Infobox Shooter initialized.");
-        });
-    }
-
-    private static FirefoxDriver driver;
-    private static ExecutorService executor;
 
     public static final String[] SUPPORT_INFOBOX = new String[] {
             "notaninfobox", "infoboxtable", "infoboxSpecial", "infotemplatebox", "infobox2",
@@ -65,8 +38,8 @@ public class InfoBoxShooter {
     };
 
     public static Future<File> getInfoBoxShot(String url, String baseURI) {
-        if (executor != null)
-            return executor.submit(() -> getInfoBoxShotInternal(url, baseURI));
+        if (WebPageRenderer.getExecutor() != null)
+            return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI));
         return null;
     }
 
@@ -129,14 +102,15 @@ public class InfoBoxShooter {
             IOUtils.write(doc.html(), writer);
         }
 
-        driver.get(html.getAbsolutePath());
-        File srcFile = driver.getFullPageScreenshotAs(OutputType.FILE);
+        WebPageRenderer.getDriver().manage().window().setSize(new Dimension(0, 0));
+        WebPageRenderer.getDriver().get(html.getAbsolutePath());
+        File srcFile = WebPageRenderer.getDriver().getFullPageScreenshotAs(OutputType.FILE);
         TempFileSystem.unlockFileAndDelete(html);
 
         File png = TempFileSystem.createTmpFileBuffered("infobox", url, "infobox", "png", false);
         BufferedImage image = ImageIO.read(srcFile);
         try {
-            WebElement element2 = driver.findElement(By.className(className));
+            WebElement element2 = WebPageRenderer.getDriver().findElement(By.className(className));
             BufferedImage sub = image.getSubimage(element2.getLocation().x,
                     element2.getLocation().y, element2.getSize().width, element2.getSize().height);
             ImageIO.write(sub, "png", png);
@@ -146,16 +120,5 @@ public class InfoBoxShooter {
         }
 
         return png;
-    }
-
-    public static void close() {
-        if (executor != null)
-            executor.shutdownNow();
-        if (driver != null)
-            driver.quit();
-        if (executor != null || driver != null)
-            INFOBOX_LOGGER.info("Infobox Shooter closed.");
-        executor = null;
-        driver = null;
     }
 }
