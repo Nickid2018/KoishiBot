@@ -7,6 +7,7 @@ import io.github.nickid2018.koishibot.filter.RequestFrequencyFilter;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.module.ModuleManager;
 import io.github.nickid2018.koishibot.permission.PermissionManager;
+import io.github.nickid2018.koishibot.permission.PermissionResolver;
 import io.github.nickid2018.koishibot.resolver.*;
 import io.github.nickid2018.koishibot.util.value.Either;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;

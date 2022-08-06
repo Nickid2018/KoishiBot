@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.util.web;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
@@ -31,6 +32,7 @@ public class OAuth2Authenticator implements HttpHandler {
     private final String oauthName;
     private final String authenticateURL;
     private final String tokenGrantURL;
+    private final String revokeURL;
     private final boolean refreshTokenEnabled;
     private final String redirect;
     private final String clientID;
@@ -41,11 +43,12 @@ public class OAuth2Authenticator implements HttpHandler {
     private final Map<String, Triple<String, List<String>, Consumer<String>>> authSequence = new ConcurrentHashMap<>();
 
     public OAuth2Authenticator(String oauthName,
-                               String authenticateURL, String tokenGrantURL, boolean refreshTokenEnabled,
+                               String authenticateURL, String tokenGrantURL, String revokeURL, boolean refreshTokenEnabled,
                                String redirect, String clientID, String clientSecret, boolean uriAppend) throws IOException {
         this.oauthName = oauthName;
         this.authenticateURL = authenticateURL;
         this.tokenGrantURL = tokenGrantURL;
+        this.revokeURL = revokeURL;
         this.refreshTokenEnabled = refreshTokenEnabled;
         this.redirect = redirect;
         this.clientID = clientID;
@@ -55,6 +58,10 @@ public class OAuth2Authenticator implements HttpHandler {
                 new File("oauth2/" + oauthName + ".dat"), HashMap::new
         ) : null;
         ServerManager.addHandle(redirect, this);
+    }
+
+    public boolean authenticated(String user) {
+        return refreshTokenEnabled && dataReader.getDataSilently().containsKey(user);
     }
 
     public void authenticate(String user, Consumer<String> authURLSender, Consumer<String> operation,
@@ -89,6 +96,28 @@ public class OAuth2Authenticator implements HttpHandler {
                 authenticateCode(user, authURLSender, operation, scopes, extraParameters);
         } else
             authenticateCode(user, authURLSender, operation, scopes, extraParameters);
+    }
+
+    public void revoke(String user) {
+        if (revokeURL == null)
+            return;
+        AsyncUtil.execute(() -> {
+            AuthenticateToken token = dataReader.getDataSilently().get(user);
+            HttpPost post = new HttpPost(revokeURL);
+
+            List<NameValuePair> pairs = new ArrayList<>();
+            pairs.add(new BasicNameValuePair("client_id", clientID));
+            pairs.add(new BasicNameValuePair("client_secret", clientSecret));
+            pairs.add(new BasicNameValuePair("token", token.accessToken()));
+
+            post.setEntity(new UrlEncodedFormEntity(pairs, StandardCharsets.UTF_8));
+
+            try {
+                WebUtil.sendNeedCode(post, 200);
+            } catch (IOException e) {
+                ErrorRecord.enqueueError("oauth.revoke", e);
+            }
+        });
     }
 
     private String authenticateRefresh(String user) throws IOException {

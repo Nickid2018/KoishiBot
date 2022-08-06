@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.resolver;
+package io.github.nickid2018.koishibot.permission;
 
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.ResolverName;

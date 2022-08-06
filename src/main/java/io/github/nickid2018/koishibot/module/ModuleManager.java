@@ -4,12 +4,14 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
+import io.github.nickid2018.koishibot.module.eval.SayResolver;
 import io.github.nickid2018.koishibot.module.github.GitHubModule;
 import io.github.nickid2018.koishibot.module.mc.MCServerResolver;
 import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
 import io.github.nickid2018.koishibot.module.translation.TranslateModule;
 import io.github.nickid2018.koishibot.module.wakatime.WakaTimeModule;
 import io.github.nickid2018.koishibot.module.wiki.WikiModule;
+import io.github.nickid2018.koishibot.permission.PermissionResolver;
 import io.github.nickid2018.koishibot.resolver.*;
 import io.github.nickid2018.koishibot.util.GroupDataReader;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
@@ -38,8 +40,10 @@ public class ModuleManager {
 
     // Module List
     static {
-        addModule(new SingleResolverModule("help", true, NOP, NOP, "帮助模块", new HelpResolver()));
-        addModule(new SingleResolverModule("info", true, NOP, NOP, "信息模块", new InfoResolver()));
+        addModule(new SingleResolverModule("help", false, NOP, NOP, "帮助模块", new HelpResolver()));
+        addModule(new SingleResolverModule("info", false, NOP, NOP, "信息模块", new InfoResolver()));
+        addModule(new SingleResolverModule("system", false, NOP, NOP, "系统模块", new SayResolver()));
+        addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
         addModule(new WikiModule());
         addModule(new SingleResolverModule("bilibili", true, NOP, NOP, "Bilibili模块", new BilibiliDataResolver()));
         addModule(new TranslateModule());
@@ -52,7 +56,6 @@ public class ModuleManager {
         addModule(new WakaTimeModule());
         addModule(new MCChatBridgeModule());
         addModule(new GitHubModule());
-        addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
     }
 
     public static void start() {

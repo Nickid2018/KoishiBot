@@ -31,7 +31,7 @@ public class GitHubAuthenticator {
             try {
                 authenticator = new OAuth2Authenticator(
                         "github", "https://github.com/login/oauth/authorize",
-                        "https://github.com/login/oauth/access_token", false,
+                        "https://github.com/login/oauth/access_token", null, false,
                         "/githubOAuth", JsonUtil.getStringOrNull(oauth, "client_id"),
                         JsonUtil.getStringOrNull(oauth, "client_secret"), false
                 );
