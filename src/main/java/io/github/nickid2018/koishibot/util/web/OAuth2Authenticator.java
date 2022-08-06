@@ -9,12 +9,16 @@ import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.DataReader;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import kotlin.Triple;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -54,42 +58,57 @@ public class OAuth2Authenticator implements HttpHandler {
     }
 
     public void authenticate(String user, Consumer<String> authURLSender, Consumer<String> operation,
-                             List<String> scopes,  Map<String, String> extraParameters) {
-        AuthenticateToken token = dataReader.getDataSilently().get(user);
-        boolean usable = token != null;
+                             List<String> scopes, Map<String, String> extraParameters) {
+        if (refreshTokenEnabled) {
+            AuthenticateToken token = dataReader.getDataSilently().get(user);
+            boolean usable = token != null;
 
-        for (String scope : scopes) {
-            if (!usable)
-                break;
-            usable = token.scopes().contains(scope);
-        }
+            for (String scope : scopes) {
+                if (!usable)
+                    break;
+                usable = token.scopes().contains(scope);
+            }
 
-        if (token != null && !usable)
-            scopes.addAll(token.scopes());
+            if (token != null && !usable)
+                scopes.addAll(token.scopes());
 
-        if (refreshTokenEnabled && usable) {
-            AsyncUtil.execute(() -> {
-                try {
-                    String accessToken = token.accessToken();
-                    if (token.isExpired())
+            if (usable) {
+                AsyncUtil.execute(() -> {
+                    try {
+                        String accessToken = token.accessToken();
+                        if (token.isExpired())
                             accessToken = authenticateRefresh(user);
-                    String finalAccessToken = accessToken;
-                    AsyncUtil.execute(() -> operation.accept(finalAccessToken));
-                } catch (IOException e) {
-                    OAUTH2_LOGGER.error("Can't refresh access token. Name = " + oauthName + ", User = " + user, e);
-                    authenticateCode(user, authURLSender, operation, scopes, extraParameters);
-                }
-            });
+                        String finalAccessToken = accessToken;
+                        AsyncUtil.execute(() -> operation.accept(finalAccessToken));
+                    } catch (IOException e) {
+                        OAUTH2_LOGGER.error("Can't refresh access token. Name = " + oauthName + ", User = " + user, e);
+                        authenticateCode(user, authURLSender, operation, scopes, extraParameters);
+                    }
+                });
+            } else
+                authenticateCode(user, authURLSender, operation, scopes, extraParameters);
         } else
             authenticateCode(user, authURLSender, operation, scopes, extraParameters);
     }
 
     private String authenticateRefresh(String user) throws IOException {
         AuthenticateToken token = dataReader.getData().get(user);
-        String url = "%s?grant_type=refresh_token&refresh_token=%s".formatted(tokenGrantURL, token.refreshToken());
 
-        HttpPost post = new HttpPost(url);
+        HttpPost post = new HttpPost(tokenGrantURL);
         post.setHeader("Accept", "application/json");
+
+        List<NameValuePair> pairs = new ArrayList<>();
+        pairs.add(new BasicNameValuePair("client_id", clientID));
+        pairs.add(new BasicNameValuePair("client_secret", clientSecret));
+        pairs.add(new BasicNameValuePair("grant_type", "refresh_token"));
+        pairs.add(new BasicNameValuePair("refresh_token", token.refreshToken()));
+
+        if (uriAppend)
+            pairs.add(new BasicNameValuePair("redirect_uri", "http://%s:14514%s".formatted(Settings.LOCAL_IP, redirect)));
+
+        UrlEncodedFormEntity entity = new UrlEncodedFormEntity(pairs, StandardCharsets.UTF_8);
+        post.setEntity(entity);
+
         JsonObject object = WebUtil.fetchDataInJson(post).getAsJsonObject();
 
         String accessToken = JsonUtil.getStringOrNull(object, "access_token");
@@ -104,12 +123,13 @@ public class OAuth2Authenticator implements HttpHandler {
     }
 
     private void authenticateCode(String user, Consumer<String> authURLSender, Consumer<String> operation,
-                                  List<String> scopes,  Map<String, String> extraParameters) {
+                                  List<String> scopes, Map<String, String> extraParameters) {
         String state = randomState();
         String url = "%s?client_id=%s&state=%s&scope=%s&response_type=code".formatted(
                 authenticateURL, clientID, state, WebUtil.encode(String.join(",", scopes)));
         if (uriAppend)
-            url += "&redirect_uri=http://%s%s".formatted(Settings.LOCAL_IP, redirect);
+            url += "&redirect_uri=http://%s:14514%s".formatted(Settings.LOCAL_IP, redirect);
+
 
         String extra = extraParameters.entrySet().stream()
                 .map(en -> WebUtil.encode(en.getKey()) + "=" + WebUtil.encode(en.getValue()))
@@ -143,12 +163,20 @@ public class OAuth2Authenticator implements HttpHandler {
                 OAUTH2_LOGGER.info("Received code from state {}.", state);
 
                 String code = args.get("code");
-                String url = "%s?client_id=%s&client_secret=%s&code=%s&grant_type=authorization_code"
-                        .formatted(tokenGrantURL, clientID, clientSecret, code);
-                if (uriAppend)
-                    url += "&redirect_uri=http://%s%s".formatted(Settings.LOCAL_IP, redirect);
-                HttpPost post = new HttpPost(url);
+                HttpPost post = new HttpPost(tokenGrantURL);
                 post.setHeader("Accept", "application/json");
+
+                List<NameValuePair> pairs = new ArrayList<>();
+                if (uriAppend)
+                    pairs.add(new BasicNameValuePair("redirect_uri", "http://%s:14514%s".formatted(Settings.LOCAL_IP, redirect)));
+                pairs.add(new BasicNameValuePair("code", code));
+                pairs.add(new BasicNameValuePair("client_id", clientID));
+                pairs.add(new BasicNameValuePair("client_secret", clientSecret));
+                pairs.add(new BasicNameValuePair("grant_type", "authorization_code"));
+
+                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(pairs, StandardCharsets.UTF_8);
+                post.setEntity(entity);
+
                 JsonObject object = WebUtil.fetchDataInJson(post).getAsJsonObject();
 
                 String accessToken = JsonUtil.getStringOrNull(object, "access_token");

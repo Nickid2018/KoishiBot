@@ -40,7 +40,7 @@ public class DataReader<E> {
     public E getDataSilently() {
         try {
             return getData();
-        } catch (IOException e) {
+        } catch (Exception e) {
             return empty.get();
         }
     }

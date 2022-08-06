@@ -18,20 +18,8 @@ import java.util.function.Consumer;
 public class GitHubAuthenticator {
 
     private String githubToken;
-//    private String githubOauth2ClientId;
-//    private String githubOauth2ClientSecret;
-
-//    private final Map<String, Consumer<String>> authSequence = new ConcurrentHashMap<>();
 
     private OAuth2Authenticator authenticator;
-
-//    protected GitHubAuthenticator() {
-//        try {
-//            ServerManager.addHandle("/githubOAuth", this);
-//        } catch (Exception e) {
-//            GitHubModule.GITHUB_LOGGER.error("Cannot start GitHub OAuth 2.0 Service.", e);
-//        }
-//    }
 
     protected void readSettings(JsonObject settingsRoot) {
         if (authenticator != null) {
@@ -103,71 +91,5 @@ public class GitHubAuthenticator {
                     environment.getMessageSender().sendMessage(context, environment.newText("已取消授权"));
             }));
         }
-//        if (githubOauth2ClientId == null) {
-//            AbstractMessage message = environment.newText(
-//                    "警告: 此操作需要授权，请发送私人访问令牌用于授权。\n" +
-//                            "本次操作需要" + String.join(", ", needScopes) + "权限。"
-//            );
-//            AsyncUtil.execute(() -> environment.getMessageSender().sendMessageAwait(context, message, (sent, reply) -> {
-//                String token = MessageUtil.getFirstText(reply);
-//                if (token != null && !token.equalsIgnoreCase("N"))
-//                    AsyncUtil.execute(() -> operation.accept(token));
-//                else
-//                    environment.getMessageSender().sendMessage(context, environment.newText("已取消授权"));
-//            }));
-//        } else {
-//            AbstractMessage message = environment.newText(
-//                    "警告: 此操作需要授权，请输入您的用户名。"
-//            );
-//            AsyncUtil.execute(() -> environment.getMessageSender().sendMessageAwait(context, message, (sent, reply) -> {
-//                String name = MessageUtil.getFirstText(reply);
-//                if (name != null) {
-//                    try {
-//                        String state = randomState();
-//                        String url = "https://github.com/login/oauth/authorize?client_id=" + githubOauth2ClientId
-//                                + "&login=" + name + "&scope=" + URLEncoder.encode(String.join(" ", needScopes), StandardCharsets.UTF_8)
-//                                + "&state=" + state;
-//                        authSequence.put(state, operation);
-//
-//                        AsyncUtil.execute(() -> environment.getMessageSender().sendMessage(context, environment.newText(
-//                                "使用OAuth验证，请点击下方链接。\n" + url
-//                        )));
-//                    } catch (Exception e) {
-//                        environment.getMessageSender().onError(e, "github.oauth", context, false);
-//                    }
-//                } else
-//                    environment.getMessageSender().sendMessage(context, environment.newText("已取消授权"));
-//            }));
-//        }
     }
-
-//    private static String randomState() {
-//        UUID uuid = UUID.randomUUID();
-//        return Long.toHexString(uuid.getMostSignificantBits()) + Long.toHexString(uuid.getLeastSignificantBits());
-//    }
-//
-//    @Override
-//    public void handle(HttpExchange httpExchange) throws IOException {
-//        String query = httpExchange.getRequestURI().getQuery();
-//        httpExchange.sendResponseHeaders(204, -1);
-//
-//        Map<String, String> args = Arrays.stream(query.split("&"))
-//                .map(s -> s.split("=", 2)).collect(
-//                        HashMap::new, (map, strArray) -> map.put(strArray[0], strArray[1]), HashMap::putAll
-//                );
-//        String state = args.get("state");
-//        if (authSequence.containsKey(state)) {
-//            String code = args.get("code");
-//            HttpPost post = new HttpPost("https://github.com/login/oauth/access_token?client_id="
-//                    + githubOauth2ClientId + "&client_secret=" + githubOauth2ClientSecret
-//                    + "&code=" + code);
-//            post.setHeader("Accept", "application/json");
-//            JsonObject object = WebUtil.fetchDataInJson(post).getAsJsonObject();
-//
-//            String token = JsonUtil.getStringOrNull(object, "access_token");
-//            Consumer<String> authData = authSequence.remove(state);
-//
-//            authData.accept(token);
-//        }
-//    }
 }

@@ -9,4 +9,9 @@ public class ErrorCodeException extends IOException {
     public ErrorCodeException(int code) {
         this.code = code;
     }
+
+    @Override
+    public String getMessage() {
+        return String.valueOf(code);
+    }
 }
