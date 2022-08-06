@@ -36,6 +36,13 @@ public class ServerManager {
         SERVER_LOGGER.info("Server Manager added a handle named {}.", root);
     }
 
+    public static void removeHandle(String root) {
+        if (httpServer != null) {
+            httpServer.removeContext(root);
+            SERVER_LOGGER.info("Server Manager removed a handle named {}.", root);
+        }
+    }
+
     public static void stop() {
         if (httpServer != null)
             httpServer.stop(0);

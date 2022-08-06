@@ -8,6 +8,7 @@ import io.github.nickid2018.koishibot.module.github.GitHubModule;
 import io.github.nickid2018.koishibot.module.mc.MCServerResolver;
 import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
 import io.github.nickid2018.koishibot.module.translation.TranslateModule;
+import io.github.nickid2018.koishibot.module.wakatime.WakaTimeModule;
 import io.github.nickid2018.koishibot.module.wiki.WikiModule;
 import io.github.nickid2018.koishibot.resolver.*;
 import io.github.nickid2018.koishibot.util.GroupDataReader;
@@ -48,6 +49,7 @@ public class ModuleManager {
         addModule(new SingleResolverModule("mojira", true, NOP, NOP, "Mojira漏洞追踪器模块", new BugTrackerResolver()));
         addModule(new SingleResolverModule("mod", true, NOP, NOP, "模组查询模块", new CurseForgeResolver(), new ModrinthResolver()));
         addModule(new SingleResolverModule("mc-server", true, NOP, NOP, "MC服务器查询模块", new MCServerResolver()));
+        addModule(new WakaTimeModule());
         addModule(new MCChatBridgeModule());
         addModule(new GitHubModule());
         addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));

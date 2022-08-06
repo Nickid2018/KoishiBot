@@ -312,7 +312,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         choose(id, contact, environment);
     }
 
-    private static String formatTime(int time) {
+    public static String formatTime(int time) {
         if (time < 60)
             return time + "s";
         if (time < 3600)
