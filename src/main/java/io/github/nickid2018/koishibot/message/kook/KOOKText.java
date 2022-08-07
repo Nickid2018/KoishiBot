@@ -1,10 +1,10 @@
 package io.github.nickid2018.koishibot.message.kook;
 
+import io.github.kookybot.message.MarkdownMessage;
+import io.github.kookybot.message.Message;
+import io.github.kookybot.message.MessageComponent;
 import io.github.nickid2018.koishibot.message.api.TextMessage;
 import io.github.nickid2018.koishibot.util.value.Either;
-import io.github.zly2006.kookybot.message.MarkdownMessage;
-import io.github.zly2006.kookybot.message.Message;
-import io.github.zly2006.kookybot.message.MessageComponent;
 
 public class KOOKText extends KOOKMessage implements TextMessage {
 

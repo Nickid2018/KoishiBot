@@ -1,14 +1,13 @@
 package io.github.nickid2018.koishibot.message.kook;
 
+import io.github.kookybot.contract.GuildUser;
+import io.github.kookybot.contract.User;
+import io.github.kookybot.message.MarkdownMessage;
+import io.github.kookybot.message.Message;
+import io.github.kookybot.message.MessageComponent;
+import io.github.kookybot.message.SelfMessage;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.value.Either;
-import io.github.zly2006.kookybot.contract.GuildUser;
-import io.github.zly2006.kookybot.contract.TextChannel;
-import io.github.zly2006.kookybot.contract.User;
-import io.github.zly2006.kookybot.message.MarkdownMessage;
-import io.github.zly2006.kookybot.message.Message;
-import io.github.zly2006.kookybot.message.MessageComponent;
-import io.github.zly2006.kookybot.message.SelfMessage;
 
 public abstract class KOOKMessage implements AbstractMessage {
 
@@ -58,8 +57,7 @@ public abstract class KOOKMessage implements AbstractMessage {
     @Override
     public MessageFrom getSource() {
         if (sentMessage != null) {
-            return new KOOKMessageFrom(sentMessage.getTarget() instanceof TextChannel channel ? channel : null,
-                    environment.getKookClient().getUser(environment.getSelf().getId()), getSentTime());
+            return new KOOKMessageFrom(sentMessage.getId());
         }
         return null;
     }

@@ -1,13 +1,14 @@
 package io.github.nickid2018.koishibot.message.kook;
 
+import io.github.kookybot.JavaBaseClass;
+import io.github.kookybot.client.Client;
+import io.github.kookybot.contract.Self;
+import io.github.kookybot.contract.TextChannel;
 import io.github.nickid2018.koishibot.core.BotLoginData;
 import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.MessageSender;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.zly2006.kookybot.JavaBaseClass;
-import io.github.zly2006.kookybot.client.Client;
-import io.github.zly2006.kookybot.contract.Self;
-import io.github.zly2006.kookybot.contract.TextChannel;
+import kotlin.Unit;
 
 public class KOOKEnvironment implements Environment {
 
@@ -19,7 +20,7 @@ public class KOOKEnvironment implements Environment {
     private final KOOKMessagePublisher publisher;
 
     public KOOKEnvironment(BotLoginData data) {
-        kookClient = new Client(data.token());
+        kookClient = new Client(data.token(), configureScope -> Unit.INSTANCE);
         self = JavaBaseClass.utils.connectWebsocket(kookClient);
 
         publisher = new KOOKMessagePublisher(this);
@@ -67,8 +68,7 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public QuoteMessage newQuote() {
-        // Unsupported
-        return null;
+        return new KOOKQuote(this);
     }
 
     @Override
@@ -79,12 +79,12 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public UserInfo getUser(String id, boolean isStranger) {
-        return id.startsWith("kook.user") ? new KOOKUser(self.getUser(id.substring(9)), isStranger) : null;
+        return id.startsWith("kook.user") ? new KOOKUser(this, self.getUser(id.substring(9)), isStranger) : null;
     }
 
     @Override
     public GroupInfo getGroup(String id) {
-        return id.startsWith("kook.group") ? new KOOKTextChannel(
+        return id.startsWith("kook.group") ? new KOOKTextChannel(this,
                 (TextChannel) self.getChannel(id.substring(10))) : null;
     }
 
@@ -121,6 +121,16 @@ public class KOOKEnvironment implements Environment {
     @Override
     public boolean quoteSupported() {
         return false;
+    }
+
+    @Override
+    public String getEnvironmentName() {
+        return "开黑啦";
+    }
+
+    @Override
+    public String getEnvironmentUserPrefix() {
+        return "kook.user";
     }
 
     @Override

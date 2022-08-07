@@ -1,80 +1,78 @@
 package io.github.nickid2018.koishibot.message.kook;
 
-import io.github.nickid2018.koishibot.message.api.*;
+import io.github.kookybot.message.Message;
+import io.github.kookybot.message.MessageComponent;
+import io.github.nickid2018.koishibot.message.api.AbstractMessage;
+import io.github.nickid2018.koishibot.message.api.ChainMessage;
+import io.github.nickid2018.koishibot.message.api.GroupInfo;
+import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.util.value.Either;
-import io.github.zly2006.kookybot.contract.GuildUser;
-import io.github.zly2006.kookybot.contract.User;
-import io.github.zly2006.kookybot.message.ImageMessage;
-import io.github.zly2006.kookybot.message.MarkdownMessage;
-import io.github.zly2006.kookybot.message.Message;
-import io.github.zly2006.kookybot.message.MessageComponent;
 
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class KOOKChain extends KOOKMessage implements ChainMessage {
 
     public static final Pattern AT_PATTERN = Pattern.compile("\\(met\\)\\w+?\\(met\\)");
 
-    private Message[] message;
+    private Either<Message, MessageComponent>[] message;
+    private KOOKMessageSource msgSource;
 
     public KOOKChain(KOOKEnvironment environment) {
         super(environment);
     }
 
-    public KOOKChain(KOOKEnvironment environment, Message[] message) {
+    public KOOKChain(KOOKEnvironment environment, Either<Message, MessageComponent>[] message, KOOKMessageSource msgSource) {
         super(environment);
         this.message = message;
+        this.msgSource = msgSource;
     }
 
     @Override
     public void send(UserInfo contact) {
-        for (Message send : message) {
-            Either<User, GuildUser> user = ((KOOKUser) contact).getUser();
-            if (user.isLeft())
-                sentMessage = user.left().sendMessage(send);
-            else
-                sentMessage = user.right().sendMessage(send);
-        }
+//        for (Message send : message) {
+//            Either<User, GuildUser> user = ((KOOKUser) contact).getUser();
+//            if (user.isLeft())
+//                sentMessage = user.left().sendMessage(send);
+//            else
+//                sentMessage = user.right().sendMessage(send);
+//        }
     }
 
     @Override
     public void send(GroupInfo group) {
-        for (Message send : message) {
-            sentMessage = ((KOOKTextChannel) group).getChannel().sendMessage(send);
-        }
+//        for (Message send : message) {
+//            sentMessage = ((KOOKTextChannel) group).getChannel().sendMessage(send);
+//        }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ChainMessage fillChain(AbstractMessage... messages) {
-        MarkdownMessage markdownMessage = new MarkdownMessage(environment.getKookClient(), "");
-        Message imageMessage = null;
-        for (AbstractMessage message : messages) {
-            if (message instanceof TextMessage text)
-                markdownMessage = new MarkdownMessage(
-                        environment.getKookClient(), markdownMessage.content() + text.getText());
-            else if (message instanceof KOOKAt at)
-                markdownMessage.append(at.getKOOKMessage().right());
-            else if (message instanceof KOOKImage image)
-                imageMessage = image.getKOOKMessage().left();
-        }
-        if (imageMessage == null)
-            message = new Message[] {markdownMessage};
-        else
-            message = new Message[] {markdownMessage, imageMessage};
+        List<Either<Message, MessageComponent>> list = Stream.of(messages)
+                .filter(s -> s instanceof KOOKMessage && !(s instanceof KOOKChain))
+                .map(s -> (KOOKMessage) s).map(KOOKMessage::getKOOKMessage).collect(Collectors.toList());
+        Stream.of(messages).filter(s -> s instanceof KOOKChain)
+                .map(s -> (KOOKChain) s).map(s -> s.message)
+                .forEach(s -> list.addAll(List.of(s)));
+        message = list.toArray(Either[]::new);
         return this;
     }
 
     @Override
     public AbstractMessage[] getMessages() {
-        if (message[0] instanceof ImageMessage image)
-            return new AbstractMessage[] {new KOOKImage(environment, image)};
-        if (message[0] instanceof MarkdownMessage markdownMessage)
-            return new AbstractMessage[] {new KOOKText(environment, markdownMessage)};
+
         return new AbstractMessage[0];
     }
 
     @Override
     public Either<Message, MessageComponent> getKOOKMessage() {
-        return Either.left(message[0]);
+        return null;
+    }
+
+    public KOOKMessageSource getMsgSource() {
+        return msgSource;
     }
 }
