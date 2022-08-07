@@ -22,16 +22,16 @@ public class SingleResolverModule extends Module {
     }
 
     @Override
-    public void onStart() {
+    public void onStartInternal() {
         start.run();
     }
 
     @Override
-    public void onSettingReload(JsonObject settingRoot) {
+    public void onSettingReloadInternal(JsonObject settingRoot) {
     }
 
     @Override
-    public void onTerminate() {
+    public void onTerminateInternal() {
         terminate.run();
     }
 

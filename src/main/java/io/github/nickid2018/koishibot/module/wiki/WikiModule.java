@@ -14,16 +14,16 @@ public class WikiModule extends Module {
     }
 
     @Override
-    public void onStart() {
+    public void onStartInternal() {
     }
 
     @Override
-    public void onSettingReload(JsonObject settingRoot) {
+    public void onSettingReloadInternal(JsonObject settingRoot) {
         WikiInfo.loadWiki(settingRoot);
     }
 
     @Override
-    public void onTerminate() {
+    public void onTerminateInternal() {
     }
 
     @Override

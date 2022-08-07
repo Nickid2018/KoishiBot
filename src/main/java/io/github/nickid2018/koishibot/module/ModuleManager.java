@@ -43,6 +43,7 @@ public class ModuleManager {
         addModule(new SingleResolverModule("help", false, NOP, NOP, "帮助模块", new HelpResolver()));
         addModule(new SingleResolverModule("info", false, NOP, NOP, "信息模块", new InfoResolver()));
         addModule(new SingleResolverModule("system", false, NOP, NOP, "系统模块", new SayResolver()));
+        addModule(new SingleResolverModule("module", false, NOP, NOP, "模块管理模块", new ModuleManageResolver()));
         addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
         addModule(new WikiModule());
         addModule(new SingleResolverModule("bilibili", true, NOP, NOP, "Bilibili模块", new BilibiliDataResolver()));
@@ -59,17 +60,15 @@ public class ModuleManager {
     }
 
     public static void start() {
-        Set<String> toRemove = new HashSet<>();
         MODULE_MAP.forEach((name, module) -> {
             try {
                 module.onStart();
                 LOGGER.info("Started {}.", name);
             } catch (Exception e) {
-                toRemove.add(name);
                 LOGGER.error("Starting failure: " + name + ". The module will be removed.", e);
+                module.setStatus(ModuleStatus.ERROR);
             }
         });
-        toRemove.forEach(MODULE_MAP::remove);
     }
 
     public static void settingLoad(JsonObject setting) {
@@ -79,6 +78,7 @@ public class ModuleManager {
                 LOGGER.info("Set {}.", name);
             } catch (Exception e) {
                 LOGGER.error("Setting failure: " + name, e);
+                module.setStatus(ModuleStatus.ERROR);
             }
         });
     }
@@ -90,6 +90,7 @@ public class ModuleManager {
                 LOGGER.info("Terminated {}.", name);
             } catch (Exception e) {
                 LOGGER.error("Terminate failure: " + name, e);
+                module.setStatus(ModuleStatus.ERROR);
             }
         });
     }
@@ -140,6 +141,15 @@ public class ModuleManager {
             return set;
         });
         return success.getValue();
+    }
+
+    public static boolean reload(String moduleName) throws Exception {
+        Module module = MODULE_MAP.get(moduleName);
+        if (module == null)
+            return false;
+        module.onTerminate();
+        module.onStart();
+        return true;
     }
 
     public static List<MessageResolver> getAvailableResolvers(ContactInfo contact) {

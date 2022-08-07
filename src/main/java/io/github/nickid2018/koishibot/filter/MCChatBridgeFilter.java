@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.filter;
 
+import io.github.nickid2018.koishibot.module.ModuleManager;
 import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
@@ -13,8 +14,10 @@ public class MCChatBridgeFilter implements PreFilter {
     @Nullable
     @Override
     public ChainMessage filterMessagePre(ChainMessage input, MessageContext context, Environment environment) {
-        AsyncUtil.execute(() -> MCChatBridgeModule.INSTANCE.onReceiveGroupText(
-                context.group(), context.user(), messageToString(input, context)));
+        assert context.group() != null;
+        if (ModuleManager.isOpened(context.group().getGroupId(), "mcchat"))
+            AsyncUtil.execute(() -> MCChatBridgeModule.INSTANCE.onReceiveGroupText(
+                    context.group(), context.user(), messageToString(input, context)));
         return input;
     }
 

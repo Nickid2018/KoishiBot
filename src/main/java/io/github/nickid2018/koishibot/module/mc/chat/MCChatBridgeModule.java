@@ -76,7 +76,7 @@ public class MCChatBridgeModule extends Module {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void onStart() throws Exception {
+    public void onStartInternal() throws Exception {
         groupChatBridges = new GroupDataReader<>("mcchat",
                 reader -> (Set<InetSocketAddress>) new ObjectInputStream(reader).readObject(),
                 (writer, data) -> new ObjectOutputStream(writer).writeObject(data),
@@ -99,11 +99,11 @@ public class MCChatBridgeModule extends Module {
     }
 
     @Override
-    public void onSettingReload(JsonObject settingRoot) {
+    public void onSettingReloadInternal(JsonObject settingRoot) {
     }
 
     @Override
-    public void onTerminate() {
+    public void onTerminateInternal() {
     }
 
     @Override

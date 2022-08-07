@@ -10,6 +10,7 @@ import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.module.Module;
 import io.github.nickid2018.koishibot.module.ModuleManager;
+import io.github.nickid2018.koishibot.module.ModuleStatus;
 import io.github.nickid2018.koishibot.permission.PermissionLevel;
 import io.github.nickid2018.koishibot.util.web.WebPageRenderer;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
@@ -92,9 +93,10 @@ public class HelpResolver extends MessageResolver {
                     return true;
                 }
                 boolean enabled = context.group() != null && !ModuleManager.isOpened(context.group().getGroupId(), key);
+                boolean error = module.getStatus() == ModuleStatus.ERROR;
 
                 File helpImage = TempFileSystem.getTmpFileBuffered(
-                        "help", key + (enabled ? "-on" : "-off"));
+                        "help", key + (enabled ? "-on" : "-off") + (error ? "-error" : "-normal"));
 
                 if (helpImage == null) {
                     String name = module.getName();
@@ -104,7 +106,11 @@ public class HelpResolver extends MessageResolver {
                     StringWriter writer = new StringWriter();
                     PrintWriter markdown = new PrintWriter(writer);
 
-                    markdown.println("## 模块: " + name);
+                    markdown.print("## 模块: " + name);
+                    if (error)
+                        markdown.print("(因错误停止)");
+
+                    markdown.println();
                     markdown.println();
                     if (enabled)
                         markdown.println("状态: 已禁用");
@@ -163,7 +169,8 @@ public class HelpResolver extends MessageResolver {
                             File srcFile = WebPageRenderer.getDriver().getFullPageScreenshotAs(OutputType.FILE);
                             TempFileSystem.unlockFileAndDelete(tmpHTML);
 
-                            File png = TempFileSystem.createTmpFileBuffered("help", finalKey + (enabled ? "-on" : "-off"),
+                            File png = TempFileSystem.createTmpFileBuffered("help",
+                                    finalKey + (enabled ? "-on" : "-off") + (error ? "-error" : "-normal"),
                                     "help", "png", false);
 
                             BufferedImage image = ImageIO.read(srcFile);

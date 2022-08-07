@@ -41,7 +41,7 @@ public class GitHubModule extends Module {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void onStart() throws IOException {
+    public void onStartInternal() throws IOException {
         groupData = new GroupDataReader<>("github",
                 reader -> (Set<String>) new ObjectInputStream(reader).readObject(),
                 (writer, data) -> new ObjectOutputStream(writer).writeObject(data),
@@ -60,14 +60,14 @@ public class GitHubModule extends Module {
         INSTANCE = this;
     }
 
-    public void onSettingReload(JsonObject settingsRoot) {
+    public void onSettingReloadInternal(JsonObject settingsRoot) {
         if (authenticator == null)
             authenticator = new GitHubAuthenticator();
         authenticator.readSettings(settingsRoot);
     }
 
     @Override
-    public void onTerminate() {
+    public void onTerminateInternal() {
     }
 
     @Override

@@ -24,11 +24,11 @@ public class WakaTimeModule extends Module {
     }
 
     @Override
-    public void onStart() {
+    public void onStartInternal() {
     }
 
     @Override
-    public void onSettingReload(JsonObject settingRoot) {
+    public void onSettingReloadInternal(JsonObject settingRoot) {
         if (authenticator != null)
             authenticator.close();
         JsonUtil.getData(settingRoot, "wakatime", JsonObject.class).ifPresent(oauth -> {
@@ -45,7 +45,7 @@ public class WakaTimeModule extends Module {
     }
 
     @Override
-    public void onTerminate() {
+    public void onTerminateInternal() {
         authenticator.close();
     }
 
