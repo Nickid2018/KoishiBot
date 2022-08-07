@@ -2,7 +2,6 @@ package io.github.nickid2018.koishibot.module.wiki;
 
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.util.*;
-import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.http.client.methods.HttpGet;
 import org.jsoup.Jsoup;
@@ -12,7 +11,9 @@ import org.jsoup.select.Elements;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -257,11 +258,13 @@ public class WikiInfo {
                 if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation"))
                     pageInfo.shortDescription = getDisambiguationText(title);
                 else {
-                    if (useTextExtracts && object.has("extract") && section == null)
+                    if (useTextExtracts && object.has("extract") && section == null) {
                         pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
-                    else
-                        pageInfo.shortDescription = resolveText(getMarkdown(title, section, pageInfo));
-                    pageInfo.infobox = InfoBoxShooter.getInfoBoxShot(pageInfo.url, baseURI);
+                        pageInfo.infobox = WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI);
+                    } else {
+                        pageInfo.shortDescription = makeSection(title, section);
+                        pageInfo.infobox = WikiPageShooter.getSectionShot(pageInfo.url, baseURI, section);
+                    }
                 }
             }
             if (object.has("imageinfo")) {
@@ -422,37 +425,41 @@ public class WikiInfo {
         return source.substring(0, Math.min(source.length(), index + 1));
     }
 
-    private String getMarkdown(String page, String section, PageInfo info) throws IOException {
+    private String queryWikiHTML(String page) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + QUERY_PAGE_TEXT + "&page="
                         + WebUtil.encode(page)))
                 .getAsJsonObject();
-        String html = JsonUtil.getStringInPathOrNull(data, "parse.text.*");
+        return JsonUtil.getStringInPathOrNull(data, "parse.text.*");
+    }
+
+    private String makeSection(String title, String section) throws IOException {
+        String html = queryWikiHTML(title);
         if (html == null)
             throw new IOException("页面无内容");
-        String markdown = WebUtil.getAsMarkdownClean(html);
-        if (section != null) {
-            StringBuilder builder = new StringBuilder();
-            MutableBoolean bool = new MutableBoolean(false);
-            new BufferedReader(new StringReader(markdown)).lines().forEach(s -> {
-                if (s.startsWith("##"))
-                    bool.setValue(s.startsWith("## " + section));
-                else if (bool.getValue())
-                    builder.append(s).append("\n");
-            });
-            String sectionData = builder.toString().trim();
-            if (!sectionData.isEmpty()) {
-                info.url += "#" + WebUtil.encode(section);
-                return sectionData;
+
+        Document document = Jsoup.parse(html);
+
+        Elements elements = document.getElementsByClass("mw-headline");
+
+        Element found = null;
+        for (Element element : elements) {
+            if (element.text().equalsIgnoreCase(section)) {
+                found = element.parent();
+                break;
             }
         }
-        return markdown;
+
+        if (found == null)
+            return "未找到此章节";
+
+        if (found.nextElementSibling() == null)
+            return "";
+
+        return resolveText(found.nextElementSibling().text());
     }
 
     private String getDisambiguationText(String page) throws IOException {
-        JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + QUERY_PAGE_TEXT + "&page="
-                        + WebUtil.encode(page)))
-                .getAsJsonObject();
-        String html = JsonUtil.getStringInPathOrNull(data, "parse.text.*");
+        String html = queryWikiHTML(page);
         if (html == null)
             throw new IOException("页面无内容");
 
