@@ -255,16 +255,15 @@ public class WikiInfo {
                 }
             } else {
                 pageInfo.title = title = object.get("title").getAsString();
-                if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation"))
-                    pageInfo.shortDescription = getDisambiguationText(title);
-                else {
-                    if (useTextExtracts && object.has("extract") && section == null) {
-                        pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
-                        pageInfo.infobox = WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI);
-                    } else {
-                        pageInfo.shortDescription = makeSection(title, section);
-                        pageInfo.infobox = WikiPageShooter.getSectionShot(pageInfo.url, baseURI, section);
-                    }
+                if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation")) {
+                    pageInfo.shortDescription = "消歧义页面";
+                    pageInfo.infobox = WikiPageShooter.getDisAmbiguousShot(pageInfo.url, baseURI);
+                } else if (useTextExtracts && object.has("extract") && section == null) {
+                    pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
+                    pageInfo.infobox = WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI);
+                } else {
+                    pageInfo.shortDescription = makeSection(title, section);
+                    pageInfo.infobox = WikiPageShooter.getSectionShot(pageInfo.url, baseURI, section);
                 }
             }
             if (object.has("imageinfo")) {
@@ -456,26 +455,6 @@ public class WikiInfo {
             return "";
 
         return resolveText(found.nextElementSibling().text());
-    }
-
-    private String getDisambiguationText(String page) throws IOException {
-        String html = queryWikiHTML(page);
-        if (html == null)
-            throw new IOException("页面无内容");
-
-        List<String> items = new ArrayList<>();
-
-        Document document = Jsoup.parse(html);
-        Elements elements = document.getElementsByTag("a");
-
-        for (Element element : elements) {
-            String title = element.ownText();
-            if (title.isEmpty())
-                title = element.attr("title");
-            items.add(title);
-        }
-
-        return "消歧义页面，" + page + "可以指:\n" + String.join(", ", items);
     }
 
     private boolean getInterWikiDataFromPage(){

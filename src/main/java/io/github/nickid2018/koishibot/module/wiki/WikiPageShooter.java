@@ -24,7 +24,9 @@ import java.io.Writer;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.Future;
 
 public class WikiPageShooter {
@@ -47,6 +49,12 @@ public class WikiPageShooter {
     public static Future<File> getInfoBoxShot(String url, String baseURI) {
         if (WebPageRenderer.getExecutor() != null)
             return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI));
+        return null;
+    }
+
+    public static Future<File> getDisAmbiguousShot(String url, String baseURI) {
+        if (WebPageRenderer.getExecutor() != null)
+            return WebPageRenderer.getExecutor().submit(() -> getDisAmbiguousShotInternal(url, baseURI));
         return null;
     }
 
@@ -87,13 +95,22 @@ public class WikiPageShooter {
                 if (!child.equals(element))
                     child.remove();
             element = parent;
-            element.removeClass("mw-collapsible");
-            element.removeClass("mw-collapsed");
             if (element.tagName().equals("template")) {
                 Element clone = element.child(0).clone();
                 element.parent().appendChild(clone);
                 element = clone;
             }
+        }
+
+        Queue<Element> bfs = new LinkedList<>();
+        bfs.offer(element);
+        while (!bfs.isEmpty()) {
+            Element now = bfs.poll();
+            now.removeClass("mw-collapsible");
+            now.removeClass("mw-collapsed");
+            now.removeClass("collapsible");
+            now.removeClass("collapsed");
+            now.children().forEach(bfs::offer);
         }
 
         doc.body().addClass("heimu_toggle_on");
@@ -119,6 +136,81 @@ public class WikiPageShooter {
         BufferedImage image = ImageIO.read(srcFile);
         try {
             WebElement element2 = WebPageRenderer.getDriver().findElement(By.className(className));
+            BufferedImage sub = image.getSubimage(element2.getLocation().x,
+                    element2.getLocation().y, element2.getSize().width, element2.getSize().height);
+            ImageIO.write(sub, "png", png);
+            srcFile.delete();
+        } catch (Exception e) {
+            throw new IOException("无法渲染信息框", e);
+        }
+
+        return png;
+    }
+
+    private static File getDisAmbiguousShotInternal(String url, String baseURI) throws IOException {
+        File data = TempFileSystem.getTmpFileBuffered("disam", url);
+
+        if (data != null)
+            return data;
+
+        Document doc = fetchWikiPage(url);
+
+        Elements elements = doc.getElementsByClass("mw-parser-output");
+
+        if (elements.size() != 1)
+            return null;
+
+        Element element = elements.get(0);
+
+        while (!element.equals(doc.body())) {
+            Element parent = element.parent();
+            for (Element child : parent.children())
+                if (!child.equals(element))
+                    child.remove();
+            element = parent;
+            if (element.tagName().equals("template")) {
+                Element clone = element.child(0).clone();
+                element.parent().appendChild(clone);
+                element = clone;
+            }
+        }
+
+        Queue<Element> bfs = new LinkedList<>();
+        bfs.offer(element);
+        while (!bfs.isEmpty()) {
+            Element now = bfs.poll();
+            now.removeClass("mw-collapsible");
+            now.removeClass("mw-collapsed");
+            now.removeClass("collapsible");
+            now.removeClass("collapsed");
+            now.children().forEach(bfs::offer);
+        }
+
+        doc.body().addClass("heimu_toggle_on");
+        doc.head().prependChild(new Element("base").attr("href", baseURI));
+        Element heimuToggle = new Element("style").text("""
+                        body.heimu_toggle_on .heimu, body.heimu_toggle_on .heimu rt {
+                          background-color: rgba(37,37,37,0.13) !important;
+                        }
+                        """);
+        doc.head().appendChild(heimuToggle);
+
+        File html = TempFileSystem.createTmpFileAndCreate("htm", "html");
+        try (Writer writer = new FileWriter(html)) {
+            IOUtils.write(doc.html(), writer);
+        }
+
+        WebPageRenderer.getDriver().manage().window().setSize(new Dimension(0, 0));
+        WebPageRenderer.getDriver().get(html.getAbsolutePath());
+        File srcFile = WebPageRenderer.getDriver().getFullPageScreenshotAs(OutputType.FILE);
+        TempFileSystem.unlockFileAndDelete(html);
+
+        File png = TempFileSystem.createTmpFileBuffered(
+                "disam", url, "disam", "png", false);
+        BufferedImage image = ImageIO.read(srcFile);
+        try {
+            // ?
+            WebElement element2 = WebPageRenderer.getDriver().findElement(By.id("mw-content-text"));
             BufferedImage sub = image.getSubimage(element2.getLocation().x,
                     element2.getLocation().y, element2.getSize().width, element2.getSize().height);
             ImageIO.write(sub, "png", png);
@@ -172,8 +264,6 @@ public class WikiPageShooter {
                 if (!child.equals(element))
                     child.remove();
             element = parent;
-            element.removeClass("mw-collapsible");
-            element.removeClass("mw-collapsed");
             if (element.tagName().equals("template")) {
                 Element clone = element.child(0).clone();
                 element.parent().appendChild(clone);
@@ -181,8 +271,17 @@ public class WikiPageShooter {
             }
         }
 
-        doc.body().children().forEach(Element::remove);
-        doc.body().appendChild(element);
+        Queue<Element> bfs = new LinkedList<>();
+        bfs.offer(element);
+        while (!bfs.isEmpty()) {
+            Element now = bfs.poll();
+            now.removeClass("mw-collapsible");
+            now.removeClass("mw-collapsed");
+            now.removeClass("collapsible");
+            now.removeClass("collapsed");
+            now.children().forEach(bfs::offer);
+        }
+
         doc.body().addClass("heimu_toggle_on");
         doc.head().prependChild(new Element("base").attr("href", baseURI));
         Element heimuToggle = new Element("style").text("""
