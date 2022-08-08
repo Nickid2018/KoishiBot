@@ -238,6 +238,7 @@ public class WikiInfo {
             if (object.has("special")) {
                 pageInfo.url = articleURL.replace("$1", WebUtil.encode(title));
                 pageInfo.shortDescription = "特殊页面";
+                pageInfo.infobox = WikiPageShooter.getFullPageShot(pageInfo.url, baseURI);
                 return pageInfo;
             }
             pageInfo.url = script + "?curid=" + id;
@@ -257,14 +258,12 @@ public class WikiInfo {
                 pageInfo.title = title = object.get("title").getAsString();
                 if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation")) {
                     pageInfo.shortDescription = "消歧义页面";
-                    pageInfo.infobox = WikiPageShooter.getDisAmbiguousShot(pageInfo.url, baseURI);
+                    pageInfo.infobox = WikiPageShooter.getFullPageShot(pageInfo.url, baseURI);
                 } else if (useTextExtracts && object.has("extract") && section == null) {
                     pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
                     pageInfo.infobox = WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI);
-                } else {
-                    pageInfo.shortDescription = makeSection(title, section);
-                    pageInfo.infobox = WikiPageShooter.getSectionShot(pageInfo.url, baseURI, section);
-                }
+                } else
+                    makeSection(section, pageInfo);
             }
             if (object.has("imageinfo")) {
                 JsonArray array = object.getAsJsonArray("imageinfo");
@@ -424,22 +423,9 @@ public class WikiInfo {
         return source.substring(0, Math.min(source.length(), index + 1));
     }
 
-    private String queryWikiHTML(String page) throws IOException {
-        JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + QUERY_PAGE_TEXT + "&page="
-                        + WebUtil.encode(page)))
-                .getAsJsonObject();
-        return JsonUtil.getStringInPathOrNull(data, "parse.text.*");
-    }
-
-    private String makeSection(String title, String section) throws IOException {
-        String html = queryWikiHTML(title);
-        if (html == null)
-            throw new IOException("页面无内容");
-
-        Document document = Jsoup.parse(html);
-
+    private void makeSection(String section, PageInfo info) throws IOException {
+        Document document = WikiPageShooter.fetchWikiPage(info.url);
         Elements elements = document.getElementsByClass("mw-headline");
-
         Element found = null;
         for (Element element : elements) {
             if (element.text().equalsIgnoreCase(section)) {
@@ -447,14 +433,11 @@ public class WikiInfo {
                 break;
             }
         }
-
         if (found == null)
-            return "未找到此章节";
-
-        if (found.nextElementSibling() == null)
-            return "";
-
-        return resolveText(found.nextElementSibling().text());
+            throw new IOException("未找到此章节");
+        info.infobox = WikiPageShooter.getSectionShot(info.url, document, baseURI, section);
+        info.shortDescription = resolveText(found.nextElementSibling() == null ? "章节无内容" : found.nextElementSibling().text());
+        info.url += "#" + WebUtil.encode(section);
     }
 
     private boolean getInterWikiDataFromPage(){

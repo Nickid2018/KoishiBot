@@ -39,7 +39,7 @@ public class WikiPageShooter {
             "tpl-infobox", "portable-infobox", "toccolours", "infobox"
     };
 
-    private static Document fetchWikiPage(String url) throws IOException {
+    public static Document fetchWikiPage(String url) throws IOException {
         URLConnection connection = new URL(url).openConnection();
         connection.addRequestProperty("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
         connection.addRequestProperty("User-Agent", WebUtil.chooseRandomUA());
@@ -53,15 +53,15 @@ public class WikiPageShooter {
         return null;
     }
 
-    public static Future<File> getDisAmbiguousShot(String url, String baseURI) {
+    public static Future<File> getFullPageShot(String url, String baseURI) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getDisAmbiguousShotInternal(url, baseURI));
+            return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI));
         return null;
     }
 
-    public static Future<File> getSectionShot(String url, String baseURI, String section) {
+    public static Future<File> getSectionShot(String url, Document doc, String baseURI, String section) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getSectionShotInternal(url, baseURI, section));
+            return WebPageRenderer.getExecutor().submit(() -> getSectionShotInternal(url, doc, baseURI, section));
         return null;
     }
 
@@ -91,7 +91,7 @@ public class WikiPageShooter {
         return chopImage(srcFile, png, By.className(className));
     }
 
-    private static File getDisAmbiguousShotInternal(String url, String baseURI) throws IOException {
+    private static File getFullPageShotInternal(String url, String baseURI) throws IOException {
         File data = TempFileSystem.getTmpFileBuffered("disam", url);
         if (data != null)
             return data;
@@ -103,14 +103,15 @@ public class WikiPageShooter {
         File srcFile = cleanAndRender(baseURI, doc, element);
         File png = TempFileSystem.createTmpFileBuffered(
                 "disam", url, "disam", "png", false);
+        WIKI_PAGE_LOGGER.info("Rendered a full page, url = {}.", url);
         return chopImage(srcFile, png, By.id("mw-content-text"));
     }
 
-    private static File getSectionShotInternal(String url, String baseURI, String section) throws IOException {
+    private static File getSectionShotInternal(String url, Document doc, String baseURI, String section) throws IOException {
         File data = TempFileSystem.getTmpFileBuffered("section", url + "-" + section);
         if (data != null)
             return data;
-        Document doc = fetchWikiPage(url);
+
         Elements elements = doc.getElementsByClass("mw-headline");
         Element found = null;
         for (Element element : elements) {
@@ -137,6 +138,8 @@ public class WikiPageShooter {
         File srcFile = cleanAndRender(baseURI, doc, element);
         File png = TempFileSystem.createTmpFileBuffered(
                 "section", url + "-" + section, "section", "png", false);
+
+        WIKI_PAGE_LOGGER.info("Rendered section: {} of {}.", section, url);
         return chopImage(srcFile, png, By.id("mw-content-text"));
     }
 
