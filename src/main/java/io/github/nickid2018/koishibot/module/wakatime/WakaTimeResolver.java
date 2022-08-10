@@ -50,7 +50,7 @@ public class WakaTimeResolver extends MessageResolver {
                             StreamSupport.stream(array.spliterator(), false)
                                     .filter(JsonElement::isJsonObject)
                                     .limit(5)
-                                    .map(e -> (JsonObject) e)
+                                    .map(JsonElement::getAsJsonObject)
                                     .forEach(object -> {
                                         String name = JsonUtil.getStringOrNull(object, "name");
                                         String percent = "%.2f".formatted(object.get("percent").getAsFloat());
