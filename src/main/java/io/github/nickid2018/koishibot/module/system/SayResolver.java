@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.module.eval;
+package io.github.nickid2018.koishibot.module.system;
 
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.ResolverName;
