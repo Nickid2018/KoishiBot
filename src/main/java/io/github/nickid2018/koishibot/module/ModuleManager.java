@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
+import io.github.nickid2018.koishibot.module.mc.MCSkinResolver;
 import io.github.nickid2018.koishibot.module.system.ReloadResolver;
 import io.github.nickid2018.koishibot.module.system.SayResolver;
 import io.github.nickid2018.koishibot.module.github.GitHubModule;
@@ -54,7 +55,7 @@ public class ModuleManager {
         addModule(new SingleResolverModule("qrcode", true, NOP, NOP, "二维码模块", new QRCodeResolver()));
         addModule(new SingleResolverModule("mojira", true, NOP, NOP, "Mojira漏洞追踪器模块", new BugTrackerResolver()));
         addModule(new SingleResolverModule("mod", true, NOP, NOP, "模组查询模块", new CurseForgeResolver(), new ModrinthResolver()));
-        addModule(new SingleResolverModule("mc-server", true, NOP, NOP, "MC服务器查询模块", new MCServerResolver()));
+        addModule(new SingleResolverModule("mc", true, NOP, NOP, "MC模块", new MCServerResolver(), new MCSkinResolver()));
         addModule(new WakaTimeModule());
         addModule(new MCChatBridgeModule());
         addModule(new GitHubModule());
