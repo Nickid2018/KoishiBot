@@ -5,6 +5,7 @@ import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.module.mc.MCSkinResolver;
+import io.github.nickid2018.koishibot.module.system.CleanCacheResolver;
 import io.github.nickid2018.koishibot.module.system.ReloadResolver;
 import io.github.nickid2018.koishibot.module.system.SayResolver;
 import io.github.nickid2018.koishibot.module.github.GitHubModule;
@@ -44,7 +45,8 @@ public class ModuleManager {
     static {
         addModule(new SingleResolverModule("help", false, NOP, NOP, "帮助模块", new HelpResolver()));
         addModule(new SingleResolverModule("info", false, NOP, NOP, "信息模块", new InfoResolver()));
-        addModule(new SingleResolverModule("system", false, NOP, NOP, "系统模块", new SayResolver(), new ReloadResolver()));
+        addModule(new SingleResolverModule("system", false, NOP, NOP, "系统模块",
+                new SayResolver(), new ReloadResolver(), new CleanCacheResolver()));
         addModule(new SingleResolverModule("module", false, NOP, NOP, "模块管理模块", new ModuleManageResolver()));
         addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
         addModule(new WikiModule());

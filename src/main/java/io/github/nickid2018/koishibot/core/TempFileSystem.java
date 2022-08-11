@@ -91,4 +91,10 @@ public class TempFileSystem {
     public static void close() {
         Stream.of(Objects.requireNonNull(TEMP_DIR.listFiles())).forEach(File::delete);
     }
+
+    public static void cleanCache() {
+        FILES_NOT_DELETE.clear();
+        BUFFERED.clear();
+        Stream.of(Objects.requireNonNull(TEMP_DIR.listFiles())).forEach(File::delete);
+    }
 }
