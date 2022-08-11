@@ -49,7 +49,13 @@ public class WikiPageShooter {
 
     public static Future<File> getInfoBoxShot(String url, String baseURI) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI));
+            return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI, null));
+        return null;
+    }
+
+    public static Future<File> getInfoBoxShot(String url, String baseURI, Document document) {
+        if (WebPageRenderer.getExecutor() != null)
+            return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI, document));
         return null;
     }
 
@@ -65,11 +71,11 @@ public class WikiPageShooter {
         return null;
     }
 
-    private static File getInfoBoxShotInternal(String url, String baseURI) throws IOException {
+    private static File getInfoBoxShotInternal(String url, String baseURI, Document doc) throws IOException {
         File data = TempFileSystem.getTmpFileBuffered("infobox", url);
         if (data != null)
             return data;
-        Document doc = fetchWikiPage(url);
+        doc = doc == null ? fetchWikiPage(url) : doc;
         Element element = null;
         String className = null;
         for (String name : SUPPORT_INFOBOX) {

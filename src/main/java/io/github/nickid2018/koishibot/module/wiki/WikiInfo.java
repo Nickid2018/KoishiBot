@@ -262,8 +262,10 @@ public class WikiInfo {
                 } else if (useTextExtracts && object.has("extract") && section == null) {
                     pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
                     pageInfo.infobox = WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI);
-                } else
+                } else if (section != null)
                     makeSection(section, pageInfo);
+                else
+                    makeFullPageAndInfobox(pageInfo);
             }
             if (object.has("imageinfo")) {
                 JsonArray array = object.getAsJsonArray("imageinfo");
@@ -435,9 +437,20 @@ public class WikiInfo {
         }
         if (found == null)
             throw new IOException("未找到此章节");
+        Element sibling = found.nextElementSibling();
         info.infobox = WikiPageShooter.getSectionShot(info.url, document, baseURI, section);
-        info.shortDescription = resolveText(found.nextElementSibling() == null ? "章节无内容" : found.nextElementSibling().text());
+        info.shortDescription = resolveText(sibling == null ? "章节无内容" : sibling.text());
         info.url += "#" + WebUtil.encode(section);
+    }
+
+    private void makeFullPageAndInfobox(PageInfo info) throws IOException {
+        Document document = WikiPageShooter.fetchWikiPage(info.url);
+        Elements elements = document.getElementsByClass("mw-parser-output");
+        if (elements.size() != 1)
+            throw new IOException("非正常页面");
+        Element found = elements.get(0);
+        info.shortDescription = resolveText(found.text());
+        info.infobox = WikiPageShooter.getInfoBoxShot(info.url, baseURI, document);
     }
 
     private boolean getInterWikiDataFromPage(){

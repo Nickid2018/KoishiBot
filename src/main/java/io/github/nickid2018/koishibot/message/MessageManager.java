@@ -13,6 +13,8 @@ import io.github.nickid2018.koishibot.util.value.Either;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import kotlin.Pair;
 import kotlin.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +25,8 @@ import java.util.function.Predicate;
 public class MessageManager {
 
     private final Environment environment;
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("Message Manager");
 
     public static final List<MessageResolver> RESOLVERS = new ArrayList<>();
     public static final Map<String, JSONServiceResolver> JSON_SERVICE_MAP = new HashMap<>();
@@ -121,13 +125,14 @@ public class MessageManager {
             boolean finalAtt = att;
 
             ModuleManager.getAvailableResolvers(context.getSendDest()).stream()
-//            RESOLVERS.stream()
                     .filter(predicate)
                     .filter(resolver -> !inGroup || !resolver.needAt() || finalAtt)
                     .filter(resolver -> PermissionManager.getLevel(user.getUserId()).levelGreaterOrEquals(resolver.getPermissionLevel()))
                     .forEach(resolver -> strings.forEach(string -> {
-                        if (!bool.getValue() && resolver.resolve(string, context, environment))
+                        if (!bool.getValue() && resolver.resolve(string, context, environment)) {
                             bool.setValue(true);
+                            LOGGER.info("Command detected: {}.", resolver.getClass());
+                        }
                     }));
             if (!bool.getValue() && att && inGroup && replyMe == null) {
                 environment.getMessageSender().sendMessage(context, environment.newChain(

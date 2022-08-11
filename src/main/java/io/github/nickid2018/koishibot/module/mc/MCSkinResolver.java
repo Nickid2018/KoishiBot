@@ -13,7 +13,6 @@ import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.client.methods.HttpGet;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @ResolverName("mc-skin")
@@ -31,7 +30,7 @@ public class MCSkinResolver extends MessageResolver {
             try {
                 object = WebUtil.fetchDataInJson(new HttpGet(
                         "https://api.mojang.com/users/profiles/minecraft/" + WebUtil.encode(key))).getAsJsonObject();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 environment.getMessageSender().sendMessage(context, environment.newText("不存在此玩家"));
                 return;
             }
