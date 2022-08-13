@@ -1,6 +1,7 @@
 package io.github.nickid2018.koishibot.module.wiki;
 
 import io.github.nickid2018.koishibot.core.TempFileSystem;
+import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.web.WebPageRenderer;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.commons.io.IOUtils;
@@ -29,10 +30,13 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 
 public class WikiPageShooter {
 
     public static final Logger WIKI_PAGE_LOGGER = LoggerFactory.getLogger("Wiki Page Shooter");
+
+    public static final Pattern HEADER_PATTERN = Pattern.compile("h[1-6]");
 
     public static final String[] SUPPORT_INFOBOX = new String[] {
             "notaninfobox", "infoboxtable", "infoboxSpecial", "infotemplatebox", "infobox2",
@@ -121,20 +125,26 @@ public class WikiPageShooter {
         Elements elements = doc.getElementsByClass("mw-headline");
         Element found = null;
         for (Element element : elements) {
-            if (element.text().equalsIgnoreCase(section)) {
+            if (element.text().equalsIgnoreCase(section) && RegexUtil.match(HEADER_PATTERN, element.parent().tagName())) {
                 found = element.parent();
                 break;
             }
         }
-        if (found == null)
+
+        if (found == null || found.nextElementSibling() == null) {
+            WIKI_PAGE_LOGGER.error("Can't find render element: {} of {}.", url, section);
             return null;
-        if (found.nextElementSibling() == null)
-            return null;
+        }
+
         String tagName = found.tagName();
+        char level = tagName.charAt(1);
         Elements renderElements = new Elements(found);
-        Element nowElement = found;
-        while (nowElement.nextElementSibling() != null && !nowElement.nextElementSibling().tagName().equals(tagName)) {
-            nowElement = nowElement.nextElementSibling();
+        Element nowElement;
+        Element nextElement = found.nextElementSibling();
+        while (nextElement != null &&
+                !(RegexUtil.match(HEADER_PATTERN, nextElement.tagName()) && nextElement.tagName().charAt(1) - level <= 0)) {
+            nowElement = nextElement;
+            nextElement = nowElement.nextElementSibling();
             renderElements.add(nowElement);
         }
         Element element = found.parent().clone();
@@ -186,6 +196,10 @@ public class WikiPageShooter {
         }
         WebPageRenderer.getDriver().manage().window().setSize(new Dimension(0, 0));
         WebPageRenderer.getDriver().get(html.getAbsolutePath());
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ignored) {
+        }
         TempFileSystem.unlockFileAndDelete(html);
         return WebPageRenderer.getDriver().getFullPageScreenshotAs(OutputType.FILE);
     }
@@ -200,6 +214,9 @@ public class WikiPageShooter {
             ImageIO.write(sub, "png", png);
             srcFile.delete();
         } catch (Exception e) {
+            File file = TempFileSystem.createTmpFileAndCreate("error", "png");
+            TempFileSystem.unlockFile(png);
+            IOUtils.copy(srcFile.toURI().toURL(), file);
             throw new IOException("无法渲染信息框", e);
         }
 

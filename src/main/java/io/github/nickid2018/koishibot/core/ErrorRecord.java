@@ -40,7 +40,8 @@ public class ErrorRecord {
             StringBuilder builder = new StringBuilder();
             builder.append("错误时间: ").append(String.format("%tc", new Date(entry.getFirst()))).append("\n");
             builder.append("错误模块: ").append(entry.getSecond()).append("\n");
-            builder.append("错误描述: ").append(entry.getThird().getMessage()).append("\n");
+            builder.append("错误描述: ").append(entry.getThird().getClass().getTypeName())
+                    .append(": ").append(entry.getThird().getMessage()).append("\n");
             StackTraceElement[] stacks = entry.getThird().getStackTrace();
             if (stacks.length > 0) {
                 int depth = 0;
