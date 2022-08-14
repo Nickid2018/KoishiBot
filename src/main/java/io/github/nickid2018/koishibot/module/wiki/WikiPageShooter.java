@@ -108,7 +108,7 @@ public class WikiPageShooter {
     }
 
     private static File getFullPageShotInternal(String url, String baseURI, Document doc) throws IOException {
-        File data = TempFileSystem.getTmpFileBuffered("disam", url);
+        File data = TempFileSystem.getTmpFileBuffered("full", url);
         if (data != null)
             return data;
         doc = doc == null ? fetchWikiPage(url) : doc;
@@ -118,7 +118,7 @@ public class WikiPageShooter {
         Element element = elements.get(0);
         File srcFile = cleanAndRender(baseURI, doc, element);
         File png = TempFileSystem.createTmpFileBuffered(
-                "disam", url, "disam", "png", false);
+                "full", url, "full", "png", false);
         WIKI_PAGE_LOGGER.info("Rendered a full page, url = {}.", url);
         return chopImage(srcFile, png, By.id("mw-content-text"));
     }

@@ -312,12 +312,13 @@ public class WikiInfo {
     private PageInfo search(String key, String prefix) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(
                 url + WIKI_SEARCH + "&srlimit=1&srsearch=" + WebUtil.encode(key))).getAsJsonObject();
-        JsonArray search = data.getAsJsonObject("query").getAsJsonArray("search");
+        JsonObject queryObject = data.getAsJsonObject("query");
+        JsonArray search = queryObject == null ? null : queryObject.getAsJsonArray("search");
         PageInfo info = new PageInfo();
         info.prefix = prefix;
         info.info = this;
         info.isSearched = true;
-        if (search.size() != 0)
+        if (search != null && search.size() != 0)
             info.title = JsonUtil.getStringOrNull(search.get(0).getAsJsonObject(), "title");
         return info;
     }
@@ -325,13 +326,15 @@ public class WikiInfo {
     private PageInfo searches(String key, String prefix) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(
                 url + WIKI_SEARCH + "&srlimit=5&srsearch=" + WebUtil.encode(key))).getAsJsonObject();
-        JsonArray search = data.getAsJsonObject("query").getAsJsonArray("search");
+        JsonObject queryObject = data.getAsJsonObject("query");
+        JsonArray search = queryObject == null ? null : queryObject.getAsJsonArray("search");
         PageInfo info = new PageInfo();
         info.prefix = prefix;
         info.info = this;
         info.searchTitles = new ArrayList<>();
-        for (JsonElement element : search)
-            info.searchTitles.add(JsonUtil.getStringOrNull(element.getAsJsonObject(), "title"));
+        if (search != null)
+            for (JsonElement element : search)
+                info.searchTitles.add(JsonUtil.getStringOrNull(element.getAsJsonObject(), "title"));
         return info;
     }
 
