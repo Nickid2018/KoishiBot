@@ -266,7 +266,7 @@ public class WikiInfo {
                 } else if (useTextExtracts && object.has("extract")) {
                     pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
                     pageInfo.infobox = takeFullPage ?
-                            WikiPageShooter.getFullPageShot(pageInfo.url, baseURI) : WikiPageShooter.getInfoBoxShot(url, baseURI);
+                            WikiPageShooter.getFullPageShot(pageInfo.url, baseURI) : WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI);
                 } else if (section != null)
                     makeSection(section, pageInfo);
                 else
