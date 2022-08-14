@@ -65,7 +65,13 @@ public class WikiPageShooter {
 
     public static Future<File> getFullPageShot(String url, String baseURI) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI));
+            return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI, null));
+        return null;
+    }
+
+    public static Future<File> getFullPageShot(String url, String baseURI, Document document) {
+        if (WebPageRenderer.getExecutor() != null)
+            return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI, document));
         return null;
     }
 
@@ -101,11 +107,11 @@ public class WikiPageShooter {
         return chopImage(srcFile, png, By.className(className));
     }
 
-    private static File getFullPageShotInternal(String url, String baseURI) throws IOException {
+    private static File getFullPageShotInternal(String url, String baseURI, Document doc) throws IOException {
         File data = TempFileSystem.getTmpFileBuffered("disam", url);
         if (data != null)
             return data;
-        Document doc = fetchWikiPage(url);
+        doc = doc == null ? fetchWikiPage(url) : doc;
         Elements elements = doc.getElementsByClass("mw-parser-output");
         if (elements.size() != 1)
             return null;

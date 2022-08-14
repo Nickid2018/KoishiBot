@@ -199,10 +199,14 @@ public class WikiInfo {
         }
 
         String section = null;
+        boolean takeFullPage = false;
         if (title != null && title.contains("#")) {
             String[] titleSplit = title.split("#", 2);
             title = titleSplit[0];
-            section = titleSplit[1];
+            if (titleSplit.length == 1 || titleSplit[1].isEmpty())
+                takeFullPage = true;
+            else
+                section = titleSplit[1];
         }
 
         JsonObject query;
@@ -259,13 +263,14 @@ public class WikiInfo {
                 if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation")) {
                     pageInfo.shortDescription = "消歧义页面";
                     pageInfo.infobox = WikiPageShooter.getFullPageShot(pageInfo.url, baseURI);
-                } else if (useTextExtracts && object.has("extract") && section == null) {
+                } else if (useTextExtracts && object.has("extract")) {
                     pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
-                    pageInfo.infobox = WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI);
+                    pageInfo.infobox = takeFullPage ?
+                            WikiPageShooter.getFullPageShot(pageInfo.url, baseURI) : WikiPageShooter.getInfoBoxShot(url, baseURI);
                 } else if (section != null)
                     makeSection(section, pageInfo);
                 else
-                    makeFullPageAndInfobox(pageInfo);
+                    makeFullPageAndInfobox(pageInfo, takeFullPage);
             }
             if (object.has("imageinfo")) {
                 JsonArray array = object.getAsJsonArray("imageinfo");
@@ -443,14 +448,15 @@ public class WikiInfo {
         info.url += "#" + WebUtil.encode(section);
     }
 
-    private void makeFullPageAndInfobox(PageInfo info) throws IOException {
+    private void makeFullPageAndInfobox(PageInfo info, boolean takeFullPage) throws IOException {
         Document document = WikiPageShooter.fetchWikiPage(info.url);
         Elements elements = document.getElementsByClass("mw-parser-output");
         if (elements.size() != 1)
             throw new IOException("非正常页面");
         Element found = elements.get(0);
         info.shortDescription = resolveText(found.text());
-        info.infobox = WikiPageShooter.getInfoBoxShot(info.url, baseURI, document);
+        info.infobox = takeFullPage ?
+                WikiPageShooter.getFullPageShot(info.url, baseURI, document) : WikiPageShooter.getInfoBoxShot(info.url, baseURI, document);
     }
 
     private boolean getInterWikiDataFromPage(){
