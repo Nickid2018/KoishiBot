@@ -19,14 +19,12 @@ import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.Future;
@@ -43,49 +41,63 @@ public class WikiPageShooter {
             "tpl-infobox", "portable-infobox", "toccolours", "infobox"
     };
 
-    public static Document fetchWikiPage(String url) throws IOException {
+    public static Document fetchWikiPage(String url, Map<String, String> headers) throws IOException {
+        File buffered = TempFileSystem.getTmpFileBuffered("wiki", url);
+        if (buffered != null) {
+            String data;
+            try (FileReader reader = new FileReader(buffered)) {
+                data = IOUtils.toString(reader);
+            }
+            return Jsoup.parse(data);
+        }
         URLConnection connection = new URL(url).openConnection();
         connection.addRequestProperty("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
         connection.addRequestProperty("User-Agent", WebUtil.chooseRandomUA());
+        for (Map.Entry<String, String> entry : headers.entrySet())
+            connection.addRequestProperty(entry.getKey(), entry.getValue());
         String htmlData = IOUtils.toString(connection.getInputStream(), StandardCharsets.UTF_8);
+        File tmp = TempFileSystem.createTmpFileBuffered("wiki", url, "wikipage", "html", true);
+        try (FileWriter writer = new FileWriter(tmp)) {
+            IOUtils.write(htmlData, writer);
+        }
         return Jsoup.parse(htmlData);
     }
 
-    public static Future<File> getInfoBoxShot(String url, String baseURI) {
+    public static Future<File> getInfoBoxShot(String url, String baseURI, WikiInfo info) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI, null));
+            return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI, null, info));
         return null;
     }
 
-    public static Future<File> getInfoBoxShot(String url, String baseURI, Document document) {
+    public static Future<File> getInfoBoxShot(String url, String baseURI, Document document, WikiInfo info) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI, document));
+            return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI, document, info));
         return null;
     }
 
-    public static Future<File> getFullPageShot(String url, String baseURI) {
+    public static Future<File> getFullPageShot(String url, String baseURI, WikiInfo info) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI, null));
+            return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI, null, info));
         return null;
     }
 
-    public static Future<File> getFullPageShot(String url, String baseURI, Document document) {
+    public static Future<File> getFullPageShot(String url, String baseURI, Document document, WikiInfo info) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI, document));
+            return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI, document, info));
         return null;
     }
 
-    public static Future<File> getSectionShot(String url, Document doc, String baseURI, String section) {
+    public static Future<File> getSectionShot(String url, Document doc, String baseURI, String section, WikiInfo info) {
         if (WebPageRenderer.getExecutor() != null)
-            return WebPageRenderer.getExecutor().submit(() -> getSectionShotInternal(url, doc, baseURI, section));
+            return WebPageRenderer.getExecutor().submit(() -> getSectionShotInternal(url, doc, baseURI, section, info));
         return null;
     }
 
-    private static File getInfoBoxShotInternal(String url, String baseURI, Document doc) throws IOException {
+    private static File getInfoBoxShotInternal(String url, String baseURI, Document doc, WikiInfo info) throws IOException {
         File data = TempFileSystem.getTmpFileBuffered("infobox", url);
         if (data != null)
             return data;
-        doc = doc == null ? fetchWikiPage(url) : doc;
+        doc = doc == null ? fetchWikiPage(url, info.getAdditionalHeaders()) : doc;
         Element element = null;
         String className = null;
         for (String name : SUPPORT_INFOBOX) {
@@ -102,28 +114,28 @@ public class WikiPageShooter {
             return null;
         } else
             WIKI_PAGE_LOGGER.info("URL {} has an infobox, element class is {}", url, className);
-        File srcFile = cleanAndRender(baseURI, doc, element);
+        File srcFile = cleanAndRender(baseURI, doc, element, info.getRenderSettings());
         File png = TempFileSystem.createTmpFileBuffered("infobox", url, "infobox", "png", false);
         return chopImage(srcFile, png, By.className(className));
     }
 
-    private static File getFullPageShotInternal(String url, String baseURI, Document doc) throws IOException {
+    private static File getFullPageShotInternal(String url, String baseURI, Document doc, WikiInfo info) throws IOException {
         File data = TempFileSystem.getTmpFileBuffered("full", url);
         if (data != null)
             return data;
-        doc = doc == null ? fetchWikiPage(url) : doc;
+        doc = doc == null ? fetchWikiPage(url, info.getAdditionalHeaders()) : doc;
         Elements elements = doc.getElementsByClass("mw-parser-output");
         if (elements.size() != 1)
             return null;
         Element element = elements.get(0);
-        File srcFile = cleanAndRender(baseURI, doc, element);
+        File srcFile = cleanAndRender(baseURI, doc, element, info.getRenderSettings());
         File png = TempFileSystem.createTmpFileBuffered(
                 "full", url, "full", "png", false);
         WIKI_PAGE_LOGGER.info("Rendered a full page, url = {}.", url);
         return chopImage(srcFile, png, By.id("mw-content-text"));
     }
 
-    private static File getSectionShotInternal(String url, Document doc, String baseURI, String section) throws IOException {
+    private static File getSectionShotInternal(String url, Document doc, String baseURI, String section, WikiInfo info) throws IOException {
         File data = TempFileSystem.getTmpFileBuffered("section", url + "-" + section);
         if (data != null)
             return data;
@@ -157,7 +169,7 @@ public class WikiPageShooter {
         element.children().forEach(Element::remove);
         found.parent().parent().appendChild(element);
         renderElements.forEach(element::appendChild);
-        File srcFile = cleanAndRender(baseURI, doc, element);
+        File srcFile = cleanAndRender(baseURI, doc, element, info.getRenderSettings());
         File png = TempFileSystem.createTmpFileBuffered(
                 "section", url + "-" + section, "section", "png", false);
 
@@ -165,7 +177,7 @@ public class WikiPageShooter {
         return chopImage(srcFile, png, By.id("mw-content-text"));
     }
 
-    private static File cleanAndRender(String baseURI, Document doc, Element element) throws IOException {
+    private static File cleanAndRender(String baseURI, Document doc, Element element, WikiRenderSettings settings) throws IOException {
         while (!element.equals(doc.body())) {
             Element parent = element.parent();
             for (Element child : parent.children())
@@ -200,7 +212,7 @@ public class WikiPageShooter {
         try (Writer writer = new FileWriter(html)) {
             IOUtils.write(doc.html(), writer);
         }
-        WebPageRenderer.getDriver().manage().window().setSize(new Dimension(0, 0));
+        WebPageRenderer.getDriver().manage().window().setSize(new Dimension(settings.width(), settings.height()));
         WebPageRenderer.getDriver().get(html.getAbsolutePath());
         try {
             Thread.sleep(1000);

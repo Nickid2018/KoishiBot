@@ -4,11 +4,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.overzealous.remark.Options;
-import com.overzealous.remark.Remark;
-import com.overzealous.remark.convert.AbstractNodeHandler;
-import com.overzealous.remark.convert.DocumentConverter;
-import com.overzealous.remark.convert.NodeHandler;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.ReflectTarget;
 import org.apache.http.Header;
@@ -19,13 +14,10 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -44,8 +36,6 @@ public class WebUtil {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62"
     };
     public static final Map<String, String> MIRROR = new HashMap<>();
-
-    private static final Remark REMARK;
     private static final Random UA_RANDOM = new Random();
 
     public static String chooseRandomUA() {
@@ -185,35 +175,6 @@ public class WebUtil {
 
     public static String encode(String str) {
         return URLEncoder.encode(str, StandardCharsets.UTF_8).replace(".", "%2E");
-    }
-
-    public static String getAsMarkdownClean(String str) {
-        StringBuilder detail = new StringBuilder();
-        new BufferedReader(new StringReader(REMARK.convert(str))).lines().forEach(s -> {
-            s = s.trim();
-            if (!s.isEmpty())
-                detail.append(s.replaceAll("\\\\\\[\\d*\\\\]", "")).append("\n");
-        });
-        return detail.toString();
-    }
-
-    static {
-        Options options = new Options();
-        options.tables = Options.Tables.REMOVE;
-        options.hardwraps = true;
-        REMARK = new Remark(options);
-        DocumentConverter converter = REMARK.getConverter();
-        converter.addInlineNode(new AbstractNodeHandler() {
-            @Override
-            public void handleNode(NodeHandler nodeHandler, Element element, DocumentConverter documentConverter) {
-            }
-        }, "img");
-        converter.addInlineNode(new AbstractNodeHandler() {
-            @Override
-            public void handleNode(NodeHandler parent, Element node, DocumentConverter documentConverter) {
-                converter.walkNodes(parent, node);
-            }
-        }, "a,i,em,b,strong,font,span,code");
     }
 
     @ReflectTarget

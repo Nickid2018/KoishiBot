@@ -7,6 +7,7 @@ import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.module.mc.MCSkinResolver;
 import io.github.nickid2018.koishibot.module.system.CleanCacheResolver;
 import io.github.nickid2018.koishibot.module.system.ReloadResolver;
+import io.github.nickid2018.koishibot.module.system.RuntimeArgResolver;
 import io.github.nickid2018.koishibot.module.system.SayResolver;
 import io.github.nickid2018.koishibot.module.github.GitHubModule;
 import io.github.nickid2018.koishibot.module.mc.MCServerResolver;
@@ -46,7 +47,7 @@ public class ModuleManager {
         addModule(new SingleResolverModule("help", false, NOP, NOP, "帮助模块", new HelpResolver()));
         addModule(new SingleResolverModule("info", false, NOP, NOP, "信息模块", new InfoResolver()));
         addModule(new SingleResolverModule("system", false, NOP, NOP, "系统模块",
-                new SayResolver(), new ReloadResolver(), new CleanCacheResolver()));
+                new SayResolver(), new ReloadResolver(), new CleanCacheResolver(), new RuntimeArgResolver()));
         addModule(new SingleResolverModule("module", false, NOP, NOP, "模块管理模块", new ModuleManageResolver()));
         addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
         addModule(new WikiModule());
@@ -116,7 +117,7 @@ public class ModuleManager {
     }
 
     public static boolean isOpened(String group, String moduleName) {
-        return DATA_READER.getData(group).contains(moduleName);
+        return getModule(moduleName) != null && (!getModule(moduleName).isClosable() || DATA_READER.getData(group).contains(moduleName));
     }
 
     public static boolean open(GroupInfo group, String moduleName) throws Exception {

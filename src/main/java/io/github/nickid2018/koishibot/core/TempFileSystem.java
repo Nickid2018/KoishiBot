@@ -27,10 +27,12 @@ public class TempFileSystem {
             while (true) {
                 try {
                     Thread.sleep(7200_000);
-                    Stream.of(Objects.requireNonNull(TEMP_DIR.listFiles())).filter(
-                            file -> !FILES_NOT_DELETE.contains(file)
-                    ).forEach(File::delete);
-                    TEMP_LOGGER.info("Ran scheduled temporary files deleting.");
+                    if (System.getProperty("bot.temp_clean", "true").equalsIgnoreCase("true")) {
+                        Stream.of(Objects.requireNonNull(TEMP_DIR.listFiles())).filter(
+                                file -> !FILES_NOT_DELETE.contains(file)
+                        ).forEach(File::delete);
+                        TEMP_LOGGER.info("Ran scheduled temporary files deleting.");
+                    }
                 } catch (InterruptedException ignored) {
                 }
             }
@@ -81,7 +83,8 @@ public class TempFileSystem {
 
     public static void unlockFileAndDelete(File file) {
         FILES_NOT_DELETE.remove(file);
-        file.delete();
+        if (System.getProperty("bot.temp_clean", "true").equalsIgnoreCase("true"))
+            file.delete();
     }
 
     public static void unlockFile(File file) {

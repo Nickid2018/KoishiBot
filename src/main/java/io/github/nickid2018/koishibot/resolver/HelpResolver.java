@@ -123,7 +123,9 @@ public class HelpResolver extends MessageResolver {
 
                     markdown.println("### 具体命令语法");
                     markdown.println();
-                    markdown.println("以下语法中使用小括号标记代表非必需参数，使用中括号代表必须参数");
+                    markdown.println("所有命令无特殊说明均使用**半角**符号。");
+                    markdown.println();
+                    markdown.println("以下语法中使用小括号标记代表非必需参数，使用中括号代表必须参数。");
                     markdown.println();
 
                     markdown.println("|解析器名称|权限|需要at|群聊|私聊|临时会话|陌生人对话|句中解析|命令语法|描述|备注|");
@@ -134,15 +136,15 @@ public class HelpResolver extends MessageResolver {
                                 + "|" + (resolver.groupEnabled() ? "是" : "否") + "|" + (resolver.friendEnabled() ? "是" : "否")
                                 + "|" + (resolver.groupTempChat() ? "是" : "否") + "|" + (resolver.strangerChat() ? "是" : "否")
                                 + "|" + (resolver.isInline() ? "是" : "否");
-                        List<Syntax> syntaxes = new ArrayList<>();
+                        List<Syntax> syntax = new ArrayList<>();
                         if (resolver.getClass().isAnnotationPresent(SyntaxCollection.class))
-                            syntaxes.addAll(List.of(resolver.getClass().getAnnotation(SyntaxCollection.class).value()));
+                            syntax.addAll(List.of(resolver.getClass().getAnnotation(SyntaxCollection.class).value()));
                         else
-                            syntaxes.add(resolver.getClass().getAnnotation(Syntax.class));
-                        for (Syntax syntax : syntaxes) {
-                            markdown.println(resolverInfo + "|`" + syntax.syntax().replace("|", "\\|")
-                                    + "`|" + syntax.help().replace("|", "\\|")
-                                    + "|" + syntax.rem().replace("|", "\\|") + "|");
+                            syntax.add(resolver.getClass().getAnnotation(Syntax.class));
+                        for (Syntax singleSyntax : syntax) {
+                            markdown.println(resolverInfo + "|`" + singleSyntax.syntax().replace("|", "\\|")
+                                    + "`|" + singleSyntax.help().replace("|", "\\|")
+                                    + "|" + singleSyntax.rem().replace("|", "\\|") + "|");
                         }
                     });
 

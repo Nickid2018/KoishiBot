@@ -27,7 +27,6 @@ public class WikiInfo {
                                             "ppprop=description%7Cdisplaytitle%7Cdisambiguation%7Cinfoboxes&explaintext&" +
                                             "exsectionformat=plain&exchars=200&redirects";
     public static final String QUERY_PAGE_NOE = "action=query&format=json&inprop=url&iiprop=url&prop=info%7Cimageinfo&redirects";
-    public static final String QUERY_PAGE_TEXT = "action=parse&format=json&prop=text";
     public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text";
     public static final String WIKI_RANDOM = "action=query&format=json&list=random";
 
@@ -49,6 +48,7 @@ public class WikiInfo {
     public static String BASE_WIKI;
 
     private final Map<String, String> additionalHeaders;
+    private final WikiRenderSettings renderSettings;
     private String url;
 
     private boolean available;
@@ -61,12 +61,14 @@ public class WikiInfo {
     public WikiInfo(String url) {
         this.url = url;
         additionalHeaders = new HashMap<>();
+        renderSettings = new WikiRenderSettings(0, 0);
         STORED_WIKI_INFO.put(url, this);
     }
 
-    public WikiInfo(String url, Map<String, String> additionalHeaders) {
+    public WikiInfo(String url, Map<String, String> additionalHeaders, WikiRenderSettings renderSettings) {
         this.url = url;
         this.additionalHeaders = additionalHeaders;
+        this.renderSettings = renderSettings;
         STORED_WIKI_INFO.put(url, this);
     }
 
@@ -80,15 +82,31 @@ public class WikiInfo {
                         SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(en.getValue().getAsString() + "?"));
                     else {
                         JsonObject wikiData = en.getValue().getAsJsonObject();
-                        JsonObject headers = wikiData.getAsJsonObject("headers");
                         Map<String, String> header = new HashMap<>();
-                        for (Map.Entry<String, JsonElement> headerEntry : headers.entrySet())
-                            header.put(headerEntry.getKey(), headerEntry.getValue().getAsString());
-                        SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(JsonUtil.getStringOrNull(wikiData, "url") + "?", header));
+                        JsonUtil.getData(wikiData, "headers", JsonObject.class).ifPresent(headers -> {
+                                    for (Map.Entry<String, JsonElement> headerEntry : headers.entrySet())
+                                        header.put(headerEntry.getKey(), headerEntry.getValue().getAsString());
+                                });
+                        WikiRenderSettings renderSettings = JsonUtil.getData(wikiData, "render", JsonObject.class)
+                                        .map(object -> {
+                                            int width = JsonUtil.getIntOrZero(object, "width");
+                                            int height = JsonUtil.getIntOrZero(object, "height");
+                                            return new WikiRenderSettings(width, height);
+                                        }).orElse(new WikiRenderSettings(0, 0));
+                        SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(
+                                JsonUtil.getStringOrNull(wikiData, "url") + "?", header, renderSettings));
                     }
                 }
             BASE_WIKI = wikiRoot.get("base").getAsString();
         });
+    }
+
+    public WikiRenderSettings getRenderSettings() {
+        return renderSettings;
+    }
+
+    public Map<String, String> getAdditionalHeaders() {
+        return additionalHeaders;
     }
 
     public void checkAvailable() throws IOException {
@@ -242,7 +260,7 @@ public class WikiInfo {
             if (object.has("special")) {
                 pageInfo.url = articleURL.replace("$1", WebUtil.encode(title));
                 pageInfo.shortDescription = "特殊页面";
-                pageInfo.infobox = WikiPageShooter.getFullPageShot(pageInfo.url, baseURI);
+                pageInfo.infobox = WikiPageShooter.getFullPageShot(pageInfo.url, baseURI, this);
                 return pageInfo;
             }
             pageInfo.url = script + "?curid=" + id;
@@ -262,14 +280,15 @@ public class WikiInfo {
                 pageInfo.title = title = object.get("title").getAsString();
                 if (object.has("pageprops") && object.getAsJsonObject("pageprops").has("disambiguation")) {
                     pageInfo.shortDescription = "消歧义页面";
-                    pageInfo.infobox = WikiPageShooter.getFullPageShot(pageInfo.url, baseURI);
-                } else if (useTextExtracts && object.has("extract")) {
-                    pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
-                    pageInfo.infobox = takeFullPage ?
-                            WikiPageShooter.getFullPageShot(pageInfo.url, baseURI) : WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI);
+                    pageInfo.infobox = WikiPageShooter.getFullPageShot(pageInfo.url, baseURI, this);
                 } else if (section != null)
                     makeSection(section, pageInfo);
-                else
+                else if (useTextExtracts && object.has("extract")) {
+                    pageInfo.shortDescription = resolveText(object.get("extract").getAsString().trim());
+                    pageInfo.infobox = takeFullPage ?
+                            WikiPageShooter.getFullPageShot(pageInfo.url, baseURI, this) :
+                            WikiPageShooter.getInfoBoxShot(pageInfo.url, baseURI, this);
+                } else
                     makeFullPageAndInfobox(pageInfo, takeFullPage);
             }
             if (object.has("imageinfo")) {
@@ -434,7 +453,7 @@ public class WikiInfo {
     }
 
     private void makeSection(String section, PageInfo info) throws IOException {
-        Document document = WikiPageShooter.fetchWikiPage(info.url);
+        Document document = WikiPageShooter.fetchWikiPage(info.url, additionalHeaders);
         Elements elements = document.getElementsByClass("mw-headline");
         Element found = null;
         for (Element element : elements) {
@@ -446,20 +465,21 @@ public class WikiInfo {
         if (found == null)
             throw new IOException("未找到此章节");
         Element sibling = found.nextElementSibling();
-        info.infobox = WikiPageShooter.getSectionShot(info.url, document, baseURI, section);
+        info.infobox = WikiPageShooter.getSectionShot(info.url, document, baseURI, section, this);
         info.shortDescription = resolveText(sibling == null ? "章节无内容" : sibling.text());
         info.url += "#" + WebUtil.encode(section);
     }
 
     private void makeFullPageAndInfobox(PageInfo info, boolean takeFullPage) throws IOException {
-        Document document = WikiPageShooter.fetchWikiPage(info.url);
+        Document document = WikiPageShooter.fetchWikiPage(info.url, additionalHeaders);
         Elements elements = document.getElementsByClass("mw-parser-output");
         if (elements.size() != 1)
             throw new IOException("非正常页面");
         Element found = elements.get(0);
         info.shortDescription = resolveText(found.text());
         info.infobox = takeFullPage ?
-                WikiPageShooter.getFullPageShot(info.url, baseURI, document) : WikiPageShooter.getInfoBoxShot(info.url, baseURI, document);
+                WikiPageShooter.getFullPageShot(info.url, baseURI, document, this) :
+                WikiPageShooter.getInfoBoxShot(info.url, baseURI, document, this);
     }
 
     private boolean getInterWikiDataFromPage(){

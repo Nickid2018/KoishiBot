@@ -1,6 +1,5 @@
 package io.github.nickid2018.koishibot.module.system;
 
-import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.ResolverName;
 import io.github.nickid2018.koishibot.message.Syntax;
@@ -9,25 +8,26 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.permission.PermissionLevel;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 
-@ResolverName("clean-cache")
-@Syntax(syntax = "~cleancache", help = "清除bot缓存")
-public class CleanCacheResolver extends MessageResolver {
+@ResolverName("runtime-arg")
+@Syntax(syntax = "~runtime [参数名] [数据]", help = "设置运行时属性")
+public class RuntimeArgResolver extends MessageResolver {
 
-    public CleanCacheResolver() {
-        super("~cleancache");
+    public RuntimeArgResolver() {
+        super("~runtime");
     }
 
     @Override
     public PermissionLevel getPermissionLevel() {
-        return PermissionLevel.ADMIN;
+        return PermissionLevel.OWNER;
     }
 
     @Override
     public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, Environment environment) {
-        if (!key.isEmpty())
+        String[] split = key.split(" ", 2);
+        if (split.length != 2)
             return false;
-        TempFileSystem.cleanCache();
-        AsyncUtil.execute(() -> environment.getMessageSender().sendMessage(context, environment.newText("缓存已清空")));
+        System.setProperty(split[0], split[1]);
+        AsyncUtil.execute(() -> environment.getMessageSender().sendMessage(context, environment.newText("设置成功。")));
         return true;
     }
 }
