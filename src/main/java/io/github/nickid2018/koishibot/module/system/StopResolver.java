@@ -17,6 +17,11 @@ public class StopResolver extends MessageResolver {
     }
 
     @Override
+    public boolean needAt() {
+        return true;
+    }
+
+    @Override
     public PermissionLevel getPermissionLevel() {
         return PermissionLevel.OWNER;
     }

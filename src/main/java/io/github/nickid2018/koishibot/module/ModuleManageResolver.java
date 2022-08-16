@@ -27,6 +27,11 @@ public class ModuleManageResolver extends MessageResolver {
     }
 
     @Override
+    public boolean needAt() {
+        return true;
+    }
+
+    @Override
     public PermissionLevel getPermissionLevel() {
         return PermissionLevel.ADMIN;
     }
