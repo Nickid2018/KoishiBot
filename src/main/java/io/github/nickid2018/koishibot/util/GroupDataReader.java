@@ -4,10 +4,10 @@ import io.github.nickid2018.koishibot.core.ErrorRecord;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -19,7 +19,7 @@ public class GroupDataReader<E> {
     private final Supplier<E> empty;
     protected final File folder;
 
-    protected final Map<String, E> data = new HashMap<>();
+    protected final Map<String, E> data = new ConcurrentHashMap<>();
 
     public GroupDataReader(String name, FunctionE<InputStream, E> reader,
                            BiConsumerE<OutputStream, E> writer, Supplier<E> empty) {

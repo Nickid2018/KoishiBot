@@ -41,10 +41,12 @@ public class MessageManager {
 
         JSON_SERVICE_MAP.put("哔哩哔哩", new BilibiliDataResolver());
 
-        GROUP_PREFILTER.add(new RequestFrequencyFilter());
-        FRIEND_PREFILTER.add(new RequestFrequencyFilter());
-        TEMP_PREFILTER.add(new RequestFrequencyFilter());
-        STRANGER_PREFILTER.add(new RequestFrequencyFilter());
+        RequestFrequencyFilter frequencyFilter = new RequestFrequencyFilter();
+
+        GROUP_PREFILTER.add(frequencyFilter);
+        FRIEND_PREFILTER.add(frequencyFilter);
+        TEMP_PREFILTER.add(frequencyFilter);
+        STRANGER_PREFILTER.add(frequencyFilter);
         GROUP_PREFILTER.add(new MCChatBridgeFilter());
     }
 
@@ -134,7 +136,8 @@ public class MessageManager {
                             LOGGER.info("Command detected: {}.", resolver.getClass());
                         }
                     }));
-            if (!bool.getValue() && att && inGroup && replyMe == null) {
+            if (!bool.getValue() && att && inGroup && replyMe == null &&
+                    ModuleManager.isOpened(group.getGroupId(), "interact")) {
                 environment.getMessageSender().sendMessage(context, environment.newChain(
                         environment.newQuote(message),
                         environment.newText("不要乱@人，会被514打电话的。")
@@ -152,11 +155,12 @@ public class MessageManager {
         if (RequestFrequencyFilter.shouldNotResponse(user, new MutableBoolean(false)))
             return;
         user.nudge(group);
-        environment.getMessageSender().sendMessage(
-                new MessageContext(group, user, environment.newChain().fillChain(), -1), environment.newChain().fillChain(
-                        environment.newAt(group, user),
-                        environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
-                ));
+        if (ModuleManager.isOpened(group.getGroupId(), "interact"))
+            environment.getMessageSender().sendMessage(
+                    new MessageContext(group, user, environment.newChain().fillChain(), -1), environment.newChain().fillChain(
+                            environment.newAt(group, user),
+                            environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
+                    ));
     }
 
     private void onGroupRecall(Triple<GroupInfo, UserInfo, Long> info) {

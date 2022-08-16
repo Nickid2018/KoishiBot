@@ -16,10 +16,10 @@ public class RequestFrequencyFilter implements PreFilter, PostFilter {
     private static final Map<UserInfo, Integer> USER_REQUEST_FAIL = new ConcurrentHashMap<>();
 
     private static final int REQUEST_MAX_FAIL = 5;
-    private static final long REQUEST_DURATION = 2000;
+    private static final long REQUEST_DURATION = 3000;
     private static final long AUTO_BAN_TIME = 3600_000;
 
-    public static boolean shouldNotResponse(UserInfo member, MutableBoolean nowBan) {
+    public static synchronized boolean shouldNotResponse(UserInfo member, MutableBoolean nowBan) {
         long nowTime = System.currentTimeMillis();
         if (USER_REQUEST_TIME.containsKey(member) && nowTime - USER_REQUEST_TIME.get(member) <= REQUEST_DURATION) {
             int times = USER_REQUEST_FAIL.getOrDefault(member, 0);
@@ -37,7 +37,7 @@ public class RequestFrequencyFilter implements PreFilter, PostFilter {
         return false;
     }
 
-    public static void refreshRequestTime(UserInfo member) {
+    public static synchronized void refreshRequestTime(UserInfo member) {
         if (member != null)
             USER_REQUEST_TIME.put(member, System.currentTimeMillis());
     }
