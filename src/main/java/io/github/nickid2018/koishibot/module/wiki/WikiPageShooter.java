@@ -5,7 +5,6 @@ import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.web.WebPageRenderer;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -13,7 +12,6 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +58,10 @@ public class WikiPageShooter {
         try (FileWriter writer = new FileWriter(tmp)) {
             IOUtils.write(htmlData, writer);
         }
-        return Jsoup.parse(htmlData);
+        Document document = Jsoup.parse(htmlData);
+        if (document.getElementById("mw-content-text") == null)
+            throw new IOException("将要渲染的页面无效，可能机器人收到了错误的页面。");
+        return document;
     }
 
     public static Future<File> getInfoBoxShot(String url, String baseURI, WikiInfo info) {
@@ -114,9 +115,9 @@ public class WikiPageShooter {
             return null;
         } else
             WIKI_PAGE_LOGGER.info("URL {} has an infobox, element class is {}", url, className);
-        File srcFile = cleanAndRender(baseURI, doc, element, info.getRenderSettings());
         File png = TempFileSystem.createTmpFileBuffered("infobox", url, "infobox", "png", false);
-        return chopImage(srcFile, png, By.className(className));
+        cleanAndRender(baseURI, doc, element, By.className(className), png, info.getRenderSettings());
+        return png;
     }
 
     private static File getFullPageShotInternal(String url, String baseURI, Document doc, WikiInfo info) throws IOException {
@@ -124,15 +125,15 @@ public class WikiPageShooter {
         if (data != null)
             return data;
         doc = doc == null ? fetchWikiPage(url, info.getAdditionalHeaders()) : doc;
-        Elements elements = doc.getElementsByClass("mw-parser-output");
-        if (elements.size() != 1)
-            return null;
-        Element element = elements.get(0);
-        File srcFile = cleanAndRender(baseURI, doc, element, info.getRenderSettings());
+        Element element = doc.getElementById("mw-content-text");
+        if (element == null)
+            throw new IOException("无效的页面");
         File png = TempFileSystem.createTmpFileBuffered(
                 "full", url, "full", "png", false);
+
+        cleanAndRender(baseURI, doc, element, By.id("mw-content-text"), png, info.getRenderSettings());
         WIKI_PAGE_LOGGER.info("Rendered a full page, url = {}.", url);
-        return chopImage(srcFile, png, By.id("mw-content-text"));
+        return png;
     }
 
     private static File getSectionShotInternal(String url, Document doc, String baseURI, String section, WikiInfo info) throws IOException {
@@ -169,15 +170,15 @@ public class WikiPageShooter {
         element.children().forEach(Element::remove);
         found.parent().parent().appendChild(element);
         renderElements.forEach(element::appendChild);
-        File srcFile = cleanAndRender(baseURI, doc, element, info.getRenderSettings());
         File png = TempFileSystem.createTmpFileBuffered(
                 "section", url + "-" + section, "section", "png", false);
 
+        cleanAndRender(baseURI, doc, element, By.id("mw-content-text"), png, info.getRenderSettings());
         WIKI_PAGE_LOGGER.info("Rendered section: {} of {}.", section, url);
-        return chopImage(srcFile, png, By.id("mw-content-text"));
+        return png;
     }
 
-    private static File cleanAndRender(String baseURI, Document doc, Element element, WikiRenderSettings settings) throws IOException {
+    private static void cleanAndRender(String baseURI, Document doc, Element element, By by, File png, WikiRenderSettings settings) throws IOException {
         while (!element.equals(doc.body())) {
             Element parent = element.parent();
             for (Element child : parent.children())
@@ -219,25 +220,8 @@ public class WikiPageShooter {
         } catch (InterruptedException ignored) {
         }
         TempFileSystem.unlockFileAndDelete(html);
-        return WebPageRenderer.getDriver().getFullPageScreenshotAs(OutputType.FILE);
-    }
-
-    @NotNull
-    private static File chopImage(File srcFile, File png, By element) throws IOException {
-        BufferedImage image = ImageIO.read(srcFile);
-        try {
-            WebElement element2 = WebPageRenderer.getDriver().findElement(element);
-            BufferedImage sub = image.getSubimage(element2.getLocation().x,
-                    element2.getLocation().y, element2.getSize().width, element2.getSize().height);
-            ImageIO.write(sub, "png", png);
-            srcFile.delete();
-        } catch (Exception e) {
-            File file = TempFileSystem.createTmpFileAndCreate("error", "png");
-            TempFileSystem.unlockFile(png);
-            IOUtils.copy(srcFile.toURI().toURL(), file);
-            throw new IOException("无法渲染信息框", e);
-        }
-
-        return png;
+        byte[] imageData = WebPageRenderer.getDriver().findElement(by).getScreenshotAs(OutputType.BYTES);
+        BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageData));
+        ImageIO.write(image, "png", png);
     }
 }

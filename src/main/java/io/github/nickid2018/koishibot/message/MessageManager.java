@@ -133,7 +133,7 @@ public class MessageManager {
                     .forEach(resolver -> strings.forEach(string -> {
                         if (!bool.getValue() && resolver.resolve(string, context, environment)) {
                             bool.setValue(true);
-                            LOGGER.info("Command detected: {}.", resolver.getClass());
+                            LOGGER.info("Command detected: {}.", resolver.getClass().getName());
                         }
                     }));
             if (!bool.getValue() && att && inGroup && replyMe == null &&
