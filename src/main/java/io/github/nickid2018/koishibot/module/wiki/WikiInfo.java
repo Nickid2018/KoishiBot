@@ -267,7 +267,7 @@ public class WikiInfo {
             if (object.has("missing")) {
                 if (!object.has("known")) {
                     if (title != null)
-                        return search(title, prefix);
+                        return search(title, prefix, takeFullPage, section);
                     throw new IOException("无法找到页面");
                 } else {
                     pageInfo.url = articleURL.replace("$1", WebUtil.encode(title));
@@ -328,7 +328,7 @@ public class WikiInfo {
         return info;
     }
 
-    private PageInfo search(String key, String prefix) throws IOException {
+    private PageInfo search(String key, String prefix, boolean full, String section) throws IOException {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(
                 url + WIKI_SEARCH + "&srlimit=1&srsearch=" + WebUtil.encode(key))).getAsJsonObject();
         JsonObject queryObject = data.getAsJsonObject("query");
@@ -337,8 +337,13 @@ public class WikiInfo {
         info.prefix = prefix;
         info.info = this;
         info.isSearched = true;
-        if (search != null && search.size() != 0)
+        if (search != null && search.size() != 0) {
             info.title = JsonUtil.getStringOrNull(search.get(0).getAsJsonObject(), "title");
+            if (full)
+                info.title += "#";
+            if (section != null)
+                info.title += "#" + section;
+        }
         return info;
     }
 

@@ -14,4 +14,9 @@ public class KOOKMessageFrom implements MessageFrom {
     public boolean equals(MessageFrom source) {
         return source instanceof KOOKMessageFrom other && other.msgID.equals(msgID);
     }
+
+    @Override
+    public void recall() {
+
+    }
 }

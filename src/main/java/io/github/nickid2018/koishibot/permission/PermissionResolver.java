@@ -6,9 +6,6 @@ import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.AtMessage;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.permission.PermissionLevel;
-import io.github.nickid2018.koishibot.permission.PermissionManager;
-import io.github.nickid2018.koishibot.permission.UserPermissionEntry;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.MessageUtil;
 
@@ -77,7 +74,9 @@ public class PermissionResolver extends MessageResolver {
                 user = environment.getEnvironmentUserPrefix() + dat[3];
             else
                 user = Arrays.stream(MessageUtil.getAts(context.message()))
-                        .map(AtMessage::getId).findFirst().orElse(null);
+                        .map(AtMessage::getId)
+                        .filter(s -> !s.equals(environment.getBotId()))
+                        .findFirst().orElse(null);
             if (user == null)
                 return false;
             long finalTime = time;

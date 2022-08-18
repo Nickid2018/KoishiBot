@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.util;
 
 import io.github.nickid2018.koishibot.message.api.AtMessage;
 import io.github.nickid2018.koishibot.message.api.ChainMessage;
+import io.github.nickid2018.koishibot.message.api.QuoteMessage;
 import io.github.nickid2018.koishibot.message.api.TextMessage;
 
 import java.util.List;
@@ -19,5 +20,11 @@ public class MessageUtil {
         List<AtMessage> texts = Stream.of(chainMessage.getMessages())
                 .filter(m -> m instanceof AtMessage).map(m -> (AtMessage) m).toList();
         return texts.toArray(AtMessage[]::new);
+    }
+
+    public static QuoteMessage getQuote(ChainMessage chainMessage) {
+        List<QuoteMessage> quoteMessages = Stream.of(chainMessage.getMessages())
+                .filter(m -> m instanceof QuoteMessage).map(m -> (QuoteMessage) m).toList();
+        return quoteMessages.size() == 0 ? null : quoteMessages.get(0);
     }
 }

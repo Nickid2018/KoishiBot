@@ -104,16 +104,16 @@ public class MessageManager {
         QuoteMessage replyMe = null;
 
         for (AbstractMessage content : message.getMessages()) {
-            if (content instanceof TextMessage)
-                strings.add(((TextMessage) content).getText());
-            if (content instanceof AtMessage)
-                if (((AtMessage) content).getId().equals(environment.getBotId()))
+            if (content instanceof TextMessage text)
+                strings.add(text.getText());
+            if (content instanceof AtMessage at)
+                if (at.getId().equals(environment.getBotId()))
                     att = true;
-            if (content instanceof QuoteMessage)
-                if (((QuoteMessage) content).getReplyToID().equals(environment.getBotId()))
-                    replyMe = (QuoteMessage) content;
-            if (content instanceof ServiceMessage)
-                service = (ServiceMessage) content;
+            if (content instanceof QuoteMessage quote)
+                if (quote.getReplyToID().equals(environment.getBotId()))
+                    replyMe = quote;
+            if (content instanceof ServiceMessage serviceMessage)
+                service = serviceMessage;
         }
 
         if (replyMe != null)

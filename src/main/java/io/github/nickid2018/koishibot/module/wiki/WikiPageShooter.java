@@ -49,6 +49,7 @@ public class WikiPageShooter {
             return Jsoup.parse(data);
         }
         URLConnection connection = new URL(url).openConnection();
+        connection.setConnectTimeout(30000);
         connection.addRequestProperty("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
         connection.addRequestProperty("User-Agent", WebUtil.chooseRandomUA());
         for (Map.Entry<String, String> entry : headers.entrySet())
@@ -178,7 +179,8 @@ public class WikiPageShooter {
         return png;
     }
 
-    private static void cleanAndRender(String baseURI, Document doc, Element element, By by, File png, WikiRenderSettings settings) throws IOException {
+    private static void cleanAndRender(String baseURI, Document doc, Element element,
+                                       By by, File png, WikiRenderSettings settings) throws IOException {
         while (!element.equals(doc.body())) {
             Element parent = element.parent();
             for (Element child : parent.children())

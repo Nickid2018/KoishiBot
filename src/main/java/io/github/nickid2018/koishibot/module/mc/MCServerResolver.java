@@ -51,6 +51,11 @@ public class MCServerResolver extends MessageResolver {
             HostAndPort hostAndPort = HostAndPort.fromString(addr).withDefaultPort(25565);
             InetSocketAddress address = new InetSocketAddress(hostAndPort.getHost(), hostAndPort.getPort());
 
+            if (address.getAddress().isLoopbackAddress()) {
+                environment.getMessageSender().sendMessage(context, environment.newText("由于安全设置，不能访问环回地址的MC服务器"));
+                return;
+            }
+
             if (je)
                 try {
                     JsonObject json = new MCJEServerPing(address).fetchData();

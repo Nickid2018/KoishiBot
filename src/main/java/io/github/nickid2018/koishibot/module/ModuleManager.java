@@ -44,7 +44,7 @@ public class ModuleManager {
         addModule(new SingleResolverModule("help", false, NOP, NOP, "帮助模块", new HelpResolver()));
         addModule(new SingleResolverModule("info", false, NOP, NOP, "信息模块", new InfoResolver()));
         addModule(new SingleResolverModule("system", false, NOP, NOP, "系统模块",
-                new SayResolver(), new ReloadResolver(), new CleanCacheResolver(), new RuntimeArgResolver(), new StopResolver()));
+                new SayResolver(), new ReloadResolver(), new CleanCacheResolver(), new RuntimeArgResolver(), new StopResolver(), new RecallResolver()));
         addModule(new SingleResolverModule("module", false, NOP, NOP, "模块管理模块", new ModuleManageResolver()));
         addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
         addModule(new WikiModule());

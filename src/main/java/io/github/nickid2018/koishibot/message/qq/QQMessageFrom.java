@@ -28,6 +28,11 @@ public class QQMessageFrom implements MessageFrom {
     }
 
     @Override
+    public void recall() {
+        MessageSource.recall(source);
+    }
+
+    @Override
     public String toString() {
         return source.getFromId() + " " + source.getTargetId() + " " + source.getTime() + " " + Arrays.toString(source.getIds())
                 + Arrays.toString(source.getInternalIds());
