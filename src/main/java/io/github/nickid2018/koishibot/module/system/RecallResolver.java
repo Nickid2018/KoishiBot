@@ -11,7 +11,7 @@ import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.MessageUtil;
 
 @ResolverName("recall")
-@Syntax(syntax = "~recall", help = "使bot撤回自己的信息")
+@Syntax(syntax = "~recall", help = "使bot撤回自己的信息", rem = "需要回复bot的特定信息")
 public class RecallResolver extends MessageResolver {
 
     public RecallResolver() {
