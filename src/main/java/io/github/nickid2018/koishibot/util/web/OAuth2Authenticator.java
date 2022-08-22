@@ -114,6 +114,8 @@ public class OAuth2Authenticator implements HttpHandler {
 
             try {
                 WebUtil.sendNeedCode(post, 200);
+                dataReader.getData().remove(user);
+                dataReader.saveData();
             } catch (IOException e) {
                 ErrorRecord.enqueueError("oauth.revoke", e);
             }
