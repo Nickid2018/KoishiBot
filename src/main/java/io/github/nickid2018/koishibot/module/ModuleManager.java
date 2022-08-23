@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
+import io.github.nickid2018.koishibot.module.eval.EvalModule;
 import io.github.nickid2018.koishibot.module.mc.MCSkinResolver;
 import io.github.nickid2018.koishibot.module.system.*;
 import io.github.nickid2018.koishibot.module.github.GitHubModule;
@@ -23,7 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.*;
 
-import static io.github.nickid2018.koishibot.module.SingleResolverModule.NOP;
+import static io.github.nickid2018.koishibot.module.PlainModule.NOP;
 
 public class ModuleManager {
 
@@ -41,24 +42,25 @@ public class ModuleManager {
 
     // Module List
     static {
-        addModule(new SingleResolverModule("help", false, NOP, NOP, "帮助模块", new HelpResolver()));
-        addModule(new SingleResolverModule("info", false, NOP, NOP, "信息模块", new InfoResolver()));
-        addModule(new SingleResolverModule("system", false, NOP, NOP, "系统模块",
+        addModule(new PlainModule("help", false, NOP, NOP, "帮助模块", new HelpResolver()));
+        addModule(new PlainModule("info", false, NOP, NOP, "信息模块", new InfoResolver()));
+        addModule(new PlainModule("system", false, NOP, NOP, "系统模块",
                 new SayResolver(), new ReloadResolver(), new CleanCacheResolver(), new RuntimeArgResolver(), new StopResolver(), new RecallResolver()));
-        addModule(new SingleResolverModule("module", false, NOP, NOP, "模块管理模块", new ModuleManageResolver()));
-        addModule(new SingleResolverModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
+        addModule(new PlainModule("module", false, NOP, NOP, "模块管理模块", new ModuleManageResolver()));
+        addModule(new PlainModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
         addModule(new WikiModule());
-        addModule(new SingleResolverModule("bilibili", true, NOP, NOP, "Bilibili模块", new BilibiliDataResolver()));
+        addModule(new PlainModule("bilibili", true, NOP, NOP, "Bilibili模块", new BilibiliDataResolver()));
         addModule(new TranslateModule());
-        addModule(new SingleResolverModule("urban", true, NOP, NOP, "城市字典模块", new UrbanDictResolver()));
-        addModule(new SingleResolverModule("latex", true, NOP, NOP, "LaTeX渲染模块", new LaTeXResolver()));
-        addModule(new SingleResolverModule("qrcode", true, NOP, NOP, "二维码模块", new QRCodeResolver()));
-        addModule(new SingleResolverModule("mojira", true, NOP, NOP, "Mojira漏洞追踪器模块", new BugTrackerResolver()));
-        addModule(new SingleResolverModule("mod", true, NOP, NOP, "模组查询模块", new CurseForgeResolver(), new ModrinthResolver()));
-        addModule(new SingleResolverModule("mc", true, NOP, NOP, "MC模块", new MCServerResolver(), new MCSkinResolver()));
+        addModule(new PlainModule("urban", true, NOP, NOP, "城市字典模块", new UrbanDictResolver()));
+        addModule(new PlainModule("latex", true, NOP, NOP, "LaTeX渲染模块", new LaTeXResolver()));
+        addModule(new PlainModule("qrcode", true, NOP, NOP, "二维码模块", new QRCodeResolver()));
+        addModule(new PlainModule("mojira", true, NOP, NOP, "Mojira漏洞追踪器模块", new BugTrackerResolver()));
+        addModule(new PlainModule("mod", true, NOP, NOP, "模组查询模块", new CurseForgeResolver(), new ModrinthResolver()));
+        addModule(new PlainModule("mc", true, NOP, NOP, "MC模块", new MCServerResolver(), new MCSkinResolver()));
         addModule(new WakaTimeModule());
         addModule(new MCChatBridgeModule());
         addModule(new GitHubModule());
+        addModule(new EvalModule());
         addModule(new NamedModule("interact", true, "其他互动模块"));
     }
 

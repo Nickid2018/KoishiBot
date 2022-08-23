@@ -161,7 +161,6 @@ public class OAuth2Authenticator implements HttpHandler {
         if (uriAppend)
             url += "&redirect_uri=http://%s:14514%s".formatted(Settings.LOCAL_IP, redirect);
 
-
         String extra = extraParameters.entrySet().stream()
                 .map(en -> WebUtil.encode(en.getKey()) + "=" + WebUtil.encode(en.getValue()))
                 .collect(Collectors.joining("&"));

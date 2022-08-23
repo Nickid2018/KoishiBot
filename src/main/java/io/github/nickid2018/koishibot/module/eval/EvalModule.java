@@ -28,11 +28,11 @@ public class EvalModule extends Module {
 
     @Override
     public String getDescription() {
-        return null;
+        return "函数模块";
     }
 
     @Override
     public String getSummary() {
-        return null;
+        return "设置可配置的函数";
     }
 }

@@ -5,7 +5,7 @@ import io.github.nickid2018.koishibot.message.MessageResolver;
 
 import java.util.List;
 
-public class SingleResolverModule extends Module {
+public class PlainModule extends Module {
 
     public static final Runnable NOP = () -> {};
 
@@ -13,8 +13,8 @@ public class SingleResolverModule extends Module {
     private final Runnable start;
     private final Runnable terminate;
 
-    public SingleResolverModule(String name, boolean closable, Runnable start, Runnable terminate, String summary,
-                                MessageResolver... resolvers) {
+    public PlainModule(String name, boolean closable, Runnable start, Runnable terminate, String summary,
+                       MessageResolver... resolvers) {
         super(name, List.of(resolvers), closable);
         this.start = start;
         this.terminate = terminate;
