@@ -209,7 +209,7 @@ public class WikiInfo {
             return random(prefix, allowAudio);
         if (title != null && title.equalsIgnoreCase("~iw"))
             return interwikiList();
-        if (title != null && title.equalsIgnoreCase("~page"))
+        if (title != null && title.toLowerCase(Locale.ROOT).startsWith("~page"))
             return parsePageInfo(null, Integer.parseInt(title.split(" ", 2)[1]), prefix, allowAudio);
         if (title != null && title.toLowerCase(Locale.ROOT).startsWith("~search")) {
             String[] split = title.split(" ", 2);

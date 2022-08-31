@@ -22,6 +22,7 @@ import java.util.stream.Stream;
 @Syntax(syntax = "~rd", help = "随机页面")
 @Syntax(syntax = "~iw", help = "查看跨wiki数据")
 @Syntax(syntax = "~search [查询内容]", help = "查询wiki页面")
+@Syntax(syntax = "~page [pageID]", help = "查询指定ID的wiki页面")
 public class WikiResolver extends MessageResolver {
 
     public static final Pattern WIKI_PATTERN = Pattern.compile("\\[\\[.+?]{2,3}+");
