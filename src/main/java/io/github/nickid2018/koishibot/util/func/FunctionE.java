@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.util;
+package io.github.nickid2018.koishibot.util.func;
 
 public interface FunctionE<T, R> {
 

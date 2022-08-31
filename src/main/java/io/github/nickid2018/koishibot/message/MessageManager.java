@@ -157,7 +157,7 @@ public class MessageManager {
         user.nudge(group);
         if (ModuleManager.isOpened(group.getGroupId(), "interact"))
             environment.getMessageSender().sendMessage(
-                    new MessageContext(group, user, environment.newChain().fillChain(), -1), environment.newChain().fillChain(
+                    new MessageContext(group, user, environment.chain().fillChain(), -1), environment.chain().fillChain(
                             environment.newAt(group, user),
                             environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
                     ));

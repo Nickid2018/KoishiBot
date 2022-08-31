@@ -142,7 +142,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         if (line != null)
             builder.append("(简介过长截断)");
 
-        ImageMessage image = environment.newImage();
+        ImageMessage image = environment.image();
         try (InputStream stream = new URL(JsonUtil.getStringOrNull(data, "cover")).openStream()) {
             image.fillImage(stream);
         }
@@ -175,7 +175,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
 
         JsonUtil.getString(data, "bvid").ifPresent(bvid -> builder.append("关联视频: ").append(bvid).append("\n"));
 
-        ImageMessage image = environment.newImage();
+        ImageMessage image = environment.image();
         try (InputStream stream = new URL(JsonUtil.getStringOrNull(data, "cover")).openStream()) {
             image.fillImage(stream);
         }
@@ -210,7 +210,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
 
         builder.append("主条目URL: https://www.bilibili.com/read/").append(key);
 
-        ImageMessage image = environment.newImage();
+        ImageMessage image = environment.image();
         try (InputStream stream = new URL(JsonUtil.getStringInPathOrNull(data, "origin_image_urls.0")).openStream()) {
             image.fillImage(stream);
         }
@@ -293,7 +293,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         if (line != null)
             builder.append("(简介过长截断)");
 
-        ImageMessage image = environment.newImage();
+        ImageMessage image = environment.image();
         try (InputStream stream = new URL(JsonUtil.getStringOrNull(data, "pic")).openStream()) {
             image.fillImage(stream);
         }

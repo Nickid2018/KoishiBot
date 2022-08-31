@@ -38,47 +38,47 @@ public class QQEnvironment implements Environment {
     }
 
     @Override
-    public AtMessage newAt() {
+    public AtMessage at() {
         return new QQAt(this);
     }
 
     @Override
-    public ChainMessage newChain() {
+    public ChainMessage chain() {
         return new QQChain(this);
     }
 
     @Override
-    public TextMessage newText() {
+    public TextMessage text() {
         return new QQText(this);
     }
 
     @Override
-    public AudioMessage newAudio() {
+    public AudioMessage audio() {
         return new QQAudio(this);
     }
 
     @Override
-    public ImageMessage newImage() {
+    public ImageMessage image() {
         return new QQImage(this);
     }
 
     @Override
-    public ForwardMessage newForwards() {
+    public ForwardMessage forwards() {
         return new QQForward(this);
     }
 
     @Override
-    public MessageEntry newMessageEntry() {
+    public MessageEntry messageEntry() {
         return new QQMessageEntry(this);
     }
 
     @Override
-    public QuoteMessage newQuote() {
+    public QuoteMessage quote() {
         return new QQQuote(this);
     }
 
     @Override
-    public ServiceMessage newService() {
+    public ServiceMessage service() {
         return new QQService(this);
     }
 

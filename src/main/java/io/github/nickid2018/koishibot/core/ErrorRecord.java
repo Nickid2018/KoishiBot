@@ -33,7 +33,7 @@ public class ErrorRecord {
         List<Triple<Long, String, Throwable>> copied = new ArrayList<>(ERROR_QUEUE);
         if (copied.size() == 0)
             return null;
-        ForwardMessage forwards = environment.newForwards();
+        ForwardMessage forwards = environment.forwards();
         ContactInfo contact = environment.getUser(environment.getBotId(), false);
         List<MessageEntry> entries = new ArrayList<>();
         for (Triple<Long, String, Throwable> entry : copied) {

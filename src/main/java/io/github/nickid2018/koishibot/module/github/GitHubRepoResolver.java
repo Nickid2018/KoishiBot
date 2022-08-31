@@ -8,7 +8,7 @@ import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
-import io.github.nickid2018.koishibot.util.ConsumerE;
+import io.github.nickid2018.koishibot.util.func.ConsumerE;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.http.client.methods.*;

@@ -69,7 +69,7 @@ public class MessageSender {
         if (t instanceof ErrorCodeException) {
             int code = ((ErrorCodeException) t).code;
             try {
-                ImageMessage image = environment.newImage();
+                ImageMessage image = environment.image();
                 try (InputStream is = new URL("https://http.cat/" + code).openStream()) {
                     image.fillImage(is);
                 }

@@ -1,6 +1,8 @@
 package io.github.nickid2018.koishibot.util;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
+import io.github.nickid2018.koishibot.util.func.BiConsumerE;
+import io.github.nickid2018.koishibot.util.func.FunctionE;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 import java.io.*;

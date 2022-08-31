@@ -27,6 +27,6 @@ public interface QuoteMessage extends AbstractMessage {
 
     default ChainMessage format() {
         Environment environment = getEnvironment();
-        return environment.newChain().fillChain(this, environment.newText().fillText(" "));
+        return environment.chain().fillChain(this, environment.text().fillText(" "));
     }
 }

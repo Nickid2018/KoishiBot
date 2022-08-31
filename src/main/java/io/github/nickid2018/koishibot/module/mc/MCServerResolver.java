@@ -4,18 +4,18 @@ import com.google.common.net.HostAndPort;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.ResolverName;
 import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
-import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.func.FuncUtils;
 import org.apache.commons.codec.binary.Base64;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,13 +89,7 @@ public class MCServerResolver extends MessageResolver {
                             .map(s -> s.split(",", 2)[1])
                             .map(Base64::decodeBase64)
                             .map(ByteArrayInputStream::new)
-                            .map(byteArrayInputStream -> {
-                                try {
-                                    return environment.newImage(byteArrayInputStream);
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
+                            .map(FuncUtils.rethrow(environment::newImage));
 
                     if (favicon.isPresent())
                         environment.getMessageSender().sendMessage(context, environment.newChain(

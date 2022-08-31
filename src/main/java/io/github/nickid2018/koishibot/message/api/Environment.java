@@ -10,23 +10,23 @@ import java.io.InputStream;
 
 public interface Environment {
 
-    AtMessage newAt();
+    AtMessage at();
 
-    ChainMessage newChain();
+    ChainMessage chain();
 
-    TextMessage newText();
+    TextMessage text();
 
-    AudioMessage newAudio();
+    AudioMessage audio();
 
-    ImageMessage newImage();
+    ImageMessage image();
 
-    ForwardMessage newForwards();
+    ForwardMessage forwards();
 
-    MessageEntry newMessageEntry();
+    MessageEntry messageEntry();
 
-    QuoteMessage newQuote();
+    QuoteMessage quote();
 
-    ServiceMessage newService();
+    ServiceMessage service();
 
     UserInfo getUser(String id, boolean isStranger);
 
@@ -53,38 +53,38 @@ public interface Environment {
     void close();
 
     default AtMessage newAt(GroupInfo group, UserInfo user) {
-        return newAt().fillAt(group, user);
+        return at().fillAt(group, user);
     }
 
     default ChainMessage newChain(AbstractMessage... messages) {
-        return newChain().fillChain(messages);
+        return chain().fillChain(messages);
     }
 
     default TextMessage newText(String text) {
-        return newText().fillText(text);
+        return text().fillText(text);
     }
 
     default AudioMessage newAudio(GroupInfo group, InputStream source) throws IOException {
-        return newAudio().fillAudio(group, source);
+        return audio().fillAudio(group, source);
     }
 
     default ImageMessage newImage(InputStream source) throws IOException {
-        return newImage().fillImage(source);
+        return image().fillImage(source);
     }
 
     default ForwardMessage newForwards(ContactInfo group, MessageEntry... entries) {
-        return newForwards().fillForwards(group, entries);
+        return forwards().fillForwards(group, entries);
     }
 
     default MessageEntry newMessageEntry(String id, String name, AbstractMessage message, int time) {
-        return newMessageEntry().fillMessageEntry(id, name, message, time);
+        return messageEntry().fillMessageEntry(id, name, message, time);
     }
 
     default QuoteMessage newQuote(ChainMessage message) {
-        return newQuote().fill(message);
+        return quote().fill(message);
     }
 
     default ServiceMessage newService(String name, Either<JsonObject, String> data) {
-        return newService().fillService(name, data);
+        return service().fillService(name, data);
     }
 }

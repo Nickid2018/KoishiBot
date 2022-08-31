@@ -29,50 +29,50 @@ public class KOOKEnvironment implements Environment {
     }
 
     @Override
-    public AtMessage newAt() {
+    public AtMessage at() {
         return new KOOKAt(this);
     }
 
     @Override
-    public ChainMessage newChain() {
+    public ChainMessage chain() {
         return new KOOKChain(this);
     }
 
     @Override
-    public TextMessage newText() {
+    public TextMessage text() {
         return new KOOKText(this);
     }
 
     @Override
-    public ImageMessage newImage() {
+    public ImageMessage image() {
         return new KOOKImage(this);
     }
 
     @Override
-    public AudioMessage newAudio() {
+    public AudioMessage audio() {
         // Unsupported
         return null;
     }
 
     @Override
-    public ForwardMessage newForwards() {
+    public ForwardMessage forwards() {
         // Unsupported
         return null;
     }
 
     @Override
-    public MessageEntry newMessageEntry() {
+    public MessageEntry messageEntry() {
         // Unsupported
         return null;
     }
 
     @Override
-    public QuoteMessage newQuote() {
+    public QuoteMessage quote() {
         return new KOOKQuote(this);
     }
 
     @Override
-    public ServiceMessage newService() {
+    public ServiceMessage service() {
         // Unsupported
         return null;
     }

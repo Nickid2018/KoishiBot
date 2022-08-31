@@ -211,7 +211,7 @@ public class BugTrackerResolver extends MessageResolver {
 
         ChainMessage chain;
         if (image != null) {
-            ImageMessage imageSend = environment.newImage();
+            ImageMessage imageSend = environment.image();
             try (InputStream stream = new URL(image).openStream()) {
                 imageSend.fillImage(stream);
             }
