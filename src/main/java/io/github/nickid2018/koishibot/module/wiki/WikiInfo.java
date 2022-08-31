@@ -35,11 +35,11 @@ public class WikiInfo {
     public static final Pattern USER_ANONYMOUS = Pattern.compile("User:\\d{1,3}(\\.\\d{1,3}){3}");
 
     public static final Set<String> SUPPORTED_IMAGE = WebUtil.SUPPORTED_IMAGE;
-    public static final Set<String> NEED_TRANSFORM_IMAGE = new HashSet<>(
-            Arrays.asList("webp", "ico")
+    public static final Set<String> NEED_TRANSFORM_IMAGE = Set.of(
+            "webp", "ico"
     );
-    public static final Set<String> NEED_TRANSFORM_AUDIO = new HashSet<>(
-            Arrays.asList("oga", "ogg", "flac", "mp3", "wav")
+    public static final Set<String> NEED_TRANSFORM_AUDIO = Set.of(
+            "oga", "ogg", "flac", "mp3", "wav"
     );
     public static final Map<String, WikiInfo> SUPPORT_WIKIS = new HashMap<>();
 
@@ -72,7 +72,6 @@ public class WikiInfo {
         STORED_WIKI_INFO.put(url, this);
     }
 
-    @ReflectTarget
     public static void loadWiki(JsonObject settingsRoot) {
         JsonUtil.getData(settingsRoot, "wiki", JsonObject.class).ifPresent(wikiRoot -> {
             JsonObject wikisArray = wikiRoot.getAsJsonObject("wikis");
@@ -210,6 +209,8 @@ public class WikiInfo {
             return random(prefix, allowAudio);
         if (title != null && title.equalsIgnoreCase("~iw"))
             return interwikiList();
+        if (title != null && title.equalsIgnoreCase("~page"))
+            return parsePageInfo(null, Integer.parseInt(title.split(" ", 2)[1]), prefix, allowAudio);
         if (title != null && title.toLowerCase(Locale.ROOT).startsWith("~search")) {
             String[] split = title.split(" ", 2);
             if (split.length == 2)
@@ -247,8 +248,8 @@ public class WikiInfo {
         pageInfo.info = this;
         pageInfo.prefix = prefix;
         pageInfo.title = title;
-        tryRedirect(query.get("redirects"), pageInfo);
-        tryRedirect(query.get("normalized"), pageInfo);
+        tryRedirect(query.get("redirects"), pageInfo, takeFullPage, section);
+        tryRedirect(query.get("normalized"), pageInfo, takeFullPage, section);
 
         JsonObject pages = query.getAsJsonObject("pages");
         if (pages == null)
@@ -372,7 +373,7 @@ public class WikiInfo {
         return info;
     }
 
-    private void tryRedirect(JsonElement entry, PageInfo info) {
+    private void tryRedirect(JsonElement entry, PageInfo info, boolean full, String section) {
         if (entry instanceof JsonArray && info.title != null) {
             for (JsonElement element : (JsonArray) entry) {
                 JsonObject object = element.getAsJsonObject();
@@ -383,6 +384,10 @@ public class WikiInfo {
                         info.titlePast = info.title;
                     info.title = to;
                     info.redirected = true;
+                    if (full)
+                        info.title += "#";
+                    if (section != null)
+                        info.title += "#" + section;
                     break;
                 }
             }

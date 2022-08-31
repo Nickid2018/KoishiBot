@@ -3,7 +3,6 @@ package io.github.nickid2018.koishibot.module.wiki;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.ReflectTarget;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -25,7 +24,6 @@ public class FormatTransformer {
     public static String FFMPEG_LOCATION;
     public static String ENCODER_LOCATION;
 
-    @ReflectTarget
     public static void loadFFmpeg(JsonObject settingsRoot) {
         JsonUtil.getData(settingsRoot, "audio", JsonObject.class).ifPresent(audio -> {
             FFMPEG_LOCATION = JsonUtil.getStringOrNull(audio, "ffmpeg");

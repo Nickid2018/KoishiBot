@@ -13,7 +13,6 @@ import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.MessageEventPublisher;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
-import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.value.Either;
 import kotlin.Pair;
 import kotlin.Triple;
@@ -48,7 +47,6 @@ public class KOOKMessagePublisher implements MessageEventPublisher {
         }
 
         @EventHandler
-        @ReflectTarget
         @SuppressWarnings("unchecked")
         public void onChannelMessage(ChannelMessageEvent event) {
             KOOKTextChannel groupInfo = new KOOKTextChannel(environment, event.getChannel());

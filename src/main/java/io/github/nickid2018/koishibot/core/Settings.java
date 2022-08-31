@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.ReflectTarget;
 import org.apache.commons.io.IOUtils;
 
 import java.io.FileReader;
@@ -49,7 +48,6 @@ public class Settings {
         PluginProcessor.set(settingsRoot);
     }
 
-    @ReflectTarget
     public static void loadProxy(JsonObject settingsRoot) {
         Properties properties = System.getProperties();
         properties.remove("http.proxyHost");

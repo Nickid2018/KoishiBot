@@ -19,7 +19,6 @@ public class ImageRenderer {
     public static Font IMAGE_FONT;
     public static Font IMAGE_FONT_BOLD;
 
-    @ReflectTarget
     public static void loadImageSettings(JsonObject settingsRoot) {
         IMAGE_FONT = new Font(null, Font.PLAIN, 20);
         IMAGE_FONT_BOLD = new Font(null, Font.BOLD, 20);

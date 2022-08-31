@@ -5,7 +5,6 @@ import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.permission.PermissionLevel;
 import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.ReflectTarget;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -149,7 +148,6 @@ public final class SensitiveWordFilter implements PostFilter {
         return null;
     }
 
-    @ReflectTarget
     public static void loadSensitiveWordsSettings(JsonObject settingsRoot) {
         JsonUtil.getString(settingsRoot, "sensitives").ifPresent(
                 s -> {

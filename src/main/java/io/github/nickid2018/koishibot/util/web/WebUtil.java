@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.ReflectTarget;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -26,8 +25,8 @@ public class WebUtil {
 
     public static final Logger WEB_LOGGER = LoggerFactory.getLogger("Web");
 
-    public static final Set<String> SUPPORTED_IMAGE = new HashSet<>(
-            Arrays.asList("jpg", "jpeg", "png", "bmp", "gif")
+    public static final Set<String> SUPPORTED_IMAGE = Set.of(
+            "jpg", "jpeg", "png", "bmp", "gif"
     );
 
     public static final String[] VIEWER_USER_AGENTS = new String[] {
@@ -177,7 +176,6 @@ public class WebUtil {
         return URLEncoder.encode(str, StandardCharsets.UTF_8).replace(".", "%2E");
     }
 
-    @ReflectTarget
     public static void loadMirror(JsonObject settingsRoot) {
         MIRROR.clear();
         JsonUtil.getData(settingsRoot, "mirrors", JsonObject.class).ifPresent(mirrors -> {
