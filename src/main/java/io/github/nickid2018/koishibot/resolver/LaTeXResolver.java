@@ -55,7 +55,7 @@ public class LaTeXResolver extends MessageResolver {
             }
             latex = latex.trim();
             try {
-                String data = WebUtil.fetchDataInText(new HttpGet("https://math.vercel.app/?from=" + WebUtil.encode(latex)));
+                String data = WebUtil.fetchDataInText(new HttpGet("https://latex2img.i207m.top/?from=" + WebUtil.encode(latex)));
                 Document document = Jsoup.parse(data);
                 Elements errors = document.getElementsByAttribute("data-mjx-error");
                 if (errors.size() > 0)
