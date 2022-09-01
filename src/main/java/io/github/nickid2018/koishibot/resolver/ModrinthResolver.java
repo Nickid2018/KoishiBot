@@ -57,7 +57,7 @@ public class ModrinthResolver extends MessageResolver {
                 else
                     displayMod(key.substring(5, key.length() - 1), context, environment);
             } catch (Exception e) {
-                environment.getMessageSender().onError(e, "curseforge", context, false);
+                environment.getMessageSender().onError(e, "modrinth", context, false);
             }
         });
         return true;
