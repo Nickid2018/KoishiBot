@@ -299,6 +299,7 @@ public class WikiInfo {
                     String suffix = type.substring(Math.min(type.length() - 1, type.lastIndexOf('.') + 1))
                             .toLowerCase(Locale.ROOT);
                     URL link = new URL(JsonUtil.getStringOrNull(array.get(0).getAsJsonObject(), "url"));
+                    pageInfo.shortDescription = "文件页面，此页面含有" + array.size() + "个文件\n其中第一个文件地址为:\n" + link;
                     if (SUPPORTED_IMAGE.contains(suffix))
                         pageInfo.imageStream = link.openStream();
                     else if (NEED_TRANSFORM_IMAGE.contains(suffix))
