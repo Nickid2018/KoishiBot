@@ -123,14 +123,15 @@ public class WikiResolver extends MessageResolver {
                 }
             });
         } else {
-            if (page.redirected)
-                data.append("(重定向[[").append(page.prefix == null ? "" : page.prefix + ":").append(page.titlePast)
-                        .append("]] -> [[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
+            if (page.redirected != null)
+                data.append("(").append(page.redirected == PageInfo.RedirectType.NORMALIZED ? "自动矫正拼写" : "重定向")
+                        .append("[").append(page.prefix == null ? "" : page.prefix + ":").append(page.titlePast)
+                        .append("] -> [").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("])\n");
             if (searchTitle != null)
-                data.append("(重搜索定向[[").append(searchTitle)
-                        .append("]] -> [[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
+                data.append("(重搜索定向[").append(searchTitle)
+                        .append("] -> [").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("])\n");
             if (page.isRandom)
-                data.append("(随机页面到[[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("]])\n");
+                data.append("(随机页面到[").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("])\n");
 
             boolean shouldHide = false;
             if (page.url != null)

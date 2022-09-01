@@ -248,8 +248,8 @@ public class WikiInfo {
         pageInfo.info = this;
         pageInfo.prefix = prefix;
         pageInfo.title = title;
-        tryRedirect(query.get("redirects"), pageInfo, takeFullPage, section);
-        tryRedirect(query.get("normalized"), pageInfo, takeFullPage, section);
+        tryRedirect(query.get("redirects"), pageInfo, takeFullPage, section, PageInfo.RedirectType.REDIRECT);
+        tryRedirect(query.get("normalized"), pageInfo, takeFullPage, section, PageInfo.RedirectType.NORMALIZED);
 
         JsonObject pages = query.getAsJsonObject("pages");
         if (pages == null)
@@ -373,7 +373,7 @@ public class WikiInfo {
         return info;
     }
 
-    private void tryRedirect(JsonElement entry, PageInfo info, boolean full, String section) {
+    private void tryRedirect(JsonElement entry, PageInfo info, boolean full, String section, PageInfo.RedirectType redirectType) {
         if (entry instanceof JsonArray && info.title != null) {
             for (JsonElement element : (JsonArray) entry) {
                 JsonObject object = element.getAsJsonObject();
@@ -383,7 +383,7 @@ public class WikiInfo {
                     if (info.titlePast == null)
                         info.titlePast = info.title;
                     info.title = to;
-                    info.redirected = true;
+                    info.redirected = redirectType;
                     if (full)
                         info.title += "#";
                     if (section != null)
