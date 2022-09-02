@@ -74,7 +74,7 @@ public class GitHubAuthenticator {
                 if (name != null)
                     authenticator.authenticate(name,
                             str -> environment.getMessageSender().sendMessage(context, environment.newText("请点击链接授权：\n" + str)),
-                            operation, List.of(needScopes), Map.of("login", name));
+                            operation, List.of(), Map.of("login", name));
                 else
                     environment.getMessageSender().sendMessage(context, environment.newText("已取消授权"));
             }));
