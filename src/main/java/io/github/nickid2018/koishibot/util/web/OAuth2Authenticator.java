@@ -181,16 +181,37 @@ public class OAuth2Authenticator implements HttpHandler {
     public void handle(HttpExchange httpExchange) {
         try {
             String query = httpExchange.getRequestURI().getQuery();
-            httpExchange.sendResponseHeaders(204, -1);
-
             Map<String, String> args = Arrays.stream(query.split("&"))
                     .map(s -> s.split("=", 2)).collect(
                             HashMap::new, (map, strArray) -> map.put(strArray[0], strArray[1]), HashMap::putAll
                     );
-
             String state = args.get("state");
+
             if (authSequence.containsKey(state)) {
                 OAUTH2_LOGGER.info("Received code from state {}.", state);
+                String success = """
+                        <!DOCTYPE HTML>
+                        <head>
+                            <meta charset="utf-8">
+                            <style type="text/css">
+                                h2 {
+                                    text-align: center;
+                                }
+                                p {
+                                    text-align: center;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <h2>你已经成功授权Koishi Bot</h2>
+                            <hr>
+                            <p>请求时间：%tc</p>
+                            <p>State ID：%s</p>
+                        </body>
+                        """.formatted(new Date(), state);
+                byte[] data = success.getBytes(StandardCharsets.UTF_8);
+                httpExchange.sendResponseHeaders(200, data.length);
+                httpExchange.getResponseBody().write(data);
 
                 String code = args.get("code");
                 HttpPost post = new HttpPost(tokenGrantURL);
@@ -221,6 +242,33 @@ public class OAuth2Authenticator implements HttpHandler {
                 }
 
                 authData.getThird().accept(accessToken);
+            } else {
+                String fail = """
+                        <!DOCTYPE HTML>
+                        <head>
+                            <meta charset="utf-8">
+                            <style type="text/css">
+                                h2 {
+                                    text-align: center;
+                                    color: red;
+                                }
+                                p {
+                                    text-align: center;
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <h2>未能成功授权Koishi Bot</h2>
+                            <hr>
+                            <p>请求时间：%tc</p>
+                            <p>State ID：%s</p>
+                            <p>原因：未能找到对应State ID，请尝试以同一链接重新授权</p>
+                        </body>
+                        """.formatted(new Date(), state);
+                byte[] data = fail.getBytes(StandardCharsets.UTF_8);
+                httpExchange.sendResponseHeaders(400, data.length);
+                httpExchange.getResponseBody().write(data);
+
             }
         } catch (Exception e) {
             OAUTH2_LOGGER.error("Cannot authenticate.", e);
