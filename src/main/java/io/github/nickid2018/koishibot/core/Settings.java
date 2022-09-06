@@ -21,6 +21,7 @@ public class Settings {
     public static final Map<String ,BotLoginData> BOT_DATA = new HashMap<>();
 
     public static String LOCAL_IP;
+    public static int OPEN_PORT;
 
     public static void load() throws IOException {
         String data = IOUtils.toString(new FileReader("botKoishi.json"));
@@ -35,7 +36,8 @@ public class Settings {
                     JsonUtil.getStringOrNull(loginData, "token")));
         }
 
-        LOCAL_IP = JsonUtil.getStringOrNull(settingsRoot, "local_ip");
+        LOCAL_IP = JsonUtil.getStringOrElse(settingsRoot, "local_ip", "localhost");
+        OPEN_PORT = JsonUtil.getIntOrElse(settingsRoot, "port", -1);
 
         System.err.close();
         PluginProcessor.set(settingsRoot);

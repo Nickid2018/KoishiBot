@@ -66,6 +66,9 @@ public class OAuth2Authenticator implements HttpHandler {
 
     public void authenticate(String user, Consumer<String> authURLSender, Consumer<String> operation,
                              List<String> scopes, Map<String, String> extraParameters) {
+        if (Settings.OPEN_PORT == -1)
+            throw new RuntimeException("bot未配置开放端口，未能成功创建授权上下文");
+
         if (refreshTokenEnabled) {
             AuthenticateToken token = dataReader.getDataSilently().get(user);
             boolean usable = token != null;
@@ -135,7 +138,7 @@ public class OAuth2Authenticator implements HttpHandler {
         pairs.add(new BasicNameValuePair("refresh_token", token.refreshToken()));
 
         if (uriAppend)
-            pairs.add(new BasicNameValuePair("redirect_uri", "http://%s:14514%s".formatted(Settings.LOCAL_IP, redirect)));
+            pairs.add(new BasicNameValuePair("redirect_uri", "http://%s:%d%s".formatted(Settings.LOCAL_IP, Settings.OPEN_PORT, redirect)));
 
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(pairs, StandardCharsets.UTF_8);
         post.setEntity(entity);
@@ -159,7 +162,7 @@ public class OAuth2Authenticator implements HttpHandler {
         String url = "%s?client_id=%s&state=%s&scope=%s&response_type=code".formatted(
                 authenticateURL, clientID, state, WebUtil.encode(String.join(",", scopes)));
         if (uriAppend)
-            url += "&redirect_uri=http://%s:14514%s".formatted(Settings.LOCAL_IP, redirect);
+            url += "&redirect_uri=http://%s:%d%s".formatted(Settings.LOCAL_IP, Settings.OPEN_PORT, redirect);
 
         String extra = extraParameters.entrySet().stream()
                 .map(en -> WebUtil.encode(en.getKey()) + "=" + WebUtil.encode(en.getValue()))
@@ -219,7 +222,7 @@ public class OAuth2Authenticator implements HttpHandler {
 
                 List<NameValuePair> pairs = new ArrayList<>();
                 if (uriAppend)
-                    pairs.add(new BasicNameValuePair("redirect_uri", "http://%s:14514%s".formatted(Settings.LOCAL_IP, redirect)));
+                    pairs.add(new BasicNameValuePair("redirect_uri", "http://%s:%d%s".formatted(Settings.LOCAL_IP, Settings.OPEN_PORT, redirect)));
                 pairs.add(new BasicNameValuePair("code", code));
                 pairs.add(new BasicNameValuePair("client_id", clientID));
                 pairs.add(new BasicNameValuePair("client_secret", clientSecret));
@@ -268,7 +271,6 @@ public class OAuth2Authenticator implements HttpHandler {
                 byte[] data = fail.getBytes(StandardCharsets.UTF_8);
                 httpExchange.sendResponseHeaders(400, data.length);
                 httpExchange.getResponseBody().write(data);
-
             }
         } catch (Exception e) {
             OAUTH2_LOGGER.error("Cannot authenticate.", e);
