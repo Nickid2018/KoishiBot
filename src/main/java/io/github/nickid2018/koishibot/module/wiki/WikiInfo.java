@@ -61,18 +61,20 @@ public class WikiInfo {
     public WikiInfo(String url) {
         this.url = url;
         additionalHeaders = new HashMap<>();
-        renderSettings = new WikiRenderSettings(0, 0);
+        renderSettings = new WikiRenderSettings(0, 0, true);
         STORED_WIKI_INFO.put(url, this);
     }
 
     public WikiInfo(String url, Map<String, String> additionalHeaders, WikiRenderSettings renderSettings) {
-        this.url = url;
+        this.url = WebUtil.mirror(url);
         this.additionalHeaders = additionalHeaders;
         this.renderSettings = renderSettings;
         STORED_WIKI_INFO.put(url, this);
     }
 
     public static void loadWiki(JsonObject settingsRoot) {
+        SUPPORT_WIKIS.clear();
+        STORED_WIKI_INFO.clear();
         JsonUtil.getData(settingsRoot, "wiki", JsonObject.class).ifPresent(wikiRoot -> {
             JsonObject wikisArray = wikiRoot.getAsJsonObject("wikis");
             for (Map.Entry<String, JsonElement> en : wikisArray.entrySet())
@@ -90,8 +92,12 @@ public class WikiInfo {
                                         .map(object -> {
                                             int width = JsonUtil.getIntOrZero(object, "width");
                                             int height = JsonUtil.getIntOrZero(object, "height");
-                                            return new WikiRenderSettings(width, height);
-                                        }).orElse(new WikiRenderSettings(0, 0));
+                                            boolean render = JsonUtil.getData(object, "enable", JsonPrimitive.class)
+                                                    .filter(JsonPrimitive::isBoolean)
+                                                    .map(JsonPrimitive::getAsBoolean)
+                                                    .orElse(true);
+                                            return new WikiRenderSettings(width, height, render);
+                                        }).orElse(new WikiRenderSettings(0, 0, true));
                         SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(
                                 JsonUtil.getStringOrNull(wikiData, "url") + "?", header, renderSettings));
                     }

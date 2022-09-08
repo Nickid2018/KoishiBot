@@ -66,31 +66,31 @@ public class WikiPageShooter {
     }
 
     public static Future<File> getInfoBoxShot(String url, String baseURI, WikiInfo info) {
-        if (WebPageRenderer.getExecutor() != null)
+        if (info.getRenderSettings().enable() && WebPageRenderer.getExecutor() != null)
             return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI, null, info));
         return null;
     }
 
     public static Future<File> getInfoBoxShot(String url, String baseURI, Document document, WikiInfo info) {
-        if (WebPageRenderer.getExecutor() != null)
+        if (info.getRenderSettings().enable() && WebPageRenderer.getExecutor() != null)
             return WebPageRenderer.getExecutor().submit(() -> getInfoBoxShotInternal(url, baseURI, document, info));
         return null;
     }
 
     public static Future<File> getFullPageShot(String url, String baseURI, WikiInfo info) {
-        if (WebPageRenderer.getExecutor() != null)
+        if (info.getRenderSettings().enable() && WebPageRenderer.getExecutor() != null)
             return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI, null, info));
         return null;
     }
 
     public static Future<File> getFullPageShot(String url, String baseURI, Document document, WikiInfo info) {
-        if (WebPageRenderer.getExecutor() != null)
+        if (info.getRenderSettings().enable() && WebPageRenderer.getExecutor() != null)
             return WebPageRenderer.getExecutor().submit(() -> getFullPageShotInternal(url, baseURI, document, info));
         return null;
     }
 
     public static Future<File> getSectionShot(String url, Document doc, String baseURI, String section, WikiInfo info) {
-        if (WebPageRenderer.getExecutor() != null)
+        if (info.getRenderSettings().enable() && WebPageRenderer.getExecutor() != null)
             return WebPageRenderer.getExecutor().submit(() -> getSectionShotInternal(url, doc, baseURI, section, info));
         return null;
     }
