@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import io.github.kookybot.events.EventHandler;
 import io.github.kookybot.events.Listener;
-import io.github.kookybot.events.MessageEvent;
 import io.github.kookybot.events.channel.ChannelMessageEvent;
 import io.github.kookybot.message.AtKt;
 import io.github.kookybot.message.Message;
@@ -13,9 +12,12 @@ import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.MessageEventPublisher;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.value.Either;
 import kotlin.Pair;
 import kotlin.Triple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +40,8 @@ public class KOOKMessagePublisher implements MessageEventPublisher {
 
     public static class ChannelMessageListener implements Listener {
 
+        private static final Logger LOGGER = LoggerFactory.getLogger("KOOK Test");
+
         private final KOOKEnvironment environment;
         private final BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> consumer;
 
@@ -49,29 +53,20 @@ public class KOOKMessagePublisher implements MessageEventPublisher {
         @EventHandler
         @SuppressWarnings("unchecked")
         public void onChannelMessage(ChannelMessageEvent event) {
+            LOGGER.info(event.getContent());
+
             KOOKTextChannel groupInfo = new KOOKTextChannel(environment, event.getChannel());
             KOOKUser userInfo = new KOOKUser(environment, event.getSender(), true);
             List<Either<Message, MessageComponent>> messages = new ArrayList<>();
 
             // Ats
-            if (event.getEventType() == MessageEvent.EventType.MARKDOWN ||
-                    event.getEventType() == MessageEvent.EventType.PLAIN_TEXT) {
-                JsonArray mentions = event.getExtra().getAsJsonArray("mention");
+            JsonUtil.getData(event.getExtra(), "mention", JsonArray.class).ifPresent(mentions -> {
                 for (JsonElement element : mentions)
                     messages.add(Either.right(AtKt.At(Objects.requireNonNull(
                             event.getChannel().getGuild().getGuildUser(element.getAsString())))));
-            }
+            });
 
-
-
-//            ChainMessage message = environment.newChain();
-//            if (event.getEventType() == MessageEvent.EventType.PLAIN_TEXT ||
-//                    event.getEventType() == MessageEvent.EventType.MARKDOWN)
-//                message.fillChain(new KOOKText(environment,
-//                        new MarkdownMessage(environment.getKookClient(), event.getContent())));
-//            else if (event.getEventType() == MessageEvent.EventType.IMAGE)
-//                message.fillChain(new KOOKImage(environment,
-//                        new ImageMessage(environment.getKookClient(), null, event.getContent(), null)));
+            String text = event.getContent();
 
             KOOKChain chain = new KOOKChain(environment, messages.toArray(Either[]::new),
                     new KOOKMessageSource(event.getMessageId(), groupInfo, userInfo));

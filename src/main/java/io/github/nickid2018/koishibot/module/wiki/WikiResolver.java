@@ -62,8 +62,8 @@ public class WikiResolver extends MessageResolver {
             if (page.title != null) {
                 ChainMessage chain = environment.newChain(
                         environment.newQuote(context.message()),
-                        environment.newText("[[" + (namespace == null ? "" : namespace + ":") + title + "]]不存在，" +
-                                "你要查看的是否为[[" + (page.prefix == null ? "" : page.prefix + ":") + page.title + "]](打y确认)")
+                        environment.newText("[" + (namespace == null ? "" : namespace + ":") + title + "]不存在，" +
+                                "你要查看的是否为[" + (page.prefix == null ? "" : page.prefix + ":") + page.title + "](打y确认)")
                 );
                 environment.getMessageSender().sendMessageAwait(context, chain, (source, next) -> {
                     try {
@@ -90,11 +90,11 @@ public class WikiResolver extends MessageResolver {
             } else {
                 environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
                         environment.newQuote(context.message()),
-                        environment.newText("没有搜索到有关于[[" + (namespace == null ? "" : namespace + ":") + title + "]]的页面")
+                        environment.newText("没有搜索到有关于[" + (namespace == null ? "" : namespace + ":") + title + "]的页面")
                 ));
             }
         } else if (page.searchTitles != null) {
-            data.append("对于[[").append(title).append("]]的搜索结果:\n");
+            data.append("对于[").append(title).append("]的搜索结果:\n");
             for (int i = 0; i < page.searchTitles.size(); i++)
                 data.append(i).append(": ").append(page.searchTitles.get(i)).append("\n");
             data.append("[对本条消息引用回复数字查看详情]");

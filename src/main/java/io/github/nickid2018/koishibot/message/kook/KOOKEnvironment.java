@@ -14,7 +14,6 @@ public class KOOKEnvironment implements Environment {
 
     private final Client kookClient;
     private final Self self;
-
     private final MessageSender sender;
     private final MessageManager manager;
     private final KOOKMessagePublisher publisher;

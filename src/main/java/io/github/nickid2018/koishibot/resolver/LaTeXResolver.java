@@ -37,10 +37,10 @@ public class LaTeXResolver extends MessageResolver {
     public LaTeXResolver() {
         super("~latex");
         transcoder = new PNGTranscoder();
-        transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, 0.1f);
+        transcoder.addTranscodingHint(SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, 0.02f);
         transcoder.addTranscodingHint(ImageTranscoder.KEY_BACKGROUND_COLOR, Color.WHITE);
         alphaTranscoder = new PNGTranscoder();
-        alphaTranscoder.addTranscodingHint(SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, 0.1f);
+        alphaTranscoder.addTranscodingHint(SVGAbstractTranscoder.KEY_PIXEL_UNIT_TO_MILLIMETER, 0.02f);
     }
 
     @Override

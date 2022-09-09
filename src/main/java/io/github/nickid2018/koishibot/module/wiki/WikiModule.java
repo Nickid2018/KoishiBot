@@ -9,7 +9,7 @@ public class WikiModule extends Module {
 
     public WikiModule() {
         super("wiki", List.of(
-                new WikiResolver()
+                new WikiResolver(), new WikiSettingResolver()
         ), true);
     }
 

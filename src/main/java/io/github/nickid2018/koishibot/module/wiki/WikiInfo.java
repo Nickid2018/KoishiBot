@@ -72,6 +72,10 @@ public class WikiInfo {
         STORED_WIKI_INFO.put(url, this);
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     public static void loadWiki(JsonObject settingsRoot) {
         SUPPORT_WIKIS.clear();
         STORED_WIKI_INFO.clear();
