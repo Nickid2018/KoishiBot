@@ -19,6 +19,7 @@ import java.util.Map;
 
 @ResolverName("wiki-settings")
 @Syntax(syntax = "~wiki prefix", help = "获取目前内置的wiki连接信息")
+@Syntax(syntax = "~wiki base", help = "获取目前的基础wiki")
 public class WikiSettingResolver extends MessageResolver {
 
     public WikiSettingResolver() {
@@ -47,7 +48,14 @@ public class WikiSettingResolver extends MessageResolver {
                 });
                 return true;
             }
+            case "base" -> {
+                AsyncUtil.execute(() -> environment.getMessageSender()
+                        .sendMessage(context, environment.newText("目前的基础wiki为%s".formatted(WikiInfo.BASE_WIKI))));
+                return true;
+            }
+            default -> {
+                return false;
+            }
         }
-        return false;
     }
 }
