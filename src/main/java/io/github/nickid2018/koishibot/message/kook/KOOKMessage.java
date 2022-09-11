@@ -1,13 +1,8 @@
 package io.github.nickid2018.koishibot.message.kook;
 
-import io.github.kookybot.contract.GuildUser;
-import io.github.kookybot.contract.User;
 import io.github.kookybot.message.MarkdownMessage;
-import io.github.kookybot.message.Message;
-import io.github.kookybot.message.MessageComponent;
 import io.github.kookybot.message.SelfMessage;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.util.value.Either;
 
 public abstract class KOOKMessage implements AbstractMessage {
 
@@ -25,22 +20,16 @@ public abstract class KOOKMessage implements AbstractMessage {
 
     @Override
     public void send(UserInfo contact) {
-        Either<Message, MessageComponent> message = getKOOKMessage();
-        Message send = message.isRight() ?
-                new MarkdownMessage(environment.getKookClient(), message.right().toMarkdown()) : message.left();
-        Either<User, GuildUser> user = ((KOOKUser) contact).getUser();
-        if (user.isLeft())
-            sentMessage = user.left().sendMessage(send);
-        else
-            sentMessage = user.right().sendMessage(send);
+        // Unsupported
     }
 
     @Override
     public void send(GroupInfo group) {
-        Either<Message, MessageComponent> message = getKOOKMessage();
-        Message send = message.isRight() ?
-                new MarkdownMessage(environment.getKookClient(), message.right().toMarkdown()) : message.left();
-        sentMessage = ((KOOKTextChannel) group).getChannel().sendMessage(send);
+        KOOKMessageData data = new KOOKMessageData();
+        formatMessage(data);
+        MarkdownMessage message = new MarkdownMessage(environment.getKookClient(), String.join("", data.getTexts()));
+        message.setQuote(data.getQuoteID());
+        sentMessage = ((KOOKTextChannel) group).getChannel().sendMessage(message);
     }
 
     @Override
@@ -56,11 +45,10 @@ public abstract class KOOKMessage implements AbstractMessage {
 
     @Override
     public MessageFrom getSource() {
-        if (sentMessage != null) {
+        if (sentMessage != null)
             return new KOOKMessageFrom(sentMessage.getId());
-        }
         return null;
     }
 
-    public abstract Either<Message, MessageComponent> getKOOKMessage();
+    public abstract void formatMessage(KOOKMessageData data);
 }

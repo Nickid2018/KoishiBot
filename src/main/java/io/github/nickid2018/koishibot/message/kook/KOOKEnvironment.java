@@ -78,7 +78,14 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public UserInfo getUser(String id, boolean isStranger) {
-        return id.startsWith("kook.user") ? new KOOKUser(this, self.getUser(id.substring(9)), isStranger) : null;
+        if (!id.startsWith("kook.user"))
+            return null;
+        String user = id.substring(9);
+        return self.getGuilds().values().stream()
+                .map(guild -> guild.getGuildUser(user))
+                .map(guildUser -> new KOOKUser(this, guildUser))
+                .findFirst()
+                .orElse(null);
     }
 
     @Override

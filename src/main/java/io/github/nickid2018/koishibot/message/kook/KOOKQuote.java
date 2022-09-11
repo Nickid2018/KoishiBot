@@ -50,22 +50,26 @@ public class KOOKQuote implements QuoteMessage {
     @Nullable
     @Override
     public UserInfo getReplyTo() {
-        return null;
+        return new KOOKUser(environment, message.getData().getQuoteUser());
     }
 
     @NotNull
     @Override
     public String getReplyToID() {
-        return null;
+        return "kook.user" + message.getData().getQuoteUser().getId();
     }
 
     @Override
     public ChainMessage getQuoteMessage() {
-        return message;
+        return new KOOKChain(environment, message.getData().getQuoteData());
     }
 
     @Override
     public MessageFrom getQuoteFrom() {
-        return new KOOKMessageFrom(message.getKOOKMessage().left().content());
+        return new KOOKMessageFrom(message.getData().getQuoteID());
+    }
+
+    public KOOKChain getMessage() {
+        return message;
     }
 }

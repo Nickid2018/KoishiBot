@@ -1,10 +1,8 @@
 package io.github.nickid2018.koishibot.message.kook;
 
-import io.github.kookybot.message.Message;
-import io.github.kookybot.message.MessageComponent;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
+import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.ImageMessage;
-import io.github.nickid2018.koishibot.util.value.Either;
 import org.apache.commons.io.IOUtils;
 
 import java.io.File;
@@ -16,6 +14,7 @@ import java.net.URL;
 public class KOOKImage extends KOOKMessage implements ImageMessage {
 
     private io.github.kookybot.message.ImageMessage image;
+    private File sendTemp;
 
     public KOOKImage(KOOKEnvironment environment) {
         super(environment);
@@ -27,12 +26,20 @@ public class KOOKImage extends KOOKMessage implements ImageMessage {
     }
 
     @Override
+    public void send(GroupInfo group) {
+//        image.send2Channel(((KOOKTextChannel) group).getChannel());
+        sentMessage = environment.getKookClient().sendChannelMessage(2,
+                ((KOOKTextChannel) group).getChannel(), null, null, image.content(), null);
+        TempFileSystem.unlockFileAndDelete(sendTemp);
+    }
+
+    @Override
     public ImageMessage fillImage(InputStream stream) throws IOException {
-        File tmp = TempFileSystem.createTmpFile("kook", "image");
-        FileOutputStream fos = new FileOutputStream(tmp);
+        sendTemp = TempFileSystem.createTmpFile("kook", "png");
+        FileOutputStream fos = new FileOutputStream(sendTemp);
         IOUtils.copy(stream, fos);
         fos.close();
-        image = new io.github.kookybot.message.ImageMessage(environment.getKookClient(), null, null, tmp);
+        image = new io.github.kookybot.message.ImageMessage(environment.getKookClient(), null, null, sendTemp);
         return this;
     }
 
@@ -40,9 +47,12 @@ public class KOOKImage extends KOOKMessage implements ImageMessage {
     public InputStream getImage() throws IOException {
         return new URL(image.content()).openStream();
     }
+    
+    public io.github.kookybot.message.ImageMessage getImageMessage() {
+        return image;
+    }
 
     @Override
-    public Either<Message, MessageComponent> getKOOKMessage() {
-        return Either.left(image);
+    public void formatMessage(KOOKMessageData data) {
     }
 }

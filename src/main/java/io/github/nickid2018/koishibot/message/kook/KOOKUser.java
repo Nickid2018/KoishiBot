@@ -1,29 +1,19 @@
 package io.github.nickid2018.koishibot.message.kook;
 
 import io.github.kookybot.contract.GuildUser;
-import io.github.kookybot.contract.User;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
-import io.github.nickid2018.koishibot.util.value.Either;
 
 public class KOOKUser implements UserInfo {
 
     private final Environment environment;
-    private final Either<User, GuildUser> user;
-    private final boolean group;
+    private final GuildUser user;
 
-    public KOOKUser(Environment environment, User user, boolean group) {
+    public KOOKUser(Environment environment, GuildUser user) {
         this.environment = environment;
-        this.user = Either.left(user);
-        this.group = group;
-    }
-
-    public KOOKUser(Environment environment, GuildUser user, boolean group) {
-        this.environment = environment;
-        this.user = Either.right(user);
-        this.group = group;
+        this.user = user;
     }
 
     @Override
@@ -38,20 +28,20 @@ public class KOOKUser implements UserInfo {
 
     @Override
     public String getName() {
-        return user.isLeft() ? user.left().getName() : user.right().getName();
+        return user.getName();
     }
 
     @Override
     public String getUserId() {
-        return "kook.user" + (user.isLeft() ? user.left().getId() : user.right().getId());
+        return "kook.user" + user.getId();
     }
 
     @Override
     public boolean isStranger() {
-        return group;
+        return true;
     }
 
-    public Either<User, GuildUser> getUser() {
+    public GuildUser getUser() {
         return user;
     }
 
@@ -62,11 +52,7 @@ public class KOOKUser implements UserInfo {
 
     @Override
     public String getNameInGroup(GroupInfo group) {
-        if (group instanceof KOOKTextChannel channel) {
-            GuildUser u = channel.getChannel().getGuild().getGuildUser(
-                    user.isLeft() ? user.left().getId() : user.right().getId());
-            return u == null ? getName() : u.getName();
-        } else
-            return null;
+        GuildUser u = ((KOOKTextChannel) group).getChannel().getGuild().getGuildUser(user.getId());
+        return u == null ? getName() : u.getName();
     }
 }
