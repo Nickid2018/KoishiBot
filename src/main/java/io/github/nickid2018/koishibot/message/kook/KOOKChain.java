@@ -34,10 +34,10 @@ public class KOOKChain extends KOOKMessage implements ChainMessage {
         for (AbstractMessage message : messages) {
             if (message instanceof KOOKImage image)
                 images.add(image);
-            else if (message instanceof KOOKMessage kook)
-                kook.formatMessage(data);
             else if (message instanceof KOOKQuote quote)
                 data.setQuoteID(quote.getMessage().data.getMsgID());
+            else if (message instanceof KOOKMessage kook)
+                kook.formatMessage(data);
         }
         return this;
     }

@@ -4,14 +4,13 @@ import io.github.kookybot.events.EventHandler;
 import io.github.kookybot.events.Listener;
 import io.github.kookybot.events.MessageEvent;
 import io.github.kookybot.events.channel.ChannelMessageEvent;
+import io.github.kookybot.events.guild.GuildUserJoinEvent;
 import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.MessageEventPublisher;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import kotlin.Pair;
 import kotlin.Triple;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -31,12 +30,11 @@ public class KOOKMessagePublisher implements MessageEventPublisher {
 
     public static class ChannelMessageListener implements Listener {
 
-        private static final Logger LOGGER = LoggerFactory.getLogger("KOOK Test");
-
         private final KOOKEnvironment environment;
         private final BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> consumer;
 
-        public ChannelMessageListener(KOOKEnvironment environment, BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> consumer) {
+        public ChannelMessageListener(KOOKEnvironment environment,
+                                      BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> consumer) {
             this.environment = environment;
             this.consumer = consumer;
         }
@@ -71,7 +69,26 @@ public class KOOKMessagePublisher implements MessageEventPublisher {
 
     @Override
     public void subscribeNewMemberAdd(BiConsumer<GroupInfo, UserInfo> consumer) {
-        // Unsupported
+        environment.getKookClient().getEventManager().addClassListener(new NewMemberListener(environment, consumer));
+    }
+
+    public static class NewMemberListener implements Listener {
+
+        private final KOOKEnvironment environment;
+        private final BiConsumer<GroupInfo, UserInfo> consumer;
+
+        public NewMemberListener(KOOKEnvironment environment,
+                                 BiConsumer<GroupInfo, UserInfo> consumer) {
+            this.environment = environment;
+            this.consumer = consumer;
+        }
+
+        @EventHandler
+        public void onChannelJoin(GuildUserJoinEvent event) {
+            KOOKTextChannel groupInfo = new KOOKTextChannel(environment, event.getGuild().getDefaultChannel());
+            KOOKUser userInfo = new KOOKUser(environment, event.getUser());
+            consumer.accept(groupInfo, userInfo);
+        }
     }
 
     @Override

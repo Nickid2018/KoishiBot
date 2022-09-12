@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.message.kook;
 
+import io.github.kookybot.message.AtKt;
 import io.github.kookybot.message.MarkdownMessage;
 import io.github.kookybot.message.SelfMessage;
 import io.github.nickid2018.koishibot.message.api.*;
@@ -29,6 +30,7 @@ public abstract class KOOKMessage implements AbstractMessage {
         formatMessage(data);
         MarkdownMessage message = new MarkdownMessage(environment.getKookClient(), String.join("", data.getTexts()));
         message.setQuote(data.getQuoteID());
+        data.getMentionUsers().forEach(user -> message.append(AtKt.At(user)));
         sentMessage = ((KOOKTextChannel) group).getChannel().sendMessage(message);
     }
 

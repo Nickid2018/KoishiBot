@@ -9,6 +9,7 @@ import io.github.kookybot.events.channel.ChannelMessageEvent;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class KOOKMessageData {
@@ -33,6 +34,7 @@ public class KOOKMessageData {
 
         Arrays.stream(SPECIALS.split(channelMessage.getContent()))
                 .map(s -> s.replace("\\[", "[").replace("\\]", "]"))
+                .filter(Predicate.not(String::isBlank))
                 .forEach(data.texts::add);
         data.timestamp = Long.parseLong(channelMessage.getTimestamp());
 
@@ -50,10 +52,12 @@ public class KOOKMessageData {
         KOOKMessageData data = new KOOKMessageData();
         JsonUtil.getDataInPath(message, "kmarkdown.mention_part", JsonArray.class).ifPresent(mentions -> {
             for (JsonElement element : mentions)
-                data.mentionUsers.add(channel.getGuild().getGuildUser(JsonUtil.getStringOrNull(element.getAsJsonObject(), "id")));
+                data.mentionUsers.add(channel.getGuild().getGuildUser(
+                        JsonUtil.getStringOrNull(element.getAsJsonObject(), "id")));
         });
         Arrays.stream(SPECIALS.split(JsonUtil.getStringOrNull(message, "content")))
                 .map(s -> s.replace("\\[", "[").replace("\\]", "]"))
+                .filter(Predicate.not(String::isBlank))
                 .forEach(data.texts::add);
 
         data.timestamp = Long.parseLong(JsonUtil.getStringOrNull(message, "create_at"));

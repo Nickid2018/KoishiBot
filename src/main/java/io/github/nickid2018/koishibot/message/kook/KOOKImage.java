@@ -27,7 +27,6 @@ public class KOOKImage extends KOOKMessage implements ImageMessage {
 
     @Override
     public void send(GroupInfo group) {
-//        image.send2Channel(((KOOKTextChannel) group).getChannel());
         sentMessage = environment.getKookClient().sendChannelMessage(2,
                 ((KOOKTextChannel) group).getChannel(), null, null, image.content(), null);
         TempFileSystem.unlockFileAndDelete(sendTemp);
@@ -46,10 +45,6 @@ public class KOOKImage extends KOOKMessage implements ImageMessage {
     @Override
     public InputStream getImage() throws IOException {
         return new URL(image.content()).openStream();
-    }
-    
-    public io.github.kookybot.message.ImageMessage getImageMessage() {
-        return image;
     }
 
     @Override
