@@ -33,10 +33,16 @@ public class WakaTimeModule extends Module {
             authenticator.close();
         JsonUtil.getData(settingRoot, "wakatime", JsonObject.class).ifPresent(oauth -> {
             try {
-                authenticator = new OAuth2Authenticator("wakatime", "https://wakatime.com/oauth/authorize",
-                        "https://wakatime.com/oauth/token", "https://wakatime.com//oauth/revoke", true,
+                authenticator = new OAuth2Authenticator(
+                        "wakatime",
+                        "https://wakatime.com/oauth/authorize",
+                        "https://wakatime.com/oauth/token",
+                        "https://wakatime.com/oauth/revoke",
+                        true,
                         "/wakaTimeOAuth",
-                        JsonUtil.getStringOrNull(oauth, "client_id"), JsonUtil.getStringOrNull(oauth, "client_secret"), true
+                        JsonUtil.getStringOrNull(oauth, "client_id"),
+                        JsonUtil.getStringOrNull(oauth, "client_secret"),
+                        true
                 );
             } catch (IOException e) {
                 throw new RuntimeException(e);
