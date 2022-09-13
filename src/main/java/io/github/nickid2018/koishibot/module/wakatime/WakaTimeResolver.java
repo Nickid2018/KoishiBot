@@ -25,7 +25,7 @@ import java.util.stream.StreamSupport;
 @Syntax(syntax = "~wakatime", help = "获取最近7天的编程工作统计", rem = "此数据每天凌晨0点更新")
 @Syntax(syntax = "~wakatime today", help = "获取今天的编程工作统计", rem = "此数据随时更新")
 @Syntax(syntax = "~wakatime yesterday", help = "获取昨天的编程工作统计")
-@Syntax(syntax = "~wakatime [时间区段]", help = "获取一定时间内的编程工作统计", rem = "时间格式为yyyymmdd-yyyymmdd")
+@Syntax(syntax = "~wakatime [时间区段]", help = "获取一段时间内的编程工作统计", rem = "时间格式为yyyymmdd-yyyymmdd")
 @Syntax(syntax = "~wakatime revoke", help = "取消授权")
 public class WakaTimeResolver extends MessageResolver {
 
@@ -129,7 +129,7 @@ public class WakaTimeResolver extends MessageResolver {
                                                 String lang = JsonUtil.getStringOrNull(language, "name");
                                                 double data = langTime.computeIfAbsent(lang, n -> 0.0);
                                                 langTime.put(lang, data +
-                                                        JsonUtil.getData(language, "seconds", JsonPrimitive.class)
+                                                        JsonUtil.getData(language, "total_seconds", JsonPrimitive.class)
                                                                 .filter(JsonPrimitive::isNumber)
                                                                 .map(JsonPrimitive::getAsDouble)
                                                                 .orElse(0.0));
@@ -143,7 +143,7 @@ public class WakaTimeResolver extends MessageResolver {
                                 .limit(5)
                                 .forEach(dat -> {
                                     String name = dat.getKey();
-                                    String percent = "%.2f".formatted(dat.getValue() / sec);
+                                    String percent = "%.2f".formatted(dat.getValue() / sec * 100);
                                     builder.append(name).append(": ").append(percent).append("%\n");
                                 });
 

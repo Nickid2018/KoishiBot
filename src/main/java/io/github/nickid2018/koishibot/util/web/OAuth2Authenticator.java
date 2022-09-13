@@ -79,10 +79,13 @@ public class OAuth2Authenticator implements HttpHandler {
                 usable = token.scopes().contains(scope);
             }
 
-            if (token != null && !usable)
+            if (token != null && !usable) {
+                scopes = new ArrayList<>(scopes);
                 scopes.addAll(token.scopes());
+            }
 
             if (usable) {
+                List<String> finalScopes = scopes;
                 AsyncUtil.execute(() -> {
                     try {
                         String accessToken = token.accessToken();
@@ -92,7 +95,7 @@ public class OAuth2Authenticator implements HttpHandler {
                         AsyncUtil.execute(() -> operation.accept(finalAccessToken));
                     } catch (IOException e) {
                         OAUTH2_LOGGER.error("Can't refresh access token. Name = " + oauthName + ", User = " + user, e);
-                        authenticateCode(user, authURLSender, operation, scopes, extraParameters);
+                        authenticateCode(user, authURLSender, operation, finalScopes, extraParameters);
                     }
                 });
             } else
