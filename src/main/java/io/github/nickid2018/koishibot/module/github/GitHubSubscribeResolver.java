@@ -41,7 +41,7 @@ public class GitHubSubscribeResolver extends MessageResolver {
         AsyncUtil.execute(() -> {
             try {
                 GitHubModule.INSTANCE.addRepo(context.group().getGroupId(), repo);
-                environment.getMessageSender().sendMessage(context, environment.newText("已填加仓库"));
+                environment.getMessageSender().sendMessage(context, environment.newText("已添加仓库"));
             } catch (Exception e) {
                 environment.getMessageSender().onError(e, "github.add", context, false);
             }

@@ -84,4 +84,8 @@ public class WebPageRenderer {
         executor = null;
         driver = null;
     }
+
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(WebPageRenderer::close));
+    }
 }

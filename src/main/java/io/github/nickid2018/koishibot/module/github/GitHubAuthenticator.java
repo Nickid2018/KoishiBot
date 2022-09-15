@@ -53,7 +53,7 @@ public class GitHubAuthenticator {
     }
 
     public HttpUriRequest acceptGitHubJSON(HttpUriRequest request, String token) {
-        request.addHeader("Authorization", "token " + token);
+        request.addHeader("Authorization", "Bearer " + token);
         request.addHeader("Accept", "application/vnd.github.v3+json");
         return request;
     }
@@ -64,7 +64,7 @@ public class GitHubAuthenticator {
     }
 
     public void authenticateOperation(Consumer<String> operation,
-                                             MessageContext context, Environment environment, String... needScopes) {
+                                      MessageContext context, Environment environment, String... needScopes) {
         if (enableOAuth2()) {
             AbstractMessage message = environment.newText(
                     "警告: 此操作需要授权，请输入您的用户名。"
@@ -74,7 +74,7 @@ public class GitHubAuthenticator {
                 if (name != null)
                     authenticator.authenticate(name,
                             str -> environment.getMessageSender().sendMessage(context, environment.newText("请点击链接授权：\n" + str)),
-                            operation, List.of("repo", "admin:repo_hook"), Map.of("login", name));
+                            operation, List.of(needScopes), Map.of("login", name));
                 else
                     environment.getMessageSender().sendMessage(context, environment.newText("已取消授权"));
             }));
