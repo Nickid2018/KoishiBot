@@ -19,7 +19,6 @@ import org.apache.http.entity.StringEntity;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.OutputType;
-import org.openqa.selenium.WebElement;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -168,19 +167,15 @@ public class HelpResolver extends MessageResolver {
 
                             WebPageRenderer.getDriver().manage().window().setSize(new Dimension(10000, 10000));
                             WebPageRenderer.getDriver().get(tmpHTML.getAbsolutePath());
-                            File srcFile = WebPageRenderer.getDriver().getFullPageScreenshotAs(OutputType.FILE);
+                            byte[] imageData = WebPageRenderer.getDriver().findElement(By.className("markdown-body"))
+                                    .getScreenshotAs(OutputType.BYTES);
                             TempFileSystem.unlockFileAndDelete(tmpHTML);
 
+                            BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageData));
                             File png = TempFileSystem.createTmpFileBuffered("help",
                                     finalKey + (enabled ? "-on" : "-off") + (error ? "-error" : "-normal"),
                                     "help", "png", false);
-
-                            BufferedImage image = ImageIO.read(srcFile);
-                            WebElement element2 = WebPageRenderer.getDriver().findElement(By.className("markdown-body"));
-                            BufferedImage sub = image.getSubimage(element2.getLocation().x,
-                                    element2.getLocation().y, element2.getSize().width, element2.getSize().height);
-                            ImageIO.write(sub, "png", png);
-                            srcFile.delete();
+                            ImageIO.write(image, "png", png);
 
                             environment.getMessageSender().sendMessage(context, environment.newImage(new FileInputStream(png)));
                         } catch (IOException e) {

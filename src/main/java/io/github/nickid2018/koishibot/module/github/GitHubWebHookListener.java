@@ -145,6 +145,8 @@ public class GitHubWebHookListener implements HttpHandler {
             while (commits.size() > 3)
                 commits.remove(0);
         }
+        if (commits.size() == 0)
+            return null;
         for (JsonObject commit : commits) {
             builder.append("提交: ");
             String message = JsonUtil.getStringOrNull(commit, "message").split("\n")[0];
@@ -203,7 +205,7 @@ public class GitHubWebHookListener implements HttpHandler {
                 if (body != null)
                     builder.append(body);
                 break;
-            case "publish":
+            case "published":
                 builder.append(user).append("发布了发行包。\n");
                 builder.append("发行包标签: ").append(tag);
                 if (pre)

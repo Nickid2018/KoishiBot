@@ -43,7 +43,6 @@ public class PluginProcessor {
                 INIT_PROCESS.add(ModuleManager.class.getMethod("start"));
 
                 EXIT_PROCESS.add(0, ModuleManager.class.getMethod("stop"));
-                EXIT_PROCESS.add(WebPageRenderer.class.getMethod("close"));
 
                 SETTING_LOAD.add(SensitiveWordFilter.class.getMethod("loadSensitiveWordsSettings", JsonObject.class));
                 SETTING_LOAD.add(ImageRenderer.class.getMethod("loadImageSettings", JsonObject.class));
