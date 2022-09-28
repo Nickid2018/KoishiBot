@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
+import io.github.nickid2018.koishibot.core.ReflectTarget;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
@@ -124,7 +125,7 @@ public class GitHubWebHookListener implements HttpHandler {
                                 .filter(e -> e.getGroup(group) != null).findFirst()
                                 .ifPresent(environment -> {
                                     MessageContext context = new MessageContext(
-                                            environment.getGroup(group), null, null, -1);
+                                            environment.getGroup(group), null, environment.chain(), -1);
                                     environment.getMessageSender().sendMessage(context, environment.newText(send));
                                 }));
             } catch (Exception e) {
@@ -133,6 +134,7 @@ public class GitHubWebHookListener implements HttpHandler {
         }
     }
 
+    @ReflectTarget
     public String push(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
         builder.append(JsonUtil.getStringInPathOrNull(object, "pusher.name")).append(
@@ -169,17 +171,20 @@ public class GitHubWebHookListener implements HttpHandler {
         return builder.toString().trim();
     }
 
+    @ReflectTarget
     public String fork(JsonObject object, String repo) {
         return JsonUtil.getStringInPathOrNull(object, "sender.login") + "进行了Fork。\n" +
                 "Fork仓库: " + JsonUtil.getStringInPathOrNull(object, "forkee.full_name");
     }
 
+    @ReflectTarget
     public String star(JsonObject object, String repo) {
         return JsonUtil.getStringInPathOrNull(object, "sender.login") +
                 (Objects.equals(JsonUtil.getStringOrNull(object, "action"), "created")
                         ? " star了此仓库" : " 取消star了此仓库");
     }
 
+    @ReflectTarget
     public String release(JsonObject object, String repo) {
         StringBuilder builder = new StringBuilder();
         String action = JsonUtil.getStringOrNull(object, "action");

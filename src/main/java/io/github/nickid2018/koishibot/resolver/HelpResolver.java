@@ -166,7 +166,7 @@ public class HelpResolver extends MessageResolver {
                             fileWriter.close();
 
                             WebPageRenderer.getDriver().manage().window().setSize(new Dimension(10000, 10000));
-                            WebPageRenderer.getDriver().get(tmpHTML.getAbsolutePath());
+                            WebPageRenderer.getDriver().get(tmpHTML.toURI().toURL().toString());
                             byte[] imageData = WebPageRenderer.getDriver().findElement(By.className("markdown-body"))
                                     .getScreenshotAs(OutputType.BYTES);
                             TempFileSystem.unlockFileAndDelete(tmpHTML);

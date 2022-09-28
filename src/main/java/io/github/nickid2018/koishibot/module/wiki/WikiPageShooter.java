@@ -216,7 +216,7 @@ public class WikiPageShooter {
             IOUtils.write(doc.html(), writer);
         }
         WebPageRenderer.getDriver().manage().window().setSize(new Dimension(settings.width(), settings.height()));
-        WebPageRenderer.getDriver().get(html.getAbsolutePath());
+        WebPageRenderer.getDriver().get(html.toURI().toURL().toString());
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ignored) {

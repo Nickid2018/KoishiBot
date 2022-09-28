@@ -493,11 +493,10 @@ public class WikiInfo {
 
     private void makeFullPageAndInfobox(PageInfo info, boolean takeFullPage) throws IOException {
         Document document = WikiPageShooter.fetchWikiPage(info.url, additionalHeaders);
-        Elements elements = document.getElementsByClass("mw-parser-output");
-        if (elements.size() != 1)
+        Element element = document.getElementById("mw-content-text");
+        if (element == null)
             throw new IOException("非正常页面");
-        Element found = elements.get(0);
-        info.shortDescription = resolveText(found.text());
+        info.shortDescription = resolveText(element.text());
         info.infobox = takeFullPage ?
                 WikiPageShooter.getFullPageShot(info.url, baseURI, document, this) :
                 WikiPageShooter.getInfoBoxShot(info.url, baseURI, document, this);
