@@ -14,7 +14,6 @@ import java.net.PasswordAuthentication;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Properties;
 
 public class Settings {
 
@@ -51,22 +50,13 @@ public class Settings {
     }
 
     public static void loadProxy(JsonObject settingsRoot) {
-        Properties properties = System.getProperties();
-        properties.remove("http.proxyHost");
-        properties.remove("http.proxyPort");
-        properties.remove("https.proxyHost");
-        properties.remove("https.proxyPort");
-        properties.remove("http.nonProxyHosts");
-        properties.remove("https.nonProxyHosts");
-        properties.remove("socksProxyHost");
-        properties.remove("socksProxyPort");
+        System.setProperty("java.net.useSystemProxies", "true");
         Authenticator.setDefault(null);
 
         JsonUtil.getData(settingsRoot, "proxy", JsonObject.class).ifPresent(root -> {
                     String type = JsonUtil.getData(root, "type", JsonPrimitive.class)
                             .map(JsonPrimitive::getAsString)
                             .filter(s -> s.equalsIgnoreCase("http")
-                                    || s.equalsIgnoreCase("https")
                                     || s.equalsIgnoreCase("socks"))
                             .orElse("http");
 
@@ -75,16 +65,13 @@ public class Settings {
                             .filter(JsonPrimitive::isNumber)
                             .map(JsonPrimitive::getAsInt);
                     if (type.equalsIgnoreCase("http")) {
-                        properties.put("http.proxyHost", host);
-                        properties.put("http.proxyPort", port.orElse(80));
-                        properties.put("http.nonProxyHosts", "localhost");
-                    } else if (type.equalsIgnoreCase("https")) {
-                        properties.put("https.proxyHost", host);
-                        properties.put("https.proxyPort", port.orElse(443));
-                        properties.put("https.nonProxyHosts", "localhost");
+                        System.setProperty("http.proxyHost", host);
+                        System.setProperty("http.proxyPort", String.valueOf(port.orElse(7890)));
+                        PluginProcessor.LOGGER.info("Set proxy, type = http, host = {}, port = {}", host, port.orElse(7890));
                     } else {
-                        properties.put("socksProxyHost", host);
-                        properties.put("socksProxyPort", port.orElse(1080));
+                        System.setProperty("socksProxyHost", host);
+                        System.setProperty("socksProxyPort", String.valueOf(port.orElse(1080)));
+                        PluginProcessor.LOGGER.info("Set proxy, type = socks, host = {}, port = {}", host, port.orElse(1080));
                     }
 
                     JsonUtil.getDataInPath(root, "user", JsonPrimitive.class)

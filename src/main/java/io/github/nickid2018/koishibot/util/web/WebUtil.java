@@ -51,7 +51,7 @@ public class WebUtil {
 
     public static JsonElement fetchDataInJson(HttpUriRequest request, String UA, boolean check) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement()
+                .disableCookieManagement().useSystemProperties()
                 .setUserAgent(UA).build();
         CloseableHttpResponse httpResponse = null;
         String json = null;
@@ -88,7 +88,7 @@ public class WebUtil {
 
     public static void sendNeedCode(HttpUriRequest request, int code) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement()
+                .disableCookieManagement().useSystemProperties()
                 .setUserAgent(chooseRandomUA()).build();
         CloseableHttpResponse httpResponse = null;
         try {
@@ -119,7 +119,7 @@ public class WebUtil {
 
     public static String fetchDataInText(HttpUriRequest post, boolean ignoreErrorCode) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement()
+                .disableCookieManagement().useSystemProperties()
                 .setUserAgent(chooseRandomUA()).build();
         CloseableHttpResponse httpResponse = null;
         try {
@@ -143,7 +143,7 @@ public class WebUtil {
 
     public static String getRedirected(HttpUriRequest request) throws IOException {
         CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableRedirectHandling().disableCookieManagement()
+                .disableRedirectHandling().disableCookieManagement().useSystemProperties()
                 .setUserAgent(chooseRandomUA()).build();
         CloseableHttpResponse httpResponse = null;
         try {

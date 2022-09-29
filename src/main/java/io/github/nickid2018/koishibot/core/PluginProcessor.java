@@ -33,8 +33,8 @@ public class PluginProcessor {
             EXIT_PROCESS.add(TempFileSystem.class.getMethod("close"));
             EXIT_PROCESS.add(ServerManager.class.getMethod("stop"));
             EXIT_PROCESS.add(AsyncUtil.class.getMethod("terminate"));
-            SETTING_LOAD.add(Settings.class.getMethod("loadProxy", JsonObject.class));
             SETTING_LOAD.add(WebUtil.class.getMethod("loadMirror", JsonObject.class));
+            SETTING_LOAD.add(Settings.class.getMethod("loadProxy", JsonObject.class));
         } catch (NoSuchMethodException ignored) {
         }
         if (!PLUGIN_FILE.exists()) {
