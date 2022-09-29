@@ -30,8 +30,6 @@ public class WikiInfo {
     public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text";
     public static final String WIKI_RANDOM = "action=query&format=json&list=random";
 
-    public static final String EDIT_URI_STR = "<link rel=\"EditURI\" type=\"application/rsd+xml\" href=\"";
-
     public static final Pattern USER_ANONYMOUS = Pattern.compile("User:\\d{1,3}(\\.\\d{1,3}){3}");
 
     public static final Set<String> SUPPORTED_IMAGE = WebUtil.SUPPORTED_IMAGE;
@@ -126,10 +124,11 @@ public class WikiInfo {
                 object = JsonParser.parseString(data).getAsJsonObject();
             } catch (JsonSyntaxException e) {
                 // Not a valid API entrance, try to get the api.php
-                int index = data.indexOf(EDIT_URI_STR);
-                if (index < 0)
+                Document doc = Jsoup.parse(data);
+                Elements elements = doc.select("link[rel=EditURI]");
+                if (elements.size() == 0)
                     throw new IOException("无法获取信息，可能网站不是一个MediaWiki或被验证码阻止");
-                String sub = data.substring(index + EDIT_URI_STR.length());
+                String sub = elements.get(0).attr("href");
                 url= sub.substring(0, sub.indexOf("?") + 1);
                 STORED_WIKI_INFO.put(url, this);
                 data = checkAndGet(url + WIKI_META);
