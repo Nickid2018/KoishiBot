@@ -22,6 +22,10 @@ public class Settings {
     public static String LOCAL_IP;
     public static int OPEN_PORT;
 
+    public static String PROXY_HOST;
+    public static int PROXY_PORT;
+    public static String PROXY_TYPE;
+
     public static void load() throws IOException {
         String data = IOUtils.toString(new FileReader("botKoishi.json"));
         JsonObject settingsRoot = JsonParser.parseString(data).getAsJsonObject();
@@ -52,7 +56,9 @@ public class Settings {
     public static void loadProxy(JsonObject settingsRoot) {
         System.setProperty("java.net.useSystemProxies", "true");
         Authenticator.setDefault(null);
-
+        PROXY_PORT = -1;
+        PROXY_HOST = null;
+        PROXY_TYPE = null;
         JsonUtil.getData(settingsRoot, "proxy", JsonObject.class).ifPresent(root -> {
                     String type = JsonUtil.getData(root, "type", JsonPrimitive.class)
                             .map(JsonPrimitive::getAsString)
@@ -64,13 +70,15 @@ public class Settings {
                     Optional<Integer> port = JsonUtil.getDataInPath(root, "port", JsonPrimitive.class)
                             .filter(JsonPrimitive::isNumber)
                             .map(JsonPrimitive::getAsInt);
+
+                    PROXY_TYPE = type;
                     if (type.equalsIgnoreCase("http")) {
-                        System.setProperty("http.proxyHost", host);
-                        System.setProperty("http.proxyPort", String.valueOf(port.orElse(7890)));
+                        System.setProperty("http.proxyHost", PROXY_HOST = host);
+                        System.setProperty("http.proxyPort", String.valueOf(PROXY_PORT = port.orElse(7890)));
                         PluginProcessor.LOGGER.info("Set proxy, type = http, host = {}, port = {}", host, port.orElse(7890));
                     } else {
-                        System.setProperty("socksProxyHost", host);
-                        System.setProperty("socksProxyPort", String.valueOf(port.orElse(1080)));
+                        System.setProperty("socksProxyHost", PROXY_HOST = host);
+                        System.setProperty("socksProxyPort", String.valueOf(PROXY_PORT = port.orElse(1080)));
                         PluginProcessor.LOGGER.info("Set proxy, type = socks, host = {}, port = {}", host, port.orElse(1080));
                     }
 

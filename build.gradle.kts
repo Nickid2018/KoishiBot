@@ -13,6 +13,9 @@ dependencies {
     // KOOK Backend
     api("com.github.KookyBot:KookyBot:0.2.4")
 
+    // Telegram Backend
+    api("org.telegram:telegrambots:6.1.0")
+
     // Logging
     api("org.apache.logging.log4j:log4j-api:2.19.0")
     api("org.apache.logging.log4j:log4j-core:2.19.0")

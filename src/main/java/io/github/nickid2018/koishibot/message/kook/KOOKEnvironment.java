@@ -126,7 +126,7 @@ public class KOOKEnvironment implements Environment {
 
     @Override
     public boolean quoteSupported() {
-        return false;
+        return true;
     }
 
     @Override

@@ -21,5 +21,6 @@
 			<AppenderRef ref="SysOut"/>
 			<AppenderRef ref="File"/>
 		</Root>
+		<logger name="org.telegram.telegrambots.updatesreceivers.DefaultBotSession" level="FATAL"/>
 	</Loggers>
 </Configuration>

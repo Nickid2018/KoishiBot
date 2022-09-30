@@ -71,7 +71,6 @@ public class WebUtil {
                 }
                 HttpEntity httpEntity = response.getEntity();
                 String json = EntityUtils.toString(httpEntity, "UTF-8");
-                EntityUtils.consume(httpEntity);
                 try {
                     return JsonParser.parseString(json);
                 } catch (JsonSyntaxException jse) {

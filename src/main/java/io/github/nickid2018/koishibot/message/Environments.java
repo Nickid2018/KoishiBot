@@ -6,17 +6,18 @@ import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.message.kook.KOOKEnvironment;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
+import io.github.nickid2018.koishibot.message.telegram.TelegramEnvironment;
+import io.github.nickid2018.koishibot.util.func.FunctionE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class Environments {
 
     public static final Logger ENVIRONMENT_LOGGER = LoggerFactory.getLogger("Environment");
 
-    public static final Map<String, Function<BotLoginData, ? extends Environment>> ENVIRONMENT_PROVIDER = new HashMap<>();
+    public static final Map<String, FunctionE<BotLoginData, ? extends Environment>> ENVIRONMENT_PROVIDER = new HashMap<>();
     private static final Map<String, Environment> ENVIRONMENT_MAP = new HashMap<>();
 
     public static void putEnvironment(String id, Environment environment) {
@@ -41,8 +42,12 @@ public class Environments {
         for (Map.Entry<String, BotLoginData> loginDataEntry : loginDataMap.entrySet()) {
             String backend = loginDataEntry.getKey();
             if (ENVIRONMENT_PROVIDER.containsKey(backend)) {
-                ENVIRONMENT_MAP.put(backend, ENVIRONMENT_PROVIDER.get(backend).apply(loginDataEntry.getValue()));
-                ENVIRONMENT_LOGGER.info("Successfully load environment {}.", backend);
+                try {
+                    ENVIRONMENT_MAP.put(backend, ENVIRONMENT_PROVIDER.get(backend).apply(loginDataEntry.getValue()));
+                    ENVIRONMENT_LOGGER.info("Successfully load environment {}.", backend);
+                } catch (Exception e) {
+                    ENVIRONMENT_LOGGER.error("Failed to load environment " + backend, e);
+                }
             } else
                 ENVIRONMENT_LOGGER.error("Backend Environment \"{}\" not found.", backend);
         }
@@ -61,5 +66,6 @@ public class Environments {
     static {
         ENVIRONMENT_PROVIDER.put("qq", QQEnvironment::new);
         ENVIRONMENT_PROVIDER.put("kook", KOOKEnvironment::new);
+        ENVIRONMENT_PROVIDER.put("telegram", TelegramEnvironment::new);
     }
 }
