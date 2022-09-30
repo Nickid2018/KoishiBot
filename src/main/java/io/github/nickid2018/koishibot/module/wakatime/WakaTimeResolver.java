@@ -13,7 +13,7 @@ import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.web.OAuth2Authenticator;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 
 import java.util.HashMap;
 import java.util.List;

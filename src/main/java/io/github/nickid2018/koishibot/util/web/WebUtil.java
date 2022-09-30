@@ -5,21 +5,25 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
 
 public class WebUtil {
 
@@ -57,9 +61,9 @@ public class WebUtil {
         String json = null;
         try {
             httpResponse = httpClient.execute(request);
-            int status = httpResponse.getStatusLine().getStatusCode();
+            int status = httpResponse.getCode();
             if (status / 100 != 2) {
-                WEB_LOGGER.debug("Incorrect return code in requesting {}: {}", request.getURI(), status);
+                WEB_LOGGER.debug("Incorrect return code in requesting {}: {}", request.getRequestUri(), status);
                 throw new ErrorCodeException(status);
             }
             if (check) {
@@ -74,8 +78,10 @@ public class WebUtil {
             return JsonParser.parseString(json);
         } catch (JsonSyntaxException jse) {
             if (json != null)
-                WEB_LOGGER.debug("Incorrect JSON data in requesting {}: {}", request.getURI(), json);
+                WEB_LOGGER.debug("Incorrect JSON data in requesting {}: {}", request.getRequestUri(), json);
             throw jse;
+        } catch (ParseException pe) {
+            throw new IOException(pe);
         } finally {
             try {
                 if (httpResponse != null)
@@ -93,10 +99,10 @@ public class WebUtil {
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(request);
-            int status = httpResponse.getStatusLine().getStatusCode();
+            int status = httpResponse.getCode();
             if (status != code) {
                 WEB_LOGGER.debug("Incorrect return code in requesting {}: {}, required {}.",
-                        request.getURI(), status, code);
+                        request.getRequestUri(), status, code);
                 throw new ErrorCodeException(status);
             }
         } finally {
@@ -124,13 +130,15 @@ public class WebUtil {
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(post);
-            int status = httpResponse.getStatusLine().getStatusCode();
+            int status = httpResponse.getCode();
             if (status / 100 != 2 && !ignoreErrorCode)
                 throw new ErrorCodeException(status);
             HttpEntity httpEntity = httpResponse.getEntity();
             String text = EntityUtils.toString(httpEntity, "UTF-8");
             EntityUtils.consume(httpEntity);
             return text;
+        } catch (ParseException pe) {
+            throw new IOException(pe);
         } finally {
             try {
                 if (httpResponse != null)
@@ -148,7 +156,7 @@ public class WebUtil {
         CloseableHttpResponse httpResponse = null;
         try {
             httpResponse = httpClient.execute(request);
-            if (httpResponse.getStatusLine().getStatusCode() != 302)
+            if (httpResponse.getCode() != 302)
                 return null;
             return httpResponse.getHeaders("location")[0].getValue();
         } finally {

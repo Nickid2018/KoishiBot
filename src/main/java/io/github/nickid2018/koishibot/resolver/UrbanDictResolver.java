@@ -9,7 +9,7 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 
 @ResolverName("urban")
 @Syntax(syntax = "~urban [查询词语]", help = "使用Urban Dictionary查询词语")

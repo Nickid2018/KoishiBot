@@ -8,7 +8,7 @@ import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.MessageUtil;
 import io.github.nickid2018.koishibot.util.web.OAuth2Authenticator;
-import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 
 import java.io.IOException;
 import java.util.List;

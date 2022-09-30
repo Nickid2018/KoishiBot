@@ -18,10 +18,11 @@ import io.github.nickid2018.koishibot.util.GroupDataReader;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,9 +80,7 @@ public class GitHubWebHookListener implements HttpHandler {
         object.add("config", config);
         String data = object.toString();
         HttpPost post = new HttpPost(GitHubModule.GITHUB_API + "/repos/" + repo + "/hooks");
-        StringEntity entity = new StringEntity(data, StandardCharsets.UTF_8);
-        entity.setContentEncoding("UTF-8");
-        entity.setContentType("application/json");
+        StringEntity entity = new StringEntity(data, ContentType.APPLICATION_JSON);
         post.setEntity(entity);
         JsonObject json = WebUtil.fetchDataInJson(GitHubModule.INSTANCE.getAuthenticator().acceptGitHubJSON(post, token)).getAsJsonObject();
         int id = JsonUtil.getIntOrZero(json, "id");

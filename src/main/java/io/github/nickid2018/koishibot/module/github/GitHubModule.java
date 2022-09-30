@@ -4,11 +4,11 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.module.Module;
 import io.github.nickid2018.koishibot.util.DataReader;
-import io.github.nickid2018.koishibot.util.web.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.GroupDataReader;
-import io.github.nickid2018.koishibot.util.web.WebUtil;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
-import org.apache.http.client.methods.HttpGet;
+import io.github.nickid2018.koishibot.util.web.ErrorCodeException;
+import io.github.nickid2018.koishibot.util.web.WebUtil;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

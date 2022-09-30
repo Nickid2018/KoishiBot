@@ -1,9 +1,12 @@
 package io.github.nickid2018.koishibot.module.wiki;
 
 import com.google.gson.*;
-import io.github.nickid2018.koishibot.util.*;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
+import io.github.nickid2018.koishibot.util.ImageRenderer;
+import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -495,6 +498,9 @@ public class WikiInfo {
         Element element = document.getElementById("mw-content-text");
         if (element == null)
             throw new IOException("非正常页面");
+        element = element.clone();
+        if (element.child(0).hasClass("t-navbar"))
+            element.child(0).remove();
         info.shortDescription = resolveText(element.text());
         info.infobox = takeFullPage ?
                 WikiPageShooter.getFullPageShot(info.url, baseURI, document, this) :
