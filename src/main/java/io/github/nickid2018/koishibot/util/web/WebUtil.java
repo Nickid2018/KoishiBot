@@ -7,12 +7,10 @@ import com.google.gson.JsonSyntaxException;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.Header;
 import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,73 +43,61 @@ public class WebUtil {
         return VIEWER_USER_AGENTS[UA_RANDOM.nextInt(VIEWER_USER_AGENTS.length)];
     }
 
-    public static JsonElement fetchDataInJson(HttpUriRequest post) throws IOException {
-        return fetchDataInJson(post, chooseRandomUA());
+    public static JsonElement fetchDataInJson(HttpUriRequest request) throws IOException {
+        return fetchDataInJson(request, chooseRandomUA());
     }
 
-    public static JsonElement fetchDataInJson(HttpUriRequest post, String UA) throws IOException {
-        return fetchDataInJson(post, UA, true);
+    public static JsonElement fetchDataInJson(HttpUriRequest request, String UA) throws IOException {
+        return fetchDataInJson(request, UA, true);
     }
 
     public static JsonElement fetchDataInJson(HttpUriRequest request, String UA, boolean check) throws IOException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement().useSystemProperties()
-                .setUserAgent(UA).build();
-        CloseableHttpResponse httpResponse = null;
-        String json = null;
-        try {
-            httpResponse = httpClient.execute(request);
-            int status = httpResponse.getCode();
-            if (status / 100 != 2) {
-                WEB_LOGGER.debug("Incorrect return code in requesting {}: {}", request.getRequestUri(), status);
-                throw new ErrorCodeException(status);
-            }
-            if (check) {
-                Header[] headers = httpResponse.getHeaders("Content-Type");
-                if (headers.length > 0 && headers[0] != null && !headers[0].getValue()
-                        .startsWith(ContentType.APPLICATION_JSON.getMimeType()))
-                    throw new IOException("Return a non-JSON Content.");
-            }
-            HttpEntity httpEntity = httpResponse.getEntity();
-            json = EntityUtils.toString(httpEntity, "UTF-8");
-            EntityUtils.consume(httpEntity);
-            return JsonParser.parseString(json);
-        } catch (JsonSyntaxException jse) {
-            if (json != null)
-                WEB_LOGGER.debug("Incorrect JSON data in requesting {}: {}", request.getRequestUri(), json);
-            throw jse;
-        } catch (ParseException pe) {
-            throw new IOException(pe);
-        } finally {
-            try {
-                if (httpResponse != null)
-                    httpResponse.close();
-            } catch (IOException e) {
-                WEB_LOGGER.error("## release resource error ##" + e);
-            }
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableCookieManagement()
+                .useSystemProperties()
+                .setUserAgent(UA)
+                .build()) {
+            return httpClient.execute(request, response -> {
+                int status = response.getCode();
+                if (status / 100 != 2) {
+                    WEB_LOGGER.debug("Incorrect return code in requesting {}: {}", request.getRequestUri(), status);
+                    throw new ErrorCodeException(status);
+                }
+                if (check) {
+                    Header[] headers = response.getHeaders("Content-Type");
+                    if (headers.length > 0 && headers[0] != null && !headers[0].getValue()
+                            .startsWith(ContentType.APPLICATION_JSON.getMimeType()))
+                        throw new IOException("Return a non-JSON Content.");
+                }
+                HttpEntity httpEntity = response.getEntity();
+                String json = EntityUtils.toString(httpEntity, "UTF-8");
+                EntityUtils.consume(httpEntity);
+                try {
+                    return JsonParser.parseString(json);
+                } catch (JsonSyntaxException jse) {
+                    if (json != null)
+                        WEB_LOGGER.debug("Incorrect JSON data in requesting {}: {}", request.getRequestUri(), json);
+                    throw jse;
+                }
+            });
         }
     }
 
     public static void sendNeedCode(HttpUriRequest request, int code) throws IOException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement().useSystemProperties()
-                .setUserAgent(chooseRandomUA()).build();
-        CloseableHttpResponse httpResponse = null;
-        try {
-            httpResponse = httpClient.execute(request);
-            int status = httpResponse.getCode();
-            if (status != code) {
-                WEB_LOGGER.debug("Incorrect return code in requesting {}: {}, required {}.",
-                        request.getRequestUri(), status, code);
-                throw new ErrorCodeException(status);
-            }
-        } finally {
-            try {
-                if (httpResponse != null)
-                    httpResponse.close();
-            } catch (IOException e) {
-                WEB_LOGGER.error("## release resource error ##" + e);
-            }
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableCookieManagement()
+                .useSystemProperties()
+                .setUserAgent(chooseRandomUA())
+                .build()) {
+            httpClient.execute(request, httpResponse -> {
+                int status = httpResponse.getCode();
+                if (status != code) {
+                    WEB_LOGGER.debug("Incorrect return code in requesting {}: {}, required {}.",
+                            request.getRequestUri(), status, code);
+                    throw new ErrorCodeException(status);
+                }
+                return null;
+            });
         }
     }
 
@@ -119,53 +105,37 @@ public class WebUtil {
         sendNeedCode(request, 204);
     }
 
-    public static String fetchDataInText(HttpUriRequest post) throws IOException {
-        return fetchDataInText(post, false);
+    public static String fetchDataInText(HttpUriRequest request) throws IOException {
+        return fetchDataInText(request, false);
     }
 
-    public static String fetchDataInText(HttpUriRequest post, boolean ignoreErrorCode) throws IOException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableCookieManagement().useSystemProperties()
-                .setUserAgent(chooseRandomUA()).build();
-        CloseableHttpResponse httpResponse = null;
-        try {
-            httpResponse = httpClient.execute(post);
-            int status = httpResponse.getCode();
-            if (status / 100 != 2 && !ignoreErrorCode)
-                throw new ErrorCodeException(status);
-            HttpEntity httpEntity = httpResponse.getEntity();
-            String text = EntityUtils.toString(httpEntity, "UTF-8");
-            EntityUtils.consume(httpEntity);
-            return text;
-        } catch (ParseException pe) {
-            throw new IOException(pe);
-        } finally {
-            try {
-                if (httpResponse != null)
-                    httpResponse.close();
-            } catch (IOException e) {
-                WEB_LOGGER.error("## release resource error ##" + e);
-            }
+    public static String fetchDataInText(HttpUriRequest request, boolean ignoreErrorCode) throws IOException {
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableCookieManagement()
+                .useSystemProperties()
+                .setUserAgent(chooseRandomUA())
+                .build()) {
+            return httpClient.execute(request, httpResponse -> {
+                int status = httpResponse.getCode();
+                if (status / 100 != 2 && !ignoreErrorCode)
+                    throw new ErrorCodeException(status);
+                return EntityUtils.toString(httpResponse.getEntity(), "UTF-8");
+            });
         }
     }
 
     public static String getRedirected(HttpUriRequest request) throws IOException {
-        CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .disableRedirectHandling().disableCookieManagement().useSystemProperties()
-                .setUserAgent(chooseRandomUA()).build();
-        CloseableHttpResponse httpResponse = null;
-        try {
-            httpResponse = httpClient.execute(request);
-            if (httpResponse.getCode() != 302)
-                return null;
-            return httpResponse.getHeaders("location")[0].getValue();
-        } finally {
-            try {
-                if (httpResponse != null)
-                    httpResponse.close();
-            } catch (IOException e) {
-                WEB_LOGGER.error("## release resource error ##" + e);
-            }
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableRedirectHandling()
+                .disableCookieManagement()
+                .useSystemProperties()
+                .setUserAgent(chooseRandomUA())
+                .build()) {
+            return httpClient.execute(request, httpResponse -> {
+                if (httpResponse.getCode() != 302)
+                    return null;
+                return httpResponse.getHeaders("location")[0].getValue();
+            });
         }
     }
 
