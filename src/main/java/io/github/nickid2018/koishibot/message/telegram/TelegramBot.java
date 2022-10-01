@@ -1,20 +1,36 @@
 package io.github.nickid2018.koishibot.message.telegram;
 
+import io.github.nickid2018.koishibot.message.api.ChainMessage;
+import io.github.nickid2018.koishibot.message.api.GroupInfo;
+import io.github.nickid2018.koishibot.message.api.MessageEventPublisher;
+import io.github.nickid2018.koishibot.message.api.UserInfo;
+import kotlin.Pair;
+import kotlin.Triple;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-public class TelegramBot extends TelegramLongPollingBot {
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
+public class TelegramBot extends TelegramLongPollingBot implements MessageEventPublisher {
+
+    private final TelegramEnvironment environment;
 
     private final String userName;
     private final String token;
 
-    public TelegramBot(String userName, String token, DefaultBotOptions options) {
+    private BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> groupMessageConsumer;
+    private BiConsumer<Pair<UserInfo, ChainMessage>, Long> friendMessageConsumer;
+    private BiConsumer<GroupInfo, UserInfo> groupMemberJoinConsumer;
+    private BiConsumer<UserInfo, Long> friendRecallConsumer;
+
+
+    public TelegramBot(String userName, String token, DefaultBotOptions options, TelegramEnvironment environment) {
         super(options);
         this.userName = userName;
         this.token = token;
+        this.environment = environment;
     }
 
     @Override
@@ -29,16 +45,55 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.hasMessage() && update.getMessage().hasText()) {
-            SendMessage message = new SendMessage(); // Create a SendMessage object with mandatory fields
-            message.setChatId(update.getMessage().getChatId().toString());
-            message.setText(update.getMessage().getText());
+        if (update.hasChatJoinRequest()) {
+            if (groupMemberJoinConsumer != null) {
+                groupMemberJoinConsumer.accept(
+                        new TelegramGroup(environment, update.getChatJoinRequest().getChat()),
+                        new TelegramUser(environment, update.getChatJoinRequest().getUser())
+                );
+            }
+        } else if (update.hasMessage()) {
+            if (update.getMessage().isGroupMessage()
+                    || update.getMessage().isSuperGroupMessage()
+                    || update.getMessage().isChannelMessage()) {
+                if (groupMessageConsumer != null) {
 
-            try {
-                execute(message); // Call method to send the message
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
+                }
             }
         }
+    }
+
+    @Override
+    public void subscribeGroupMessage(BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> consumer) {
+        groupMessageConsumer = consumer;
+    }
+
+    @Override
+    public void subscribeFriendMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer) {
+        friendMessageConsumer = consumer;
+    }
+
+    @Override
+    public void subscribeGroupTempMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer) {
+        // Unsupported
+    }
+
+    @Override
+    public void subscribeStrangerMessage(BiConsumer<Pair<UserInfo, ChainMessage>, Long> consumer) {
+        // Unsupported
+    }
+
+    @Override
+    public void subscribeNewMemberAdd(BiConsumer<GroupInfo, UserInfo> consumer) {
+        groupMemberJoinConsumer = consumer;
+    }
+
+    @Override
+    public void subscribeGroupRecall(Consumer<Triple<GroupInfo, UserInfo, Long>> consumer) {
+    }
+
+    @Override
+    public void subscribeFriendRecall(BiConsumer<UserInfo, Long> consumer) {
+        friendRecallConsumer = consumer;
     }
 }

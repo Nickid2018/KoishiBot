@@ -5,8 +5,10 @@ import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.MessageSender;
 import io.github.nickid2018.koishibot.message.api.*;
+import org.apache.http.client.config.RequestConfig;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
@@ -14,18 +16,27 @@ public class TelegramEnvironment implements Environment {
 
     private final DefaultBotSession session;
     private final TelegramBot bot;
+    private final TelegramUser me;
 
     public TelegramEnvironment(BotLoginData data) throws TelegramApiException {
         DefaultBotOptions botOptions = new DefaultBotOptions();
+        RequestConfig.Builder builder = RequestConfig.custom();
+        builder.setConnectTimeout(10000);
+        builder.setConnectionRequestTimeout(10000);
+        builder.setSocketTimeout(10000);
+        builder.setCircularRedirectsAllowed(false);
+        builder.setContentCompressionEnabled(true);
+        botOptions.setRequestConfig(builder.build());
         if (Settings.PROXY_TYPE == null) {
             botOptions.setProxyHost(Settings.PROXY_HOST);
             botOptions.setProxyPort(Settings.PROXY_PORT);
             botOptions.setProxyType(Settings.PROXY_TYPE.equals("http") ?
                     DefaultBotOptions.ProxyType.HTTP :DefaultBotOptions.ProxyType.SOCKS5);
         }
-        bot = new TelegramBot(data.uid(), data.token(), botOptions);
+        bot = new TelegramBot(data.uid(), data.token(), botOptions, this);
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         session = (DefaultBotSession) botsApi.registerBot(bot);
+        me = new TelegramUser(this, bot.getMe());
     }
 
     @Override
@@ -75,23 +86,31 @@ public class TelegramEnvironment implements Environment {
 
     @Override
     public UserInfo getUser(String id, boolean isStranger) {
-
-        return null;
+        // Because API doesn't support getting user info, so we can only get the user info from the message.
+        return me;
     }
 
     @Override
     public GroupInfo getGroup(String id) {
-        return null;
+        if (!id.startsWith("tg.group"))
+            return null;
+        GetChat chat = new GetChat();
+        chat.setChatId(id.substring(8));
+        try {
+            return new TelegramGroup(this, bot.execute(chat));
+        } catch (TelegramApiException e) {
+            return null;
+        }
     }
 
     @Override
     public String getBotId() {
-        return null;
+        return me.getUserId();
     }
 
     @Override
     public MessageEventPublisher getEvents() {
-        return null;
+        return bot;
     }
 
     @Override
@@ -106,7 +125,7 @@ public class TelegramEnvironment implements Environment {
 
     @Override
     public boolean forwardMessageSupported() {
-        return false;
+        return true;
     }
 
     @Override
@@ -116,7 +135,7 @@ public class TelegramEnvironment implements Environment {
 
     @Override
     public boolean quoteSupported() {
-        return false;
+        return true;
     }
 
     @Override

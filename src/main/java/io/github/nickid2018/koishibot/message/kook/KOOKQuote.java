@@ -36,8 +36,7 @@ public class KOOKQuote implements QuoteMessage {
 
     @Override
     public MessageFrom getSource() {
-        // Unsupported, single quote cannot be sent
-        return null;
+        return message.getSource();
     }
 
     @Override
