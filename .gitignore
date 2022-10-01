@@ -131,3 +131,4 @@ src/test/kotlin/RunTerminal.kt
 /debug-sandbox
 
 test/
+logs/
