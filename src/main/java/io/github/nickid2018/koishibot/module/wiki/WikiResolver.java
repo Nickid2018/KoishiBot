@@ -7,6 +7,7 @@ import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
+import io.github.nickid2018.koishibot.util.FormatTransformer;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 
 import java.io.File;
@@ -56,7 +57,7 @@ public class WikiResolver extends MessageResolver {
     private static void requestWikiPage(
             WikiInfo wiki, String namespace, String title, MessageContext context, String searchTitle, Environment environment)
             throws Exception {
-        PageInfo page = wiki.parsePageInfo(title, 0, namespace, environment.audioSupported());
+        PageInfo page = wiki.parsePageInfo(title, 0, namespace, environment);
         StringBuilder data = new StringBuilder();
         if (page.isSearched) {
             if (page.title != null) {
@@ -158,7 +159,7 @@ public class WikiResolver extends MessageResolver {
                     try {
                         File[] audios = page.audioFiles.get();
                         for (File file : audios) {
-                            Thread.sleep((FormatTransformer.VOICE_TRANSFORM_MAX_LENGTH + 10) * 1000);
+                            Thread.sleep((FormatTransformer.QQ_VOICE_TRANSFORM_MAX_LENGTH + 10) * 1000);
                             environment.getMessageSender().sendMessage(
                                     context, environment.newAudio(context.group(), new FileInputStream(file)));
                         }

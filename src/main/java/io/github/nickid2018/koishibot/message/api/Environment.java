@@ -5,8 +5,11 @@ import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.MessageSender;
 import io.github.nickid2018.koishibot.util.value.Either;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.util.concurrent.Future;
 
 public interface Environment {
 
@@ -49,6 +52,8 @@ public interface Environment {
     String getEnvironmentName();
 
     String getEnvironmentUserPrefix();
+
+    Future<File[]> parseAudioFile(String suffix, URL url) throws IOException;
 
     void close();
 

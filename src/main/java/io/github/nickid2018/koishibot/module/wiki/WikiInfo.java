@@ -1,10 +1,8 @@
 package io.github.nickid2018.koishibot.module.wiki;
 
 import com.google.gson.*;
-import io.github.nickid2018.koishibot.util.AsyncUtil;
-import io.github.nickid2018.koishibot.util.ImageRenderer;
-import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.RegexUtil;
+import io.github.nickid2018.koishibot.message.api.Environment;
+import io.github.nickid2018.koishibot.util.*;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.jsoup.Jsoup;
@@ -181,7 +179,7 @@ public class WikiInfo {
         }
     }
 
-    public PageInfo parsePageInfo(String title, int pageID, String prefix, boolean allowAudio) throws Exception {
+    public PageInfo parsePageInfo(String title, int pageID, String prefix, Environment environment) throws Exception {
         if (title != null && title.isEmpty())
             throw new IOException("无效的wiki查询");
 
@@ -213,16 +211,16 @@ public class WikiInfo {
             if (interWikiMap.containsKey(namespace)) {
                 WikiInfo skip = STORED_WIKI_INFO.get(interWikiMap.get(namespace));
                 return skip.parsePageInfo(title.split(":", 2)[1], 0,
-                        (prefix == null ? "" : prefix + ":") + namespace, allowAudio);
+                        (prefix == null ? "" : prefix + ":") + namespace, environment);
             }
         }
 
         if (title != null && title.equalsIgnoreCase("~rd"))
-            return random(prefix, allowAudio);
+            return random(prefix, environment);
         if (title != null && title.equalsIgnoreCase("~iw"))
             return interwikiList();
         if (title != null && title.toLowerCase(Locale.ROOT).startsWith("~page"))
-            return parsePageInfo(null, Integer.parseInt(title.split(" ", 2)[1]), prefix, allowAudio);
+            return parsePageInfo(null, Integer.parseInt(title.split(" ", 2)[1]), prefix, environment);
         if (title != null && title.toLowerCase(Locale.ROOT).startsWith("~search")) {
             String[] split = title.split(" ", 2);
             if (split.length == 2)
@@ -317,10 +315,9 @@ public class WikiInfo {
                     else if (NEED_TRANSFORM_IMAGE.contains(suffix))
                         pageInfo.imageStream = FormatTransformer.transformImageToPNG(link.openStream(), suffix);
                     else if (NEED_TRANSFORM_AUDIO.contains(suffix)) {
-                        if (allowAudio) {
+                        if (environment.audioSupported()) {
                             pageInfo.shortDescription = "音频信息，将分割后发送";
-                            pageInfo.audioFiles = AsyncUtil.submit(() -> FormatTransformer.transformWebAudioToSilks(
-                                    suffix, link));
+                            pageInfo.audioFiles = environment.parseAudioFile(suffix, link);
                         } else
                             pageInfo.shortDescription = "音频信息，但平台不支持音频发送";
                     }
@@ -334,10 +331,10 @@ public class WikiInfo {
         return pageInfo;
     }
 
-    private PageInfo random(String prefix, boolean allowAudio) throws Exception {
+    private PageInfo random(String prefix, Environment environment) throws Exception {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_RANDOM)).getAsJsonObject();
         PageInfo info =  parsePageInfo(Objects.requireNonNull(
-                JsonUtil.getStringInPathOrNull(data, "query.random.0.title")), 0, prefix, allowAudio);
+                JsonUtil.getStringInPathOrNull(data, "query.random.0.title")), 0, prefix, environment);
         info.isRandom = true;
         return info;
     }

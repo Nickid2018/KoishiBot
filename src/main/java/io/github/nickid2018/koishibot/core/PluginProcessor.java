@@ -3,7 +3,7 @@ package io.github.nickid2018.koishibot.core;
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.filter.SensitiveWordFilter;
 import io.github.nickid2018.koishibot.module.ModuleManager;
-import io.github.nickid2018.koishibot.module.wiki.FormatTransformer;
+import io.github.nickid2018.koishibot.util.FormatTransformer;
 import io.github.nickid2018.koishibot.permission.PermissionManager;
 import io.github.nickid2018.koishibot.server.ServerManager;
 import io.github.nickid2018.koishibot.util.AsyncUtil;

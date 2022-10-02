@@ -50,4 +50,8 @@ public class TelegramUser implements UserInfo {
     public String getNameInGroup(GroupInfo group) {
         return getName();
     }
+
+    public User getUser() {
+        return user;
+    }
 }

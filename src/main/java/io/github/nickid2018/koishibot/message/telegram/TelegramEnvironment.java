@@ -5,14 +5,24 @@ import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.MessageSender;
 import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
+import io.github.nickid2018.koishibot.util.FormatTransformer;
 import org.apache.http.client.config.RequestConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChat;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+import java.io.File;
+import java.net.URL;
+import java.util.concurrent.Future;
+
 public class TelegramEnvironment implements Environment {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("Telegram Environment");
 
     private final DefaultBotSession session;
     private final TelegramBot bot;
@@ -146,6 +156,11 @@ public class TelegramEnvironment implements Environment {
     @Override
     public String getEnvironmentUserPrefix() {
         return "tg.user";
+    }
+
+    @Override
+    public Future<File[]> parseAudioFile(String suffix, URL url) {
+        return AsyncUtil.submit(() -> FormatTransformer.transformWebAudioToMP3(suffix, url));
     }
 
     public TelegramBot getBot() {

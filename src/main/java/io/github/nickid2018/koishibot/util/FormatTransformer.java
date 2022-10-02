@@ -1,8 +1,7 @@
-package io.github.nickid2018.koishibot.module.wiki;
+package io.github.nickid2018.koishibot.util;
 
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
-import io.github.nickid2018.koishibot.util.JsonUtil;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -19,7 +18,8 @@ public class FormatTransformer {
 
     public static final Logger TRANSFORMER_LOGGER = LoggerFactory.getLogger("Format Transformer");
 
-    public static final int VOICE_TRANSFORM_MAX_LENGTH = 110;
+    public static final int QQ_VOICE_TRANSFORM_MAX_LENGTH = 110;
+    public static final int TELEGRAM_VOICE_MAX_SIZE = 50 * 1024 * 1024;
 
     public static String FFMPEG_LOCATION;
     public static String ENCODER_LOCATION;
@@ -37,6 +37,36 @@ public class FormatTransformer {
         File sourceFile = TempFileSystem.createTmpFileAndCreate("as", suffix);
         IOUtils.copy(source, sourceFile);
         return transformAsSilk(sourceFile);
+    }
+
+    public static File[] transformWebAudioToMP3(String suffix, URL source) throws Exception {
+        if (FFMPEG_LOCATION == null)
+            return null;
+        File sourceFile = TempFileSystem.createTmpFileAndCreate("as", suffix);
+        IOUtils.copy(source, sourceFile);
+        int length = getAudioLength(sourceFile);
+        int offset = 0;
+        TRANSFORMER_LOGGER.info("Start transforming {} to mp3 files, length = {}s.", sourceFile, length);
+        File mp3 = TempFileSystem.createTmpFile("out", "mp3");
+        executeCommand(null, FFMPEG_LOCATION, "-i", sourceFile.getAbsolutePath(), mp3.getAbsolutePath());
+        TempFileSystem.unlockFileAndDelete(sourceFile);
+        if (mp3.length() > TELEGRAM_VOICE_MAX_SIZE) {
+            int count = (int) Math.ceil((double) mp3.length() / TELEGRAM_VOICE_MAX_SIZE);
+            int audioLength = (int) Math.ceil((double)length / count);
+            List<File> files = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                File file = TempFileSystem.createTmpFile("out", "mp3");
+                executeCommand(null, FFMPEG_LOCATION,
+                        "-i", sourceFile.getAbsolutePath(),
+                        "-ss", String.valueOf(offset),
+                        "-t", String.valueOf(audioLength),
+                        "-y", file.getAbsolutePath());
+                files.add(file);
+                offset += audioLength;
+            }
+            TempFileSystem.unlockFileAndDelete(mp3);
+            return files.toArray(new File[0]);
+        } else return new File[]{mp3};
     }
 
     public static int getAudioLength(File source) throws Exception {
@@ -57,20 +87,30 @@ public class FormatTransformer {
         int length = getAudioLength(sourceFile);
         int offset = 0;
         TRANSFORMER_LOGGER.info("Start transforming {} to silk files, length = {}s.", sourceFile, length);
-        while (length > VOICE_TRANSFORM_MAX_LENGTH) {
+        while (length > QQ_VOICE_TRANSFORM_MAX_LENGTH) {
             File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
-            executeCommand(null, FFMPEG_LOCATION, "-i",
-                    sourceFile.getAbsolutePath(), "-ss", offset + "", "-t", VOICE_TRANSFORM_MAX_LENGTH + "",
-                    "-f", "s16le", "-ar", "24000", "-ac", "1",
-                    "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
+            executeCommand(null, FFMPEG_LOCATION,
+                    "-i", sourceFile.getAbsolutePath(),
+                    "-ss", String.valueOf(offset),
+                    "-t", String.valueOf(QQ_VOICE_TRANSFORM_MAX_LENGTH),
+                    "-f", "s16le",
+                    "-ar", "24000",
+                    "-ac", "1",
+                    "-acodec", "pcm_s16le",
+                    "-y", pcm.getAbsolutePath());
             silks.add(transformPCMtoSILK(pcm));
-            offset += VOICE_TRANSFORM_MAX_LENGTH;
-            length -= VOICE_TRANSFORM_MAX_LENGTH;
+            offset += QQ_VOICE_TRANSFORM_MAX_LENGTH;
+            length -= QQ_VOICE_TRANSFORM_MAX_LENGTH;
         }
         File pcm = TempFileSystem.createTmpFile("tmp", "pcm");
-        executeCommand(null, FFMPEG_LOCATION, "-i",
-                sourceFile.getAbsolutePath(), "-ss", offset + "", "-f", "s16le", "-ar", "24000", "-ac", "1",
-                "-acodec", "pcm_s16le", "-y", pcm.getAbsolutePath());
+        executeCommand(null, FFMPEG_LOCATION,
+                "-i", sourceFile.getAbsolutePath(),
+                "-ss", String.valueOf(offset),
+                "-f", "s16le",
+                "-ar", "24000",
+                "-ac", "1",
+                "-acodec", "pcm_s16le",
+                "-y", pcm.getAbsolutePath());
         silks.add(transformPCMtoSILK(pcm));
         TempFileSystem.unlockFileAndDelete(sourceFile);
         TRANSFORMER_LOGGER.info("Transformed {} to silk files.", sourceFile);

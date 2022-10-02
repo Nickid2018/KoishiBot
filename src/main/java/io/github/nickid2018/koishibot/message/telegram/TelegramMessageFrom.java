@@ -7,10 +7,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class TelegramMessageFrom implements MessageFrom {
 
     private final TelegramEnvironment environment;
-    private final String chatID;
+    private final long chatID;
     private final int msgID;
 
-    public TelegramMessageFrom(TelegramEnvironment environment, String chatID, int msgID) {
+    public TelegramMessageFrom(TelegramEnvironment environment, long chatID, int msgID) {
         this.environment = environment;
         this.chatID = chatID;
         this.msgID = msgID;
@@ -28,7 +28,8 @@ public class TelegramMessageFrom implements MessageFrom {
         deleteMessage.setChatId(chatID);
         try {
             environment.getBot().execute(deleteMessage);
-        } catch (TelegramApiException ignored) {
+        } catch (TelegramApiException e) {
+            TelegramEnvironment.LOGGER.error("Failed to delete message", e);
         }
     }
 }

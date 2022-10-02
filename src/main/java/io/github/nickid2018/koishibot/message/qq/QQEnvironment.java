@@ -7,6 +7,8 @@ import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.message.api.ServiceMessage;
 import io.github.nickid2018.koishibot.message.api.UnsupportedMessage;
 import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
+import io.github.nickid2018.koishibot.util.FormatTransformer;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.message.data.*;
@@ -15,6 +17,8 @@ import net.mamoe.mirai.utils.LoggerAdapters;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.net.URL;
+import java.util.concurrent.Future;
 
 public class QQEnvironment implements Environment {
 
@@ -136,6 +140,11 @@ public class QQEnvironment implements Environment {
     @Override
     public String getEnvironmentUserPrefix() {
         return "qq.user";
+    }
+
+    @Override
+    public Future<File[]> parseAudioFile(String suffix, URL url) {
+        return AsyncUtil.submit(() -> FormatTransformer.transformWebAudioToSilks(suffix, url));
     }
 
     public void close() {

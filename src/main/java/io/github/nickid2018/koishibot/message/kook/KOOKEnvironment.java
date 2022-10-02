@@ -10,6 +10,11 @@ import io.github.nickid2018.koishibot.message.MessageSender;
 import io.github.nickid2018.koishibot.message.api.*;
 import kotlin.Unit;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.concurrent.Future;
+
 public class KOOKEnvironment implements Environment {
 
     private final Client kookClient;
@@ -137,6 +142,11 @@ public class KOOKEnvironment implements Environment {
     @Override
     public String getEnvironmentUserPrefix() {
         return "kook.user";
+    }
+
+    @Override
+    public Future<File[]> parseAudioFile(String suffix, URL url) throws IOException {
+        return null;
     }
 
     @Override
