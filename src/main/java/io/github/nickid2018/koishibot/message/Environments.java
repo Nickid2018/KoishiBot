@@ -7,7 +7,7 @@ import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.message.kook.KOOKEnvironment;
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 import io.github.nickid2018.koishibot.message.telegram.TelegramEnvironment;
-import io.github.nickid2018.koishibot.util.func.FunctionE;
+import io.github.nickid2018.koishibot.util.func.FunctionNE;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ public class Environments {
 
     public static final Logger ENVIRONMENT_LOGGER = LoggerFactory.getLogger("Environment");
 
-    public static final Map<String, FunctionE<BotLoginData, ? extends Environment>> ENVIRONMENT_PROVIDER = new HashMap<>();
+    public static final Map<String, FunctionNE<BotLoginData, ? extends Environment>> ENVIRONMENT_PROVIDER = new HashMap<>();
     private static final Map<String, Environment> ENVIRONMENT_MAP = new HashMap<>();
 
     public static void putEnvironment(String id, Environment environment) {

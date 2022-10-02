@@ -23,7 +23,7 @@ public final class SensitiveWordFilter implements PostFilter {
 
     private static final List<SingleChar> SINGLE_CHAR_LIST = new ArrayList<>();
     private final static char REPLACE_CHARACTER = '*';
-    private final static char[] SKIP_CHARACTERS = new char[] {
+    private final static char[] SKIP_CHARACTERS = new char[]{
             '!', '*', '-', '+', '_', '=', ',', '.'
     };
 
@@ -76,7 +76,7 @@ public final class SensitiveWordFilter implements PostFilter {
     public static void loadWordFromFile(String path) throws IOException {
         File file = new File(path);
         if (file.isFile() && file.exists()) {
-            try(BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
                     new FileInputStream(file), StandardCharsets.UTF_8
             ))) {
                 loadWords(bufferedReader.lines().collect(Collectors.toList()));

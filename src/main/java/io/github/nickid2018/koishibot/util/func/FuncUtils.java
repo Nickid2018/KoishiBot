@@ -5,7 +5,7 @@ import java.util.function.Function;
 
 public class FuncUtils {
 
-    public static <T> Consumer<T> rethrow(ConsumerE<T> consumer) {
+    public static <T> Consumer<T> rethrow(ConsumerNE<T> consumer) {
         return t -> {
             try {
                 consumer.accept(t);
@@ -15,7 +15,7 @@ public class FuncUtils {
         };
     }
 
-    public static <T, R> Function<T, R> rethrow(FunctionE<T, R> func) {
+    public static <T, R> Function<T, R> rethrow(FunctionNE<T, R> func) {
         return t -> {
             try {
                 return func.apply(t);

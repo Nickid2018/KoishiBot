@@ -9,7 +9,7 @@ import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.func.ConsumerE;
+import io.github.nickid2018.koishibot.util.func.ConsumerNE;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.hc.client5.http.classic.methods.*;
 import org.apache.hc.core5.http.io.entity.StringEntity;
@@ -174,7 +174,7 @@ public class GitHubRepoResolver extends MessageResolver {
     }
 
     private void doAuthenticatedOperation(HttpUriRequest request, Environment environment, MessageContext context,
-                                          ConsumerE<HttpUriRequest> requestConsumer, AbstractMessage success, String module,
+                                          ConsumerNE<HttpUriRequest> requestConsumer, AbstractMessage success, String module,
                                           String... scopes) {
         GitHubModule.INSTANCE.getAuthenticator().authenticateOperation(token -> {
             GitHubModule.INSTANCE.getAuthenticator().acceptGitHubJSON(request, token);

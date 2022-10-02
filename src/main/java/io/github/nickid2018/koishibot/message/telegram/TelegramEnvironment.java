@@ -28,6 +28,9 @@ public class TelegramEnvironment implements Environment {
     private final TelegramBot bot;
     private final TelegramUser me;
 
+    private final MessageManager manager;
+    private final MessageSender sender;
+
     public TelegramEnvironment(BotLoginData data) throws TelegramApiException {
         DefaultBotOptions botOptions = new DefaultBotOptions();
         RequestConfig.Builder builder = RequestConfig.custom();
@@ -37,41 +40,44 @@ public class TelegramEnvironment implements Environment {
         builder.setCircularRedirectsAllowed(false);
         builder.setContentCompressionEnabled(true);
         botOptions.setRequestConfig(builder.build());
-        if (Settings.PROXY_TYPE == null) {
+        if (Settings.PROXY_TYPE != null) {
             botOptions.setProxyHost(Settings.PROXY_HOST);
             botOptions.setProxyPort(Settings.PROXY_PORT);
             botOptions.setProxyType(Settings.PROXY_TYPE.equals("http") ?
-                    DefaultBotOptions.ProxyType.HTTP :DefaultBotOptions.ProxyType.SOCKS5);
+                    DefaultBotOptions.ProxyType.HTTP : DefaultBotOptions.ProxyType.SOCKS5);
         }
         bot = new TelegramBot(data.uid(), data.token(), botOptions, this);
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         session = (DefaultBotSession) botsApi.registerBot(bot);
         me = new TelegramUser(this, bot.getMe());
+
+        sender = new MessageSender(this, false, false);
+        manager = new MessageManager(this);
     }
 
     @Override
     public AtMessage at() {
-        return null;
+        return new TelegramAt(this);
     }
 
     @Override
     public ChainMessage chain() {
-        return null;
+        return new TelegramChain(this);
     }
 
     @Override
     public TextMessage text() {
-        return null;
+        return new TelegramText(this);
     }
 
     @Override
     public AudioMessage audio() {
-        return null;
+        return new TelegramAudio(this);
     }
 
     @Override
     public ImageMessage image() {
-        return null;
+        return new TelegramImage(this);
     }
 
     @Override
@@ -86,7 +92,7 @@ public class TelegramEnvironment implements Environment {
 
     @Override
     public QuoteMessage quote() {
-        return null;
+        return new TelegramQuote(this);
     }
 
     @Override
@@ -125,22 +131,22 @@ public class TelegramEnvironment implements Environment {
 
     @Override
     public MessageSender getMessageSender() {
-        return null;
+        return sender;
     }
 
     @Override
     public MessageManager getManager() {
-        return null;
+        return manager;
     }
 
     @Override
     public boolean forwardMessageSupported() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean audioSupported() {
-        return false;
+        return true;
     }
 
     @Override

@@ -1,8 +1,8 @@
 package io.github.nickid2018.koishibot.util;
 
 import io.github.nickid2018.koishibot.core.ErrorRecord;
-import io.github.nickid2018.koishibot.util.func.BiConsumerE;
-import io.github.nickid2018.koishibot.util.func.FunctionE;
+import io.github.nickid2018.koishibot.util.func.BiConsumerNE;
+import io.github.nickid2018.koishibot.util.func.FunctionNE;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 import java.io.*;
@@ -16,15 +16,15 @@ import java.util.function.Supplier;
 public class GroupDataReader<E> {
 
     private final String name;
-    private final FunctionE<InputStream, E> reader;
-    private final BiConsumerE<OutputStream, E> writer;
+    private final FunctionNE<InputStream, E> reader;
+    private final BiConsumerNE<OutputStream, E> writer;
     private final Supplier<E> empty;
     protected final File folder;
 
     protected final Map<String, E> data = new ConcurrentHashMap<>();
 
-    public GroupDataReader(String name, FunctionE<InputStream, E> reader,
-                           BiConsumerE<OutputStream, E> writer, Supplier<E> empty) {
+    public GroupDataReader(String name, FunctionNE<InputStream, E> reader,
+                           BiConsumerNE<OutputStream, E> writer, Supplier<E> empty) {
        this.name = name;
        this.reader = reader;
        this.writer = writer;

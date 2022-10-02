@@ -53,12 +53,27 @@ public class TelegramBot extends TelegramLongPollingBot implements MessageEventP
                 );
             }
         } else if (update.hasMessage()) {
-            if (update.getMessage().isGroupMessage()
+            if (groupMessageConsumer != null && (update.getMessage().isGroupMessage()
                     || update.getMessage().isSuperGroupMessage()
-                    || update.getMessage().isChannelMessage()) {
-                if (groupMessageConsumer != null) {
-
-                }
+                    || update.getMessage().isChannelMessage())) {
+                TelegramMessageData data = TelegramMessageData.fromMessage(update.getMessage());
+                groupMessageConsumer.accept(
+                        new Triple<>(
+                                new TelegramGroup(environment, update.getMessage().getChat()),
+                                new TelegramUser(environment, update.getMessage().getFrom()),
+                                new TelegramChain(environment, data)
+                        ),
+                        Long.valueOf(update.getMessage().getDate())
+                );
+            } else if (friendMessageConsumer != null && update.getMessage().isUserMessage()) {
+                TelegramMessageData data = TelegramMessageData.fromMessage(update.getMessage());
+                friendMessageConsumer.accept(
+                        new Pair<>(
+                                new TelegramUser(environment, update.getMessage().getFrom()),
+                                new TelegramChain(environment, data)
+                        ),
+                        Long.valueOf(update.getMessage().getDate())
+                );
             }
         }
     }

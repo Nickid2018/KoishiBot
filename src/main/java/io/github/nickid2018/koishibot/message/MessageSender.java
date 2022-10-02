@@ -36,9 +36,14 @@ public class MessageSender {
     private final List<PostFilter> postFilters = new ArrayList<>();
 
     public MessageSender(Environment environment, boolean needAntiFilter) {
+        this(environment, needAntiFilter, true);
+    }
+
+    public MessageSender(Environment environment, boolean needAntiFilter, boolean needSensitiveFilter) {
         this.environment = environment;
 
-        postFilters.add(new SensitiveWordFilter());
+        if (needSensitiveFilter)
+            postFilters.add(new SensitiveWordFilter());
         if (needAntiFilter)
             postFilters.add(new AntiFilter());
         postFilters.add(new RequestFrequencyFilter());
