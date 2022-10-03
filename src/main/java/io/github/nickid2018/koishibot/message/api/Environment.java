@@ -47,6 +47,8 @@ public interface Environment {
 
     boolean audioSupported();
 
+    boolean audioToFriendSupported();
+
     boolean quoteSupported();
 
     String getEnvironmentName();

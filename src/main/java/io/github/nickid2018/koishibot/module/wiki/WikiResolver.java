@@ -154,7 +154,7 @@ public class WikiResolver extends MessageResolver {
                 ));
             if (page.imageStream != null)
                 environment.getMessageSender().sendMessageRecallable(context, environment.newImage(page.imageStream));
-            if (page.audioFiles != null && context.group() != null) {
+            if (page.audioFiles != null && (context.group() != null || environment.audioToFriendSupported())) {
                 EXECUTOR.execute(() -> {
                     try {
                         File[] audios = page.audioFiles.get();

@@ -130,6 +130,11 @@ public class KOOKEnvironment implements Environment {
     }
 
     @Override
+    public boolean audioToFriendSupported() {
+        return false;
+    }
+
+    @Override
     public boolean quoteSupported() {
         return true;
     }

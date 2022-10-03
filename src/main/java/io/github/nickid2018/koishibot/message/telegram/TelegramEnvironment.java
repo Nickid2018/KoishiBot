@@ -150,6 +150,11 @@ public class TelegramEnvironment implements Environment {
     }
 
     @Override
+    public boolean audioToFriendSupported() {
+        return true;
+    }
+
+    @Override
     public boolean quoteSupported() {
         return true;
     }
