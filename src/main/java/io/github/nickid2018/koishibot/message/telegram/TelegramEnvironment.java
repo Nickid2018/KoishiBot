@@ -175,5 +175,7 @@ public class TelegramEnvironment implements Environment {
 
     @Override
     public void close() {
+//        if (System.getProperty("env.tgstop").equals("true") && session != null)
+//            session.stop();
     }
 }

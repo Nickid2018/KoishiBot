@@ -29,7 +29,7 @@ public class UrbanDictResolver extends MessageResolver {
         AsyncUtil.execute(() -> {
             try {
                 JsonArray object = WebUtil.fetchDataInJson(
-                        new HttpGet(URBAN_API + WebUtil.encode(term))).getAsJsonArray();
+                        new HttpGet(URBAN_API + WebUtil.encode(term))).getAsJsonObject().getAsJsonArray("list");
                 if (object.size() == 0)
                     environment.getMessageSender().sendMessage(context, environment.newChain(
                             environment.newQuote(context.message()),
