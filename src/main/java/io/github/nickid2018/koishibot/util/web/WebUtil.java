@@ -131,7 +131,7 @@ public class WebUtil {
                 .setUserAgent(chooseRandomUA())
                 .build()) {
             return httpClient.execute(request, httpResponse -> {
-                if (httpResponse.getCode() != 302)
+                if (httpResponse.getCode() / 100 != 3)
                     return null;
                 return httpResponse.getHeaders("location")[0].getValue();
             });

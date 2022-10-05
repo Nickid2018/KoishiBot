@@ -78,7 +78,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         return true;
     }
 
-    private void choose(String key, MessageContext contact, Environment environment) throws IOException {
+    private boolean choose(String key, MessageContext contact, Environment environment) throws IOException {
         if (RegexUtil.match(B_CV_ARTICLE_PATTERN, key))
             doArticleDisplay(key, contact, environment);
         else if (RegexUtil.match(B_SS_EPISODE_PATTERN, key))
@@ -87,8 +87,11 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
             doEpisodeDisplay(key, contact, false, environment);
         else if (RegexUtil.match(B_AU_AUDIO_PATTERN, key))
             doAudioDisplay(key, contact, environment);
-        else
+        else if (RegexUtil.match(B_AV_VIDEO_PATTERN, key) || RegexUtil.match(B_BV_VIDEO_PATTERN, key))
             doVideoDisplay(key, contact, environment);
+        else
+            return false;
+        return true;
     }
 
     private void doEpisodeDisplay(String key, MessageContext contact, boolean isSSID, Environment environment) throws IOException {
@@ -308,9 +311,14 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         String location = WebUtil.getRedirected(new HttpGet(key));
         if (location == null)
             return;
-        String id = location.split("\\?")[0];
-        id = id.substring(id.lastIndexOf('/') + 1);
-        choose(id, contact, environment);
+        if (location.startsWith("https://www.bilibili.com/read/mobile/"))
+            doArticleDisplay("cv" + location.split("\\?")[0].substring(
+                    "https://www.bilibili.com/read/mobile/".length()), contact, environment);
+        else {
+            String id = location.split("\\?")[0];
+            id = id.substring(id.lastIndexOf('/') + 1);
+            choose(id, contact, environment);
+        }
     }
 
     public static String formatTime(int time) {
