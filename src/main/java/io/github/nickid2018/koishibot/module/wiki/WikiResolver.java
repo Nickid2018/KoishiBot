@@ -125,7 +125,7 @@ public class WikiResolver extends MessageResolver {
             });
         } else {
             if (page.redirected != null)
-                data.append("(").append(page.redirected == PageInfo.RedirectType.NORMALIZED ? "自动矫正拼写" : "重定向")
+                data.append("(").append(page.redirected == PageInfo.RedirectType.NORMALIZED ? "标准化" : "重定向")
                         .append("[").append(page.prefix == null ? "" : page.prefix + ":").append(page.titlePast)
                         .append("] -> [").append(page.prefix == null ? "" : page.prefix + ":").append(page.title).append("])\n");
             if (searchTitle != null)
