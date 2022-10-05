@@ -46,7 +46,11 @@ public class WebPageRenderer {
         if (executor != null)
             executor.shutdownNow();
         if (driver != null)
-            driver.quit();
+            try {
+                driver.quit();
+            } catch (Exception e) {
+                WEB_RENDERER_LOGGER.error("Error occurred when closing web driver.", e);
+            }
         if (executor != null || driver != null)
             WEB_RENDERER_LOGGER.info("Web Page Renderer closed.");
         executor = null;

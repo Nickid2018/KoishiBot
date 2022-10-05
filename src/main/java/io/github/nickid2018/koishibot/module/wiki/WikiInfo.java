@@ -136,7 +136,7 @@ public class WikiInfo {
                 try {
                     object = JsonParser.parseString(data).getAsJsonObject();
                 } catch (JsonSyntaxException ex) {
-                    throw new IOException("无法获取信息，可能网站不是一个MediaWiki或被验证码阻止");
+                    throw new IOException("无法获取信息，可能网站不是一个MediaWiki或被验证码阻止", ex);
                 }
             }
 
@@ -157,7 +157,11 @@ public class WikiInfo {
             else
                 realURL = server;
             articleURL = realURL + JsonUtil.getStringInPathOrNull(object, "query.general.articlepath");
+            if (articleURL.startsWith("//"))
+                articleURL = "https:" + articleURL;
             script = realURL + JsonUtil.getStringInPathOrNull(object, "query.general.script");
+            if (script.startsWith("//"))
+                script = "https:" + script;
             baseURI = "https://" + new URL(articleURL).getHost();
 
             if (!getInterWikiDataFromPage()) {
@@ -194,6 +198,7 @@ public class WikiInfo {
                 pageInfo.url = STORED_INTERWIKI_SOURCE_URL.get(this)
                         .replace("$1", URLEncoder.encode(title, StandardCharsets.UTF_8).replace("%2F", "/"));
                 pageInfo.shortDescription = "目标可能不是一个MediaWiki，已自动转换为网址链接";
+                WikiPageShooter.WIKI_PAGE_LOGGER.error("Interwiki link to a non-MediaWiki site: " + pageInfo.url, e);
                 return pageInfo;
             } else
                 throw e;
