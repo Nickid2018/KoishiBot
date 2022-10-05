@@ -78,7 +78,7 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
         return true;
     }
 
-    private boolean choose(String key, MessageContext contact, Environment environment) throws IOException {
+    private void choose(String key, MessageContext contact, Environment environment) throws IOException {
         if (RegexUtil.match(B_CV_ARTICLE_PATTERN, key))
             doArticleDisplay(key, contact, environment);
         else if (RegexUtil.match(B_SS_EPISODE_PATTERN, key))
@@ -89,9 +89,6 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
             doAudioDisplay(key, contact, environment);
         else if (RegexUtil.match(B_AV_VIDEO_PATTERN, key) || RegexUtil.match(B_BV_VIDEO_PATTERN, key))
             doVideoDisplay(key, contact, environment);
-        else
-            return false;
-        return true;
     }
 
     private void doEpisodeDisplay(String key, MessageContext contact, boolean isSSID, Environment environment) throws IOException {
