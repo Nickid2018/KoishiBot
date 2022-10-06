@@ -522,7 +522,7 @@ public class WikiInfo {
                 String url = urlEntry.ownText();
                 interWikiMap.put(prefix, url);
                 WikiInfo info = new WikiInfo(url.contains("?") ?
-                        url.substring(0, url.lastIndexOf('?') + 1) : url + "?");
+                        url.substring(0, url.lastIndexOf('?') + 1) : url + "?", new HashMap<>(), renderSettings);
                 STORED_WIKI_INFO.put(url, info);
                 STORED_INTERWIKI_SOURCE_URL.put(info, url);
             }
