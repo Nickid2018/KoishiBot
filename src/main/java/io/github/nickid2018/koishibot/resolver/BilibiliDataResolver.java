@@ -51,8 +51,8 @@ public class BilibiliDataResolver extends MessageResolver implements JSONService
     public static final String[] EPISODE_TYPE = {null, "番剧", "电影", "纪录片", "国创", "电视剧", null, "综艺"};
 
     public BilibiliDataResolver() {
-        super(B_AV_VIDEO_PATTERN, B_BV_VIDEO_PATTERN, B_CV_ARTICLE_PATTERN, B_AU_AUDIO_PATTERN,
-                B_EP_EPISODE_PATTERN, B_SS_EPISODE_PATTERN, B_SHORT_LINK_PATTERN);
+        super(B_SHORT_LINK_PATTERN, B_AV_VIDEO_PATTERN, B_BV_VIDEO_PATTERN, B_CV_ARTICLE_PATTERN, B_AU_AUDIO_PATTERN,
+                B_EP_EPISODE_PATTERN, B_SS_EPISODE_PATTERN);
     }
 
     @Override

@@ -197,6 +197,8 @@ public class WikiPageShooter {
         bfs.offer(element);
         while (!bfs.isEmpty()) {
             Element now = bfs.poll();
+            if (now.hasClass("navbox"))
+                continue;
             now.removeClass("mw-collapsible");
             now.removeClass("mw-collapsed");
             now.removeClass("collapsible");
@@ -211,6 +213,8 @@ public class WikiPageShooter {
                         }
                         """);
         doc.head().appendChild(heimuToggle);
+        doc.getElementsByClass("custom-modal").forEach(Element::remove);
+
         File html = TempFileSystem.createTmpFileAndCreate("htm", "html");
         try (Writer writer = new FileWriter(html)) {
             IOUtils.write(doc.html(), writer);
