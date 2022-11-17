@@ -49,7 +49,7 @@ public class WikiPageShooter {
             return Jsoup.parse(data);
         }
         URLConnection connection = new URL(url).openConnection();
-        connection.setConnectTimeout(30000);
+        connection.setConnectTimeout(15000);
         connection.addRequestProperty("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2");
         connection.addRequestProperty("User-Agent", WebUtil.chooseRandomUA());
         for (Map.Entry<String, String> entry : headers.entrySet())
@@ -193,6 +193,7 @@ public class WikiPageShooter {
                 element = clone;
             }
         }
+        WIKI_PAGE_LOGGER.info("Cleaned the page, url = {}.", baseURI);
         Queue<Element> bfs = new LinkedList<>();
         bfs.offer(element);
         while (!bfs.isEmpty()) {
@@ -205,6 +206,7 @@ public class WikiPageShooter {
             now.removeClass("collapsed");
             now.children().forEach(bfs::offer);
         }
+        WIKI_PAGE_LOGGER.info("Removed collapsed sections, url = {}.", baseURI);
         doc.body().addClass("heimu_toggle_on");
         doc.head().prependChild(new Element("base").attr("href", baseURI));
         Element heimuToggle = new Element("style").text("""
@@ -214,6 +216,7 @@ public class WikiPageShooter {
                         """);
         doc.head().appendChild(heimuToggle);
         doc.getElementsByClass("custom-modal").forEach(Element::remove);
+        WIKI_PAGE_LOGGER.info("Removed modals, url = {}.", baseURI);
 
         File html = TempFileSystem.createTmpFileAndCreate("htm", "html");
         try (Writer writer = new FileWriter(html)) {
@@ -229,5 +232,6 @@ public class WikiPageShooter {
         byte[] imageData = WebPageRenderer.getDriver().findElement(by).getScreenshotAs(OutputType.BYTES);
         BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageData));
         ImageIO.write(image, "png", png);
+        WIKI_PAGE_LOGGER.info("Rendered page, target={}.", png);
     }
 }

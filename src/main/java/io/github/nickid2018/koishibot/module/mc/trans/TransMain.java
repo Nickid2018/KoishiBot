@@ -21,6 +21,7 @@ public class TransMain {
         ChatDataResolver resolver = new ChatDataResolver(new InetSocketAddress(rconAddr, rconPort), rconPassword);
 
         SecServer server = new SecServer(port, resolver);
+        resolver.setServer(server);
         System.out.println("Transfer Server Started");
 
         while (System.in.read() != -1)

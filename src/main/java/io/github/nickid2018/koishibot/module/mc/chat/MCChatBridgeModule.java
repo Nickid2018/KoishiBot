@@ -1,6 +1,7 @@
 package io.github.nickid2018.koishibot.module.mc.chat;
 
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.module.Module;
@@ -74,6 +75,22 @@ public class MCChatBridgeModule extends Module {
                         .forEach(provider -> provider.sendMessage(group, user, t)));
     }
 
+    public Set<String> getSendGroups(ChatBridgeProvider provider) {
+        Set<String> set = new HashSet<>();
+        for (Map.Entry<String, Set<ChatBridgeProvider>> entry : groupMap.entrySet()) {
+            if (entry.getValue().contains(provider))
+                set.add(entry.getKey());
+        }
+        return set;
+    }
+
+    private void receiveMessage(String group, String text) {
+        Environments.getEnvironments().forEach(env -> {
+            if (env.getGroup(group) != null)
+                env.getGroup(group).send(env.newText(text));
+        });
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void onStartInternal() throws Exception {
@@ -89,6 +106,7 @@ public class MCChatBridgeModule extends Module {
                 case DIRECT -> new DirectChatBridgeProvider(chatBridgeSetting.remote, chatBridgeSetting.password);
                 case INDIRECT -> new IndirectChatBridgeProvider(chatBridgeSetting.remote);
             };
+            provider.receiveMessage(this::receiveMessage);
             providerMap.put(chatBridgeSetting.remote, provider);
         });
 

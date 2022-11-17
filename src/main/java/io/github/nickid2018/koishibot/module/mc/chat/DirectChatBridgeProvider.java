@@ -8,6 +8,8 @@ import nl.vv32.rcon.RconBuilder;
 import java.net.InetSocketAddress;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class DirectChatBridgeProvider implements ChatBridgeProvider {
@@ -15,6 +17,9 @@ public class DirectChatBridgeProvider implements ChatBridgeProvider {
     private final InetSocketAddress addr;
     private final String password;
     private Rcon rcon;
+    private boolean lastFailed = false;
+
+    private final Set<BiConsumer<String, String>> listeners = new HashSet<>();
 
     public DirectChatBridgeProvider(InetSocketAddress addr, String password) {
         this.addr = addr;
@@ -26,9 +31,15 @@ public class DirectChatBridgeProvider implements ChatBridgeProvider {
         try {
             rcon = new RconBuilder().withCharset(StandardCharsets.UTF_8).withChannel(SocketChannel.open(addr)).build();
             rcon.authenticate(password);
+            lastFailed = false;
             return true;
         } catch (Exception e) {
             MCChatBridgeModule.CHAT_BRIDGE_LOGGER.error("Can't connect RCON", e);
+            if (!lastFailed) {
+                lastFailed = true;
+                MCChatBridgeModule.INSTANCE.getSendGroups(this).forEach(
+                        u -> listeners.forEach(l -> l.accept(u, "警告：远端MC服务器无法连接")));
+            }
             return false;
         }
     }
@@ -57,6 +68,6 @@ public class DirectChatBridgeProvider implements ChatBridgeProvider {
 
     @Override
     public void receiveMessage(BiConsumer<String, String> consumer) {
-        // Unsupported now
+        listeners.add(consumer);
     }
 }

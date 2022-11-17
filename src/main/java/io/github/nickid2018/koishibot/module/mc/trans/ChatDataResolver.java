@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.module.mc.trans;
 
+import io.github.nickid2018.koishibot.util.tcp.SecServer;
 import nl.vv32.rcon.Rcon;
 import nl.vv32.rcon.RconBuilder;
 
@@ -16,19 +17,37 @@ public class ChatDataResolver implements Consumer<byte[]> {
     private final String password;
     private Rcon rcon;
 
+    private SecServer server;
+
+    private boolean lastFailed = false;
+
     public ChatDataResolver(InetSocketAddress addr, String password) {
         this.addr = addr;
         this.password = password;
         tryLinkAndAuthenticate();
     }
 
+    public void setServer(SecServer server) {
+        this.server = server;
+    }
+
     private boolean tryLinkAndAuthenticate() {
         try {
             rcon = new RconBuilder().withCharset(StandardCharsets.UTF_8).withChannel(SocketChannel.open(addr)).build();
             rcon.authenticate(password);
+            lastFailed = false;
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            if (!lastFailed && server != null) {
+                lastFailed = true;
+                byte[] data = "警告：远端MC服务器无法连接".getBytes(StandardCharsets.UTF_8);
+                server.getServerHandlers().forEach(h -> {
+                    try {
+                        h.send(data);
+                    } catch (Exception ignored) {
+                    }
+                });
+            }
             return false;
         }
     }
@@ -50,11 +69,10 @@ public class ChatDataResolver implements Consumer<byte[]> {
             commandBuilder.append("> \"},{\"color\":\"white\",\"text\":\"");
             commandBuilder.append(text);
             commandBuilder.append("\"}]");
-            System.out.println("DEBUG: " + commandBuilder);
             do {
                 loop = !loop;
                 try {
-                    System.out.println("debug: " + rcon.sendCommand(commandBuilder.toString()));
+                    System.out.println("Debug: " + rcon.sendCommand(commandBuilder.toString()));
                     break;
                 } catch (Exception ignored) {
                 }

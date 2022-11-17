@@ -8,12 +8,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class IndirectChatBridgeProvider implements ChatBridgeProvider {
 
     private final InetSocketAddress addr;
     private SecClient client;
+
+    private final Set<BiConsumer<String, String>> listeners = new HashSet<>();
 
     public IndirectChatBridgeProvider(InetSocketAddress addr) {
         this.addr = addr;
@@ -27,7 +32,11 @@ public class IndirectChatBridgeProvider implements ChatBridgeProvider {
         } catch (IOException ignored) {
         }
         try {
-            client = new SecClient(addr, bytes -> {});
+            client = new SecClient(addr, bytes -> {
+                String data = new String(bytes, StandardCharsets.UTF_8);
+                MCChatBridgeModule.INSTANCE.getSendGroups(this).forEach(
+                        group -> listeners.forEach(consumer -> consumer.accept(group, data)));
+            });
             MCChatBridgeModule.CHAT_BRIDGE_LOGGER.info("Connected remote transfer program.");
             return true;
         } catch (IOException e) {
@@ -62,6 +71,6 @@ public class IndirectChatBridgeProvider implements ChatBridgeProvider {
 
     @Override
     public void receiveMessage(BiConsumer<String, String> consumer) {
-        // Unsupported now
+        listeners.add(consumer);
     }
 }
