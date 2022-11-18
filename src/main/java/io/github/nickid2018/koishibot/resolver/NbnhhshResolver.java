@@ -48,9 +48,9 @@ public class NbnhhshResolver extends MessageResolver {
                         .map(JsonElement::getAsString)
                         .limit(10)
                         .toList();
-                String result = "「" + key + "」可能指：" + String.join("\n", keys);
+                String result = "「" + key + "」可能指：" + String.join(" ", keys);
                 if (findKeys.size() > 10)
-                    result += "\n等" + findKeys.size() + "个结果";
+                    result += " 等" + findKeys.size() + "个结果";
                 environment.getMessageSender().sendMessage(context, environment.newText(result));
             } catch (IOException e) {
                 environment.getMessageSender().onError(e, "nbnhhsh", context, true);
