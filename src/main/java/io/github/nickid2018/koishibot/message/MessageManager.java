@@ -159,7 +159,7 @@ public class MessageManager {
             environment.getMessageSender().sendMessage(
                     new MessageContext(group, user, environment.chain().fillChain(), -1), environment.chain().fillChain(
                             environment.newAt(group, user),
-                            environment.newText(" 欢迎来到本群，要使用Koishi bot可以at或私聊输入~help查看帮助")
+                            environment.newText(" 欢迎来到本群。使用机器人时@Koishi bot（可群发或私聊）并输入“~help”查看帮助。")
                     ));
     }
 
