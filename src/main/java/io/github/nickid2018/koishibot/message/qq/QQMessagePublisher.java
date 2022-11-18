@@ -27,6 +27,8 @@ public class QQMessagePublisher implements MessageEventPublisher {
     public void subscribeGroupMessage(BiConsumer<Triple<GroupInfo, UserInfo, ChainMessage>, Long> consumer) {
         eventChannel.exceptionHandler(createHandler("qq.group.message"))
                 .subscribe(GroupMessageEvent.class, messageEvent -> {
+                    if (messageEvent.getSender().getId() == 80000000)
+                        return ListeningStatus.LISTENING;
                     GroupInfo group = new QQGroup(environment, messageEvent.getGroup());
                     UserInfo user = new QQUser(environment, messageEvent.getSender(), false, true);
                     ChainMessage message = new QQChain(environment, messageEvent.getMessage());
