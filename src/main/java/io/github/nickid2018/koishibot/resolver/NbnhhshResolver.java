@@ -38,6 +38,10 @@ public class NbnhhshResolver extends MessageResolver {
             post.setEntity(entity);
             try {
                 JsonArray array = WebUtil.fetchDataInJson(post).getAsJsonArray();
+                if (array.isEmpty()) {
+                    environment.getMessageSender().sendMessage(context, environment.newText("未找到结果"));
+                    return;
+                }
                 JsonObject find = array.get(0).getAsJsonObject();
                 if (!find.has("trans")) {
                     environment.getMessageSender().sendMessage(context, environment.newText("未找到结果"));

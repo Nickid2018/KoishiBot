@@ -46,14 +46,15 @@ public class TelegramBot extends TelegramLongPollingBot implements MessageEventP
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasChatJoinRequest()) {
-            if (groupMemberJoinConsumer != null) {
+            if (groupMemberJoinConsumer != null && update.getChatJoinRequest().getUser() != null) {
                 groupMemberJoinConsumer.accept(
                         new TelegramGroup(environment, update.getChatJoinRequest().getChat()),
                         new TelegramUser(environment, update.getChatJoinRequest().getUser())
                 );
             }
         } else if (update.hasMessage()) {
-            if (groupMessageConsumer != null && (update.getMessage().isGroupMessage()
+            if (groupMessageConsumer != null && update.getMessage().getFrom() != null
+                    && (update.getMessage().isGroupMessage()
                     || update.getMessage().isSuperGroupMessage()
                     || update.getMessage().isChannelMessage())) {
                 TelegramMessageData data = TelegramMessageData.fromMessage(update.getMessage());

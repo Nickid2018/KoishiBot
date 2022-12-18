@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     // QQ Backend
-    api("net.mamoe:mirai-core:2.12.3")
+    api("net.mamoe:mirai-core:2.13.2")
 
     // KOOK Backend
     api("com.github.KookyBot:KookyBot:0.2.4")
@@ -22,14 +22,14 @@ dependencies {
     api("org.apache.logging.log4j:log4j-slf4j-impl:2.19.0")
 
     api("commons-io:commons-io:2.11.0")
-    api("org.apache.commons:commons-text:1.9")
-    api("org.apache.httpcomponents.client5:httpclient5:5.2-beta1")
-    api("com.google.code.gson:gson:2.9.0")
+    api("org.apache.commons:commons-text:1.10.0")
+    api("org.apache.httpcomponents.client5:httpclient5:5.2.1")
+    api("com.google.code.gson:gson:2.10")
     api("org.jsoup:jsoup:1.15.3")
     api("org.apache.xmlgraphics:batik-transcoder:1.15")
     api("org.apache.xmlgraphics:batik-codec:1.15")
-    api("com.google.zxing:core:3.5.0")
-    api("org.seleniumhq.selenium:selenium-java:4.4.0")
+    api("com.google.zxing:core:3.5.1")
+    api("org.seleniumhq.selenium:selenium-java:4.7.1")
     api("nl.vv32.rcon:rcon:1.2.0")
 }
 

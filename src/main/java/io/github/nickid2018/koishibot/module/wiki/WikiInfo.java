@@ -2,7 +2,10 @@ package io.github.nickid2018.koishibot.module.wiki;
 
 import com.google.gson.*;
 import io.github.nickid2018.koishibot.message.api.Environment;
-import io.github.nickid2018.koishibot.util.*;
+import io.github.nickid2018.koishibot.util.FormatTransformer;
+import io.github.nickid2018.koishibot.util.ImageRenderer;
+import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.jsoup.Jsoup;
@@ -25,8 +28,8 @@ public class WikiInfo {
 
     public static final String WIKI_META = "action=query&format=json&meta=siteinfo&siprop=extensions%7Cgeneral%7Cinterwikimap";
     public static final String QUERY_PAGE = "action=query&format=json&prop=info%7Cimageinfo%7Cextracts%7Cpageprops&inprop=url&iiprop=url&" +
-                                            "ppprop=description%7Cdisplaytitle%7Cdisambiguation%7Cinfoboxes&explaintext&" +
-                                            "exsectionformat=plain&exchars=200&redirects";
+            "ppprop=description%7Cdisplaytitle%7Cdisambiguation%7Cinfoboxes&explaintext&" +
+            "exsectionformat=plain&exchars=200&redirects";
     public static final String QUERY_PAGE_NOE = "action=query&format=json&inprop=url&iiprop=url&prop=info%7Cimageinfo&redirects";
     public static final String WIKI_SEARCH = "action=query&format=json&list=search&srwhat=text";
     public static final String WIKI_RANDOM = "action=query&format=json&list=random";
@@ -88,19 +91,19 @@ public class WikiInfo {
                         JsonObject wikiData = en.getValue().getAsJsonObject();
                         Map<String, String> header = new HashMap<>();
                         JsonUtil.getData(wikiData, "headers", JsonObject.class).ifPresent(headers -> {
-                                    for (Map.Entry<String, JsonElement> headerEntry : headers.entrySet())
-                                        header.put(headerEntry.getKey(), headerEntry.getValue().getAsString());
-                                });
+                            for (Map.Entry<String, JsonElement> headerEntry : headers.entrySet())
+                                header.put(headerEntry.getKey(), headerEntry.getValue().getAsString());
+                        });
                         WikiRenderSettings renderSettings = JsonUtil.getData(wikiData, "render", JsonObject.class)
-                                        .map(object -> {
-                                            int width = JsonUtil.getIntOrZero(object, "width");
-                                            int height = JsonUtil.getIntOrZero(object, "height");
-                                            boolean render = JsonUtil.getData(object, "enable", JsonPrimitive.class)
-                                                    .filter(JsonPrimitive::isBoolean)
-                                                    .map(JsonPrimitive::getAsBoolean)
-                                                    .orElse(true);
-                                            return new WikiRenderSettings(width, height, render);
-                                        }).orElse(new WikiRenderSettings(0, 0, true));
+                                .map(object -> {
+                                    int width = JsonUtil.getIntOrZero(object, "width");
+                                    int height = JsonUtil.getIntOrZero(object, "height");
+                                    boolean render = JsonUtil.getData(object, "enable", JsonPrimitive.class)
+                                            .filter(JsonPrimitive::isBoolean)
+                                            .map(JsonPrimitive::getAsBoolean)
+                                            .orElse(true);
+                                    return new WikiRenderSettings(width, height, render);
+                                }).orElse(new WikiRenderSettings(0, 0, true));
                         SUPPORT_WIKIS.put(en.getKey(), new WikiInfo(
                                 JsonUtil.getStringOrNull(wikiData, "url") + "?", header, renderSettings));
                     }
@@ -130,7 +133,7 @@ public class WikiInfo {
                 if (elements.size() == 0)
                     throw new IOException("无法获取信息，可能网站不是一个MediaWiki或被验证码阻止");
                 String sub = elements.get(0).attr("href");
-                url= sub.substring(0, sub.indexOf("?") + 1);
+                url = sub.substring(0, sub.indexOf("?") + 1);
                 STORED_WIKI_INFO.put(url, this);
                 data = checkAndGet(url + WIKI_META);
                 try {
@@ -211,7 +214,7 @@ public class WikiInfo {
         if (forceNoInterwiki)
             title = title.substring(1, title.length() - 1);
 
-        if (title != null && !forceNoInterwiki && title.contains(":")){
+        if (title != null && !forceNoInterwiki && title.contains(":")) {
             String namespace = title.split(":")[0];
             if (interWikiMap.containsKey(namespace)) {
                 WikiInfo skip = STORED_WIKI_INFO.get(interWikiMap.get(namespace));
@@ -338,7 +341,7 @@ public class WikiInfo {
 
     private PageInfo random(String prefix, Environment environment) throws Exception {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_RANDOM)).getAsJsonObject();
-        PageInfo info =  parsePageInfo(Objects.requireNonNull(
+        PageInfo info = parsePageInfo(Objects.requireNonNull(
                 JsonUtil.getStringInPathOrNull(data, "query.random.0.title")), 0, prefix, environment);
         info.isRandom = true;
         return info;
@@ -430,6 +433,7 @@ public class WikiInfo {
 
     private String resolveText(String source) {
         source = source.replaceAll("(\n){2,}+", "\n");
+        source = source.trim();
         int index = 0;
         int blankets = 0;
         boolean quote = false;
@@ -437,41 +441,18 @@ public class WikiInfo {
         INDEX_FIND: for (; index < source.length(); index++) {
             char now = source.charAt(index);
             switch (now) {
-                case '《':
-                case '「':
-                case '<':
-                case '[':
-                case '{':
-                case '(':
-                case '（':
-                    blankets++;
-                    break;
-                case '>':
-                case ']':
-                case '}':
-                case '」':
-                case '》':
-                case ')':
-                case '）':
-                    blankets--;
-                    break;
-                case '"':
-                    quote = !quote;
-                    break;
-                case '\'':
-                    subQuote = !subQuote;
-                    break;
-                case '?':
-                case '!':
-                case '.':
-                case '？':
-                case '！':
-                case '。':
+                case '《', '「', '<', '[', '{', '(', '（' -> blankets++;
+                case '>', ']', '}', '」', '》', ')', '）' -> blankets--;
+                case '"' -> quote = !quote;
+                case '\'' -> subQuote = !subQuote;
+                case '?', '!', '.', '？', '！', '。' -> {
                     if (blankets == 0 && !quote && !subQuote && index > 15)
                         break INDEX_FIND;
-                case '\n':
+                }
+                case '\n' -> {
                     if (index > 20)
                         break INDEX_FIND;
+                }
             }
         }
         return source.substring(0, Math.min(source.length(), index + 1));
@@ -509,7 +490,7 @@ public class WikiInfo {
                 WikiPageShooter.getInfoBoxShot(info.url, baseURI, document, this);
     }
 
-    private boolean getInterWikiDataFromPage(){
+    private boolean getInterWikiDataFromPage() {
         try {
             String data = WebUtil.fetchDataInText(
                     getWithHeader(articleURL.replace("$1", "Special:Interwiki")));
