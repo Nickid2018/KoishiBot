@@ -9,6 +9,7 @@ import io.github.nickid2018.koishibot.message.ResolverName;
 import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
 import io.github.nickid2018.koishibot.util.web.OAuth2Authenticator;
@@ -85,6 +86,10 @@ public class WakaTimeResolver extends MessageResolver {
             return true;
         } else if (key.equalsIgnoreCase("yesterday")) {
             formatSummary("https://wakatime.com/api/v1/users/current/summaries?range=Yesterday", context, environment);
+            return true;
+        } else if (key.equalsIgnoreCase("tomorrow")) {
+            AsyncUtil.execute(() -> environment.getMessageSender().sendMessage(
+                    context, environment.newText("你明天的编程时间为：\n11 hrs 45 mins 14 secs！")));
             return true;
         } else {
             if (!RegexUtil.match(TIME_DURATION, key))
