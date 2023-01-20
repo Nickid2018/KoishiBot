@@ -1,22 +1,18 @@
 package io.github.nickid2018.koishibot.module.wiki;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
+import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.AudioSender;
 import io.github.nickid2018.koishibot.message.ResolverName;
 import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
-import io.github.nickid2018.koishibot.util.FormatTransformer;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 @ResolverName("wiki")
 @Syntax(syntax = "[[查询页面]]", help = "查询wiki页面", rem = "允许使用跨wiki和章节，强制禁止进行跨wiki需要再加一层中括号，特殊页面查询如下")
@@ -27,8 +23,6 @@ import java.util.stream.Stream;
 public class WikiResolver extends MessageResolver {
 
     public static final Pattern WIKI_PATTERN = Pattern.compile("\\[\\[.+?]{2,3}+");
-    public static final ExecutorService EXECUTOR =
-            Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).build());
 
     public WikiResolver() {
         super(WIKI_PATTERN);
@@ -154,21 +148,8 @@ public class WikiResolver extends MessageResolver {
                 ));
             if (page.imageStream != null)
                 environment.getMessageSender().sendMessageRecallable(context, environment.newImage(page.imageStream));
-            if (page.audioFiles != null && (context.group() != null || environment.audioToFriendSupported())) {
-                EXECUTOR.execute(() -> {
-                    try {
-                        File[] audios = page.audioFiles.get();
-                        for (File file : audios) {
-                            Thread.sleep((FormatTransformer.QQ_VOICE_TRANSFORM_MAX_LENGTH + 10) * 1000);
-                            environment.getMessageSender().sendMessage(
-                                    context, environment.newAudio(context.group(), new FileInputStream(file)));
-                        }
-                        Stream.of(audios).forEach(TempFileSystem::unlockFile);
-                    } catch (Exception e) {
-                        environment.getMessageSender().onError(e, "wiki.audio", context, false);
-                    }
-                });
-            }
+            if (page.audioFiles != null)
+                AudioSender.sendAudio(page.audioFiles, context, environment);
             if (page.infobox != null) {
                 AsyncUtil.execute(() -> {
                     try {
