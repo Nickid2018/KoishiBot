@@ -19,6 +19,7 @@ public class FormatTransformer {
     public static final Logger TRANSFORMER_LOGGER = LoggerFactory.getLogger("Format Transformer");
 
     public static final int QQ_VOICE_TRANSFORM_MAX_LENGTH = 110;
+    public static final int QQ_VOICE_SAMPLE_RATE = 44100;
     public static final int TELEGRAM_VOICE_MAX_SIZE = 50 * 1024 * 1024;
 
     public static String FFMPEG_LOCATION;
@@ -82,7 +83,6 @@ public class FormatTransformer {
         return hours * 3600 + minutes * 60 + secs;
     }
 
-    // Tencent QQ VOICE SAMPLE RATE IS 24000Hz, AND CAN'T BE CHANGED!
     public static File[] transformAsSilk(File sourceFile) throws Exception {
         List<File> silks = new ArrayList<>();
         int length = getAudioLength(sourceFile);
@@ -95,7 +95,7 @@ public class FormatTransformer {
                     "-ss", String.valueOf(offset),
                     "-t", String.valueOf(QQ_VOICE_TRANSFORM_MAX_LENGTH),
                     "-f", "s16le",
-                    "-ar", "24000",
+                    "-ar", String.valueOf(QQ_VOICE_SAMPLE_RATE),
                     "-ac", "1",
                     "-acodec", "pcm_s16le",
                     "-y", pcm.getAbsolutePath());
@@ -108,7 +108,7 @@ public class FormatTransformer {
                 "-i", sourceFile.getAbsolutePath(),
                 "-ss", String.valueOf(offset),
                 "-f", "s16le",
-                "-ar", "24000",
+                "-ar", String.valueOf(QQ_VOICE_SAMPLE_RATE),
                 "-ac", "1",
                 "-acodec", "pcm_s16le",
                 "-y", pcm.getAbsolutePath());
@@ -122,7 +122,7 @@ public class FormatTransformer {
         File silk = TempFileSystem.createTmpFile("slk", "silk");
         executeCommand(null, ENCODER_LOCATION,
                 sourceFile.getAbsolutePath(), silk.getAbsolutePath(),
-                "-Fs_API", "24000", "-tencent");
+                "-Fs_API", String.valueOf(QQ_VOICE_SAMPLE_RATE), "-tencent");
         TempFileSystem.unlockFileAndDelete(sourceFile);
         return silk;
     }
