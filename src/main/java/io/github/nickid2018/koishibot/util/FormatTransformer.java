@@ -82,6 +82,7 @@ public class FormatTransformer {
         return hours * 3600 + minutes * 60 + secs;
     }
 
+    // Tencent QQ VOICE SAMPLE RATE IS 24000Hz, AND CAN'T BE CHANGED!
     public static File[] transformAsSilk(File sourceFile) throws Exception {
         List<File> silks = new ArrayList<>();
         int length = getAudioLength(sourceFile);

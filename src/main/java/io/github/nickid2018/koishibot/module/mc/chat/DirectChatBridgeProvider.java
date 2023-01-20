@@ -34,7 +34,6 @@ public class DirectChatBridgeProvider implements ChatBridgeProvider {
             lastFailed = false;
             return true;
         } catch (Exception e) {
-            MCChatBridgeModule.CHAT_BRIDGE_LOGGER.error("Can't connect RCON", e);
             if (!lastFailed) {
                 lastFailed = true;
                 MCChatBridgeModule.INSTANCE.getSendGroups(this).forEach(

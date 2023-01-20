@@ -40,7 +40,6 @@ public class IndirectChatBridgeProvider implements ChatBridgeProvider {
             MCChatBridgeModule.CHAT_BRIDGE_LOGGER.info("Connected remote transfer program.");
             return true;
         } catch (IOException e) {
-            MCChatBridgeModule.CHAT_BRIDGE_LOGGER.error("Can't link remote transfer program.", e);
             return false;
         }
     }
