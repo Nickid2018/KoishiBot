@@ -11,9 +11,12 @@ import java.io.FileInputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 public class AudioSender {
+
+    public static final AtomicBoolean PAUSE_FLAG = new AtomicBoolean(false);
 
     private static final ExecutorService EXECUTOR =
             Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setDaemon(true).build());
@@ -21,10 +24,19 @@ public class AudioSender {
     public static void sendAudio(Future<File[]> filesToSend, MessageContext context, Environment environment) {
         if (context.group() != null || environment.audioToFriendSupported())
             EXECUTOR.execute(() -> {
+                if (PAUSE_FLAG.get()) {
+                    try {
+                        Stream.of(filesToSend.get()).forEach(TempFileSystem::unlockFile);
+                    } catch (Exception ignored) {
+                    }
+                    return;
+                }
                 try {
                     File[] audios = filesToSend.get();
                     for (File file : audios) {
                         Thread.sleep((FormatTransformer.QQ_VOICE_TRANSFORM_MAX_LENGTH + 10) * 1000);
+                        if (PAUSE_FLAG.get())
+                            break;
                         environment.getMessageSender().sendMessage(
                                 context, environment.newAudio(context.group(), new FileInputStream(file)));
                     }

@@ -9,6 +9,7 @@ import io.github.nickid2018.koishibot.module.github.GitHubModule;
 import io.github.nickid2018.koishibot.module.mc.MCServerResolver;
 import io.github.nickid2018.koishibot.module.mc.MCSkinResolver;
 import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
+import io.github.nickid2018.koishibot.module.music.MusicInfoResolver;
 import io.github.nickid2018.koishibot.module.music.MusicResolver;
 import io.github.nickid2018.koishibot.module.system.*;
 import io.github.nickid2018.koishibot.module.translation.TranslateModule;
@@ -46,7 +47,9 @@ public class ModuleManager {
         addModule(new PlainModule("help", false, NOP, NOP, "帮助模块", new HelpResolver()));
         addModule(new PlainModule("info", false, NOP, NOP, "信息模块", new InfoResolver()));
         addModule(new PlainModule("system", false, NOP, NOP, "系统模块",
-                new SayResolver(), new ReloadResolver(), new CleanCacheResolver(), new RuntimeArgResolver(), new StopResolver(), new RecallResolver()));
+                new SayResolver(), new ReloadResolver(), new CleanCacheResolver(),
+                new RuntimeArgResolver(), new StopResolver(), new RecallResolver(),
+                new StopMusicQueueResolver()));
         addModule(new PlainModule("module", false, NOP, NOP, "模块管理模块", new ModuleManageResolver()));
         addModule(new PlainModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
         addModule(new WikiModule());
@@ -62,7 +65,7 @@ public class ModuleManager {
         addModule(new WakaTimeModule());
         addModule(new MCChatBridgeModule());
         addModule(new GitHubModule());
-        addModule(new PlainModule("music", true, NOP, NOP, "音乐模块", new MusicResolver()));
+        addModule(new PlainModule("music", true, NOP, NOP, "音乐模块", new MusicResolver(), new MusicInfoResolver()));
         addModule(new EvalModule());
         addModule(new NamedModule("interact", true, "其他互动模块"));
     }
