@@ -43,13 +43,14 @@ public class MusicResolver extends MessageResolver {
                         Pair<String, URL> pair = MusicInfoResolver.getMusicInfo(obj);
                         environment.getMessageSender().sendMessage(context, environment.newChain(
                                 environment.newText(pair.getFirst()),
+                                environment.newText("\n(源URL: " + url + ")"),
                                 environment.newImage(pair.getSecond().openStream())
                         ));
                         AudioSender.sendAudio(fileToSend, context, environment);
                     } else
                         environment.getMessageSender().sendMessage(context, environment.newText("未找到歌曲"));
                 } catch (Exception e) {
-                    environment.getMessageSender().sendMessage(context, environment.newText("获取音乐信息失败"));
+                    environment.getMessageSender().onError(e, "music.get", context, false);
                 }
             });
             return true;

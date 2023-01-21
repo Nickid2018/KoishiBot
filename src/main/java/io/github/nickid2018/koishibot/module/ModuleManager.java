@@ -11,6 +11,7 @@ import io.github.nickid2018.koishibot.module.mc.MCSkinResolver;
 import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
 import io.github.nickid2018.koishibot.module.music.MusicInfoResolver;
 import io.github.nickid2018.koishibot.module.music.MusicResolver;
+import io.github.nickid2018.koishibot.module.music.MusicSearchResolver;
 import io.github.nickid2018.koishibot.module.system.*;
 import io.github.nickid2018.koishibot.module.translation.TranslateModule;
 import io.github.nickid2018.koishibot.module.wakatime.WakaTimeModule;
@@ -65,7 +66,8 @@ public class ModuleManager {
         addModule(new WakaTimeModule());
         addModule(new MCChatBridgeModule());
         addModule(new GitHubModule());
-        addModule(new PlainModule("music", true, NOP, NOP, "音乐模块", new MusicResolver(), new MusicInfoResolver()));
+        addModule(new PlainModule("music", true, NOP, NOP, "音乐模块",
+                new MusicResolver(), new MusicInfoResolver(), new MusicSearchResolver()));
         addModule(new EvalModule());
         addModule(new NamedModule("interact", true, "其他互动模块"));
     }

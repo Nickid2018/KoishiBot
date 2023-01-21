@@ -34,7 +34,7 @@ public class NeteaseMusicProtocol {
         pairs.add(new BasicNameValuePair("s", keywords));
         pairs.add(new BasicNameValuePair("type", "1"));
         pairs.add(new BasicNameValuePair("offset", "0"));
-        pairs.add(new BasicNameValuePair("limit", "10"));
+        pairs.add(new BasicNameValuePair("limit", "20"));
         UrlEncodedFormEntity entity = new UrlEncodedFormEntity(pairs, StandardCharsets.UTF_8);
         post.setEntity(entity);
 

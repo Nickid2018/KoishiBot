@@ -18,7 +18,7 @@ import java.net.URL;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@ResolverName("musicinfo")
+@ResolverName("music-info")
 @Syntax(syntax = "~musicinfo [网易云音乐ID]", help = "获取网易云音乐信息")
 public class MusicInfoResolver extends MessageResolver {
 
@@ -43,7 +43,7 @@ public class MusicInfoResolver extends MessageResolver {
                     } else
                         environment.getMessageSender().sendMessage(context, environment.newText("未找到歌曲"));
                 } catch (Exception e) {
-                    environment.getMessageSender().sendMessage(context, environment.newText("获取音乐信息失败"));
+                    environment.getMessageSender().onError(e, "music.info", context, false);
                 }
             });
             return true;
