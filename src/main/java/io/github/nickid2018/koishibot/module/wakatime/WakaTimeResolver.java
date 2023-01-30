@@ -47,6 +47,8 @@ public class WakaTimeResolver extends MessageResolver {
                             HttpGet get = new HttpGet("https://wakatime.com/api/v1/users/current/stats/last_7_days");
                             get.setHeader("Authorization", "Bearer " + accessToken);
                             JsonObject data = WebUtil.fetchDataInJson(get).getAsJsonObject().getAsJsonObject("data");
+                            if (data == null)
+                                throw new IllegalStateException("未获得正确数据，可能授权已过期");
 
                             StringBuilder builder = new StringBuilder();
 
@@ -109,15 +111,17 @@ public class WakaTimeResolver extends MessageResolver {
                         get.setHeader("Authorization", "Bearer " + accessToken);
 
                         JsonObject gotta = WebUtil.fetchDataInJson(get).getAsJsonObject();
-                        JsonObject cummulative_total = gotta.getAsJsonObject("cummulative_total");
-                        double sec = JsonUtil.getData(cummulative_total, "seconds", JsonPrimitive.class)
+                        JsonObject cumulative_total = gotta.getAsJsonObject("cumulative_total");
+                        if (cumulative_total == null)
+                            throw new IllegalStateException("未获得正确数据，可能授权已过期");
+                        double sec = JsonUtil.getData(cumulative_total, "seconds", JsonPrimitive.class)
                                 .filter(JsonPrimitive::isNumber)
                                 .map(JsonPrimitive::getAsDouble)
                                 .orElse(0.0);
 
                         StringBuilder builder = new StringBuilder();
 
-                        builder.append("编程时长: ").append(JsonUtil.getStringOrNull(cummulative_total, "text")).append("\n");
+                        builder.append("编程时长: ").append(JsonUtil.getStringOrNull(cumulative_total, "text")).append("\n");
 
                         Map<String, Double> langTime = new HashMap<>();
 

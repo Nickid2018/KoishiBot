@@ -33,7 +33,7 @@ public class MusicSearchResolver extends MessageResolver {
                     JsonObject obj = NeteaseMusicProtocol.searchMusic(key);
                     StringBuilder builder = new StringBuilder();
                     builder.append("结果数量: ").append(JsonUtil.getIntOrZero(obj, "songCount")).append("\n\n");
-                    builder.append("| ID | 歌曲名 | 专辑 | 歌手 |\n");
+                    builder.append("| ID | 歌曲名 | 专辑 | 作者 |\n");
                     builder.append("| --- | --- | --- | --- |\n");
                     JsonUtil.getData(obj, "songs", JsonArray.class)
                             .ifPresent(array -> array.forEach(element -> {

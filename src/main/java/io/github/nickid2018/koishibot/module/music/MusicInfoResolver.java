@@ -64,7 +64,7 @@ public class MusicInfoResolver extends MessageResolver {
 
         StringBuilder builder = new StringBuilder();
         builder.append("歌曲名: ").append(name).append("\n");
-        builder.append("歌手: ").append(artistsName).append("\n");
+        builder.append("作者: ").append(artistsName).append("\n");
         builder.append("专辑: ").append(albumName);
         JsonUtil.getData(obj, "alia", JsonArray.class)
                 .filter(array -> !array.isEmpty())

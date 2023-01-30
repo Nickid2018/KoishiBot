@@ -39,14 +39,21 @@ public class MusicResolver extends MessageResolver {
                     if (data.isPresent()) {
                         JsonObject obj = data.get();
                         String url = NeteaseMusicProtocol.getMusicDataURL(id);
-                        Future<File[]> fileToSend = environment.parseAudioFile("mp3", new URL(url));
                         Pair<String, URL> pair = MusicInfoResolver.getMusicInfo(obj);
-                        environment.getMessageSender().sendMessage(context, environment.newChain(
-                                environment.newText(pair.getFirst()),
-                                environment.newText("\n(源URL: " + url + ")"),
-                                environment.newImage(pair.getSecond().openStream())
-                        ));
-                        AudioSender.sendAudio(fileToSend, context, environment);
+                        if (url != null) {
+                            Future<File[]> fileToSend = environment.parseAudioFile("mp3", new URL(url));
+                            environment.getMessageSender().sendMessage(context, environment.newChain(
+                                    environment.newText(pair.getFirst()),
+                                    environment.newText("\n(源URL: " + url + ")"),
+                                    environment.newImage(pair.getSecond().openStream())
+                            ));
+                            AudioSender.sendAudio(fileToSend, context, environment);
+                        } else
+                            environment.getMessageSender().sendMessage(context, environment.newChain(
+                                    environment.newText(pair.getFirst()),
+                                    environment.newText("\n由于版权或其他问题，此歌曲不提供播放。"),
+                                    environment.newImage(pair.getSecond().openStream())
+                            ));
                     } else
                         environment.getMessageSender().sendMessage(context, environment.newText("未找到歌曲"));
                 } catch (Exception e) {
