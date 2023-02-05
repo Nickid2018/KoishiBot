@@ -31,6 +31,7 @@ dependencies {
     api("com.google.zxing:core:3.5.1")
     api("org.seleniumhq.selenium:selenium-java:4.7.1")
     api("nl.vv32.rcon:rcon:1.2.0")
+    api("io.github.nickid2018:smcl:1.0.3")
 }
 
 group = "io.github.nickid2018"

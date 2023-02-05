@@ -65,20 +65,11 @@ public class GitHubAuthenticator {
 
     public void authenticateOperation(Consumer<String> operation,
                                       MessageContext context, Environment environment, String... needScopes) {
-        if (enableOAuth2()) {
-            AbstractMessage message = environment.newText(
-                    "警告: 此操作需要授权，请输入您的用户名。"
-            );
-            AsyncUtil.execute(() -> environment.getMessageSender().sendMessageAwait(context, message, (sent, reply) -> {
-                String name = MessageUtil.getFirstText(reply);
-                if (name != null)
-                    authenticator.authenticate(name,
-                            str -> environment.getMessageSender().sendMessage(context, environment.newText("请点击链接授权：\n" + str)),
-                            operation, List.of(needScopes), Map.of("login", name));
-                else
-                    environment.getMessageSender().sendMessage(context, environment.newText("已取消授权"));
-            }));
-        } else {
+        if (enableOAuth2())
+            authenticator.authenticate(context.user().getUserId(),
+                    str -> environment.getMessageSender().sendMessage(context, environment.newText("请点击链接授权：\n" + str)),
+                    operation, List.of(needScopes), Map.of());
+        else {
             AbstractMessage message = environment.newText(
                     "警告: 此操作需要授权，请发送私人访问令牌用于授权。\n" +
                             "本次操作需要" + String.join(", ", needScopes) + "权限。"

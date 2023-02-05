@@ -12,6 +12,7 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.RegexUtil;
+import io.github.nickid2018.koishibot.util.web.ErrorCodeException;
 import io.github.nickid2018.koishibot.util.web.OAuth2Authenticator;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -70,6 +71,11 @@ public class WakaTimeResolver extends MessageResolver {
                                     });
 
                             environment.getMessageSender().sendMessage(context, environment.newText(builder.toString().trim()));
+                        } catch (ErrorCodeException e) {
+                            if (e.code == 400)
+                                environment.getMessageSender().sendMessage(context, environment.newText("未获得正确数据，可能wakatime插件未正确安装"));
+                            else
+                                environment.getMessageSender().onError(e, "wakatime", context, false);
                         } catch (Exception e) {
                             environment.getMessageSender().onError(e, "wakatime", context, false);
                         }
@@ -157,6 +163,11 @@ public class WakaTimeResolver extends MessageResolver {
                                 });
 
                         environment.getMessageSender().sendMessage(context, environment.newText(builder.toString().trim()));
+                    } catch (ErrorCodeException e) {
+                        if (e.code == 400)
+                            environment.getMessageSender().sendMessage(context, environment.newText("未获得正确数据，可能wakatime插件未正确安装"));
+                        else
+                            environment.getMessageSender().onError(e, "wakatime", context, false);
                     } catch (Exception e) {
                         environment.getMessageSender().onError(e, "wakatime", context, false);
                     }

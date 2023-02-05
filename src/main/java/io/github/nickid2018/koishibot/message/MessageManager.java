@@ -154,13 +154,14 @@ public class MessageManager {
     private void onMemberAdd(GroupInfo group, UserInfo user) {
         if (RequestFrequencyFilter.shouldNotResponse(user, new MutableBoolean(false)))
             return;
-        user.nudge(group);
-        if (ModuleManager.isOpened(group.getGroupId(), "interact"))
+        if (ModuleManager.isOpened(group.getGroupId(), "interact")) {
+            user.nudge(group);
             environment.getMessageSender().sendMessage(
-                    new MessageContext(group, user, environment.chain().fillChain(), -1), environment.chain().fillChain(
+                    new MessageContext(group, user, environment.newChain(), -1), environment.newChain(
                             environment.newAt(group, user),
                             environment.newText(" 欢迎来到本群。使用机器人时@Koishi bot（可群发或私聊）并输入“~help”查看帮助。")
                     ));
+        }
     }
 
     private void onGroupRecall(Triple<GroupInfo, UserInfo, Long> info) {

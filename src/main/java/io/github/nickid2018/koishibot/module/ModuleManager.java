@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
+import io.github.nickid2018.koishibot.module.calc.CalcModule;
 import io.github.nickid2018.koishibot.module.eval.EvalModule;
 import io.github.nickid2018.koishibot.module.github.GitHubModule;
 import io.github.nickid2018.koishibot.module.mc.MCServerResolver;
@@ -68,6 +69,7 @@ public class ModuleManager {
         addModule(new GitHubModule());
         addModule(new PlainModule("music", true, NOP, NOP, "音乐模块",
                 new MusicResolver(), new MusicInfoResolver(), new MusicSearchResolver()));
+        addModule(new CalcModule());
         addModule(new EvalModule());
         addModule(new NamedModule("interact", true, "其他互动模块"));
     }
