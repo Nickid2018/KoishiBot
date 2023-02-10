@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     // QQ Backend
-    api("net.mamoe:mirai-core:2.13.2")
+    api("net.mamoe:mirai-core:2.14.0")
 
     // KOOK Backend
     api("com.github.KookyBot:KookyBot:0.2.4")
