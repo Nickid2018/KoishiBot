@@ -11,18 +11,22 @@ import io.github.nickid2018.smcl.functions.BinaryFunctionBuilder;
 import io.github.nickid2018.smcl.parser.BinaryFunctionParser;
 import io.github.nickid2018.smcl.statements.NumberStatement;
 
+import java.security.SecureRandom;
 import java.util.List;
+import java.util.Random;
 
 public class CalcModule extends Module {
 
     private static SMCLContext context;
     public static VariableValueList DEFAULT_VARIABLES;
 
+    private static final Random random = new SecureRandom();
+
     // Non-standard functions --------------------------------
     public static final BinaryFunctionBuilder STANDARD_RANDOM = BinaryFunctionBuilder.createBuilder("rand").withCalcFunction(
-            (a, b) -> context.numberProvider.fromStdNumber(Math.random() * b.subtract(a).toStdNumber() + a.toStdNumber()));
-    public static final BinaryFunctionBuilder STANDARD_RANDOM_INT = BinaryFunctionBuilder.createBuilder("randint").withCalcFunction(
-            (a, b) -> context.numberProvider.fromStdNumber(Math.floor(Math.random() * b.subtract(a).toStdNumber() + a.toStdNumber())));
+            (a, b) -> context.numberProvider.fromStdNumber(random.nextDouble(a.toStdNumber(), b.toStdNumber())));
+    public static final BinaryFunctionBuilder STANDARD_RANDOM_INT = BinaryFunctionBuilder.createBuilder("randint")
+            .withCalcFunction((a, b) -> context.numberProvider.fromStdNumber(random.nextInt((int) a.toStdNumber(), (int) b.toStdNumber())));
     // End ---------------------------------------------------
 
     public CalcModule() {
@@ -38,8 +42,8 @@ public class CalcModule extends Module {
         context.globalvars.registerVariable("k");
         context.register.registerConstant("phi",
                 new NumberStatement(context, context.numberProvider.fromStdNumber(Math.sqrt(5) / 2 + 0.5)));
-        context.register.registerFunction("rand", new BinaryFunctionParser(STANDARD_RANDOM));
-        context.register.registerFunction("randint", new BinaryFunctionParser(STANDARD_RANDOM_INT));
+        context.register.registerFunction("rand", new BinaryFunctionParser(STANDARD_RANDOM).noOptimize());
+        context.register.registerFunction("randint", new BinaryFunctionParser(STANDARD_RANDOM_INT).noOptimize());
         context.register.registerFunction("sum", new SumFunctionParser());
         DEFAULT_VARIABLES = new VariableValueList(context);
     }
