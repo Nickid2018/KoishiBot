@@ -10,12 +10,12 @@ import net.mamoe.mirai.contact.User;
 
 public class QQUser implements UserInfo {
 
-    private final Environment environment;
+    private final QQEnvironment environment;
     private final User user;
     private final boolean stranger;
     private final boolean group;
 
-    public QQUser(Environment environment, User user, boolean stranger, boolean group) {
+    public QQUser(QQEnvironment environment, User user, boolean stranger, boolean group) {
         this.environment = environment;
         this.user = user;
         this.stranger = stranger;
@@ -41,6 +41,8 @@ public class QQUser implements UserInfo {
 
     @Override
     public void nudge(ContactInfo contact) {
+        if (!environment.isNudgeEnabled())
+            return;
         if (contact instanceof QQUser)
             user.nudge().sendTo(((QQUser) contact).getUser());
         else

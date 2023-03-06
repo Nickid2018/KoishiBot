@@ -36,7 +36,8 @@ public class Settings {
             BOT_DATA.put(en.getKey(), new BotLoginData(
                     JsonUtil.getStringOrNull(loginData, "uid"),
                     JsonUtil.getStringOrNull(loginData, "password"),
-                    JsonUtil.getStringOrNull(loginData, "token")));
+                    JsonUtil.getStringOrNull(loginData, "token"),
+                    JsonUtil.getStringOrNull(loginData, "protocol")));
         }
 
         LOCAL_IP = JsonUtil.getStringOrElse(settingsRoot, "local_ip", "localhost");

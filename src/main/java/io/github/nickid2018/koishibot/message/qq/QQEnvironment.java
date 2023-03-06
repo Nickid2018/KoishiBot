@@ -27,6 +27,8 @@ public class QQEnvironment implements Environment {
     private final MessageSender sender;
     private final MessageManager manager;
 
+    private boolean nudgeEnabled;
+
     public QQEnvironment(BotLoginData loginData) {
         bot = BotFactory.INSTANCE.newBot(Long.parseLong(loginData.uid()), loginData.password(), new BotConfiguration() {{
             setHeartbeatStrategy(HeartbeatStrategy.STAT_HB);
@@ -34,6 +36,13 @@ public class QQEnvironment implements Environment {
             fileBasedDeviceInfo();
             setBotLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger("Mirai Bot")));
             setNetworkLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger("Mirai Net")));
+            if (loginData.protocol() != null) {
+                String protocol = loginData.protocol();
+                MiraiProtocol miraiProtocol = MiraiProtocol.valueOf(protocol.toUpperCase());
+                setProtocol(miraiProtocol);
+                nudgeEnabled = miraiProtocol == MiraiProtocol.ANDROID_PHONE || miraiProtocol == MiraiProtocol.IPAD;
+            } else
+                nudgeEnabled = true;
         }});
         bot.login();
         publisher = new QQMessagePublisher(this);
@@ -154,6 +163,10 @@ public class QQEnvironment implements Environment {
 
     public void close() {
         bot.close();
+    }
+
+    public boolean isNudgeEnabled() {
+        return nudgeEnabled;
     }
 
     public Bot getBot() {
