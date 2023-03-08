@@ -66,7 +66,9 @@ public class CalcModule extends Module {
 
     @Override
     public String getSummary() {
-        return "提供有关于数学计算的功能";
+        return """
+                提供有关于数学计算的功能
+                """;
     }
 
     public static SMCLContext getContext() {
