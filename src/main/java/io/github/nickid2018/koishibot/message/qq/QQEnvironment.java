@@ -11,7 +11,6 @@ import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.FormatTransformer;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
-import net.mamoe.mirai.internal.utils.MiraiProtocolInternal;
 import net.mamoe.mirai.message.data.*;
 import net.mamoe.mirai.utils.BotConfiguration;
 import net.mamoe.mirai.utils.LoggerAdapters;
@@ -31,30 +30,6 @@ public class QQEnvironment implements Environment {
     private boolean nudgeEnabled;
 
     public QQEnvironment(BotLoginData loginData) {
-        MiraiProtocolInternal.Companion.getProtocols$mirai_core().put(BotConfiguration.MiraiProtocol.ANDROID_PHONE, new MiraiProtocolInternal(
-                "com.tencent.mobileqq",
-                537151682,
-                "8.9.33.10335",
-                "6.0.0.2534",
-                150470524,
-                0x10400,
-                16724722,
-                "A6 B7 45 BF 24 A2 C2 77 52 77 16 F6 F3 6E B6 8D",
-                1673599898L,
-                19
-        ));
-        MiraiProtocolInternal.Companion.getProtocols$mirai_core().put(BotConfiguration.MiraiProtocol.ANDROID_PAD, new MiraiProtocolInternal(
-                "com.tencent.mobileqq",
-                537151218,
-                "8.9.33.10335",
-                "6.0.0.2534",
-                150470524,
-                0x10400,
-                16724722,
-                "A6 B7 45 BF 24 A2 C2 77 52 77 16 F6 F3 6E B6 8D",
-                1673599898L,
-                19
-        ));
         bot = BotFactory.INSTANCE.newBot(Long.parseLong(loginData.uid()), loginData.password(), new BotConfiguration() {{
             setHeartbeatStrategy(HeartbeatStrategy.STAT_HB);
             setWorkingDir(new File("qq"));

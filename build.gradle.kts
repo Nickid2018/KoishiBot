@@ -7,8 +7,12 @@ plugins {
 }
 
 dependencies {
+
+    // --------------------------------------------------
     // QQ Backend
-    api("net.mamoe:mirai-core:2.14.0")
+//    api("net.mamoe:mirai-core:2.14.0")
+    api("net.mamoe:mirai-core:2.15.0-dev-22")
+    // --------------------------------------------------
 
     // KOOK Backend
     api("com.github.KookyBot:KookyBot:0.2.4")
@@ -42,6 +46,7 @@ repositories {
     maven("https://maven.aliyun.com/repository/public")
     maven("https://jitpack.io")
     maven("https://libraries.minecraft.net")
+    maven("https://repo.mirai.mamoe.net/snapshots")
 }
 
 tasks.jar.configure {
