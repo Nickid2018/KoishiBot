@@ -1,7 +1,7 @@
 package io.github.nickid2018.koishibot.network.handler;
 
 import io.github.nickid2018.koishibot.network.ByteData;
-import io.github.nickid2018.koishibot.network.PacketRegistry;
+import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -12,9 +12,9 @@ import java.util.List;
 
 public class PacketDecoder extends ByteToMessageDecoder {
 
-    private final PacketRegistry registry;
+    private final DataRegistry registry;
 
-    public PacketDecoder(PacketRegistry registry) {
+    public PacketDecoder(DataRegistry registry) {
         this.registry = registry;
     }
 
@@ -24,10 +24,10 @@ public class PacketDecoder extends ByteToMessageDecoder {
             return;
         ByteData buf = new ByteData(in);
         int id = buf.readVarInt();
-        Class<? extends SerializableData> packetClass = registry.getPacketClass(id);
+        Class<? extends SerializableData> packetClass = registry.getDataClass(id);
         if (packetClass == null)
             throw new IOException("Bad packet (ID %d) - Unknown ID".formatted(id));
-        SerializableData packet = registry.createPacket(packetClass);
+        SerializableData packet = registry.createData(packetClass);
         packet.read(buf);
         if (buf.readableBytes() > 0)
             throw new IOException("Bad packet (ID %d, Name: %s) - Unexpected %s byte(s) at the packet tail".formatted(

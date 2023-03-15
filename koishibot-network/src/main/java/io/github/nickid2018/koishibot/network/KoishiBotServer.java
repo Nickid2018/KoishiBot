@@ -27,11 +27,11 @@ public class KoishiBotServer {
     private ChannelFuture future;
     private final List<Connection> connections = Collections.synchronizedList(new ArrayList<>());
     private final int port;
-    private final PacketRegistry registry;
+    private final DataRegistry registry;
     private final NetworkListener listener;
     private boolean active;
 
-    public KoishiBotServer(int port, PacketRegistry registry, NetworkListener listener) {
+    public KoishiBotServer(int port, DataRegistry registry, NetworkListener listener) {
         this.port = port;
         this.registry = registry;
         this.listener = listener;

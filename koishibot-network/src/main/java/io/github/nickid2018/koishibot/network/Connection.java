@@ -41,22 +41,30 @@ public class Connection extends SimpleChannelInboundHandler<SerializableData> {
 
     public static final Logger NETWORK_LOGGER = LoggerFactory.getLogger("Network");
 
-    private final PacketRegistry registry;
+    private final DataRegistry registry;
     private final NetworkListener listener;
     private Channel channel;
     private SocketAddress address;
     private final Queue<PacketHolder> packetBuffer = new ConcurrentLinkedQueue<>();
 
-    public Connection(PacketRegistry registry, NetworkListener listener) {
+    public Connection(DataRegistry registry, NetworkListener listener) {
         this.registry = registry;
         this.listener = listener;
     }
 
-    public static Connection connectToTcpServer(PacketRegistry registry, NetworkListener listener, InetAddress addr, int port) {
+    public DataRegistry getRegistry() {
+        return registry;
+    }
+
+    public NetworkListener getListener() {
+        return listener;
+    }
+
+    public static Connection connectToTcpServer(DataRegistry registry, NetworkListener listener, InetAddress addr, int port) {
         return connectToTcpServer(registry, listener, addr, port, 30);
     }
 
-    public static Connection connectToTcpServer(PacketRegistry registry, NetworkListener listener, InetAddress addr, int port, int timeout) {
+    public static Connection connectToTcpServer(DataRegistry registry, NetworkListener listener, InetAddress addr, int port, int timeout) {
         Connection connection = new Connection(registry, listener);
         Class<? extends Channel> clazz;
         LazyLoadedValue<?> lazyLoadedValue;

@@ -16,6 +16,8 @@ import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
+import java.util.Objects;
+import java.util.UUID;
 
 @SuppressWarnings("unused")
 public record ByteData(ByteBuf buf) {
@@ -95,6 +97,76 @@ public record ByteData(ByteBuf buf) {
 
     public void writeBitSet(BitSet bitset) {
         writeLongArray(bitset.toLongArray());
+    }
+
+    public SerializableData readSerializableData(DataRegistry registry) {
+        int i = readVarInt();
+        Class<? extends SerializableData> clazz = registry.getDataClass(i);
+        if (clazz == null)
+            throw new DecoderException("Unknown data id " + i);
+        SerializableData data = registry.createData(clazz);
+        data.read(this);
+        return data;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends SerializableData> T readSerializableDataOrNull(DataRegistry registry, Class<T> clazz) {
+        int i = readVarInt();
+        Class<? extends SerializableData> clazzReal = registry.getDataClass(i);
+        if (clazz != clazzReal)
+            return null;
+        T data = (T) registry.createData(clazzReal);
+        data.read(this);
+        return data;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends SerializableData> T readSerializableData(DataRegistry registry, Class<T> clazz) {
+        T data = (T) registry.createData(clazz);
+        data.read(this);
+        return data;
+    }
+
+    public void writeSerializableData(SerializableData data) {
+        data.write(this);
+    }
+
+    public void writeSerializableDataMultiChoice(DataRegistry registry, SerializableData data) {
+        writeVarInt(registry.getPacketId(data.getClass()));
+        data.write(this);
+    }
+
+    public void writeSerializableDataOrNull(DataRegistry registry, SerializableData data) {
+        writeSerializableDataMultiChoice(registry, Objects.requireNonNullElse(data, NullData.INSTANCE));
+    }
+
+    public ByteData writeUUID(UUID paramUUID) {
+        writeLong(paramUUID.getMostSignificantBits());
+        writeLong(paramUUID.getLeastSignificantBits());
+        return this;
+    }
+
+    public UUID readUUID() {
+        return new UUID(readLong(), readLong());
+    }
+
+    public byte[] readByteArray() {
+        return readByteArray(readableBytes());
+    }
+
+    public ByteData writeByteArray(byte[] paramArrayOfbyte) {
+        writeVarInt(paramArrayOfbyte.length);
+        writeBytes(paramArrayOfbyte);
+        return this;
+    }
+
+    public byte[] readByteArray(int paramInt) {
+        int i = readVarInt();
+        if (i > paramInt)
+            throw new DecoderException("ByteArray with size " + i + " is bigger than allowed " + paramInt);
+        byte[] arrayOfByte = new byte[i];
+        readBytes(arrayOfByte);
+        return arrayOfByte;
     }
 
     public int capacity() {

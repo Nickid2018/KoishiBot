@@ -1,7 +1,7 @@
 package io.github.nickid2018.koishibot.network.handler;
 
 import io.github.nickid2018.koishibot.network.ByteData;
-import io.github.nickid2018.koishibot.network.PacketRegistry;
+import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -11,9 +11,9 @@ import java.io.IOException;
 
 public class PacketEncoder extends MessageToByteEncoder<SerializableData> {
 
-    private final PacketRegistry registry;
+    private final DataRegistry registry;
 
-    public PacketEncoder(PacketRegistry registry) {
+    public PacketEncoder(DataRegistry registry) {
         this.registry = registry;
     }
 
