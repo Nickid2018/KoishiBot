@@ -8,14 +8,14 @@ import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
 
-public class SendMessageEvent implements SerializableData {
+public class SendMessageAction implements SerializableData {
 
     private final Environment env;
 
     public AbstractMessage message;
     public Either<UserInfo, GroupInfo> target;
 
-    public SendMessageEvent(Environment env) {
+    public SendMessageAction(Environment env) {
         this.env = env;
     }
 

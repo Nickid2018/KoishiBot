@@ -5,10 +5,10 @@ import javax.annotation.Nullable;
 
 public class QuoteMessage extends AbstractMessage {
 
-    private ChainMessage message;
-    private MessageSource quoteFrom;
-    private UserInfo replyTo;
-    private String replyToID;
+    protected ChainMessage message;
+    protected MessageSource quoteFrom;
+    protected UserInfo replyTo;
+    protected String replyToID;
 
     public QuoteMessage(Environment env) {
         super(env);

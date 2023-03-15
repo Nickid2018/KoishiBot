@@ -4,8 +4,8 @@ import io.github.nickid2018.koishibot.network.ByteData;
 
 public class ForwardMessage extends AbstractMessage {
 
-    private ContactInfo group;
-    private MessageEntry[] entries;
+    protected ContactInfo group;
+    protected MessageEntry[] entries;
 
     public ForwardMessage(Environment env) {
         super(env);

@@ -1,8 +1,8 @@
 package io.github.nickid2018.koishibot.message.api;
 
 import com.google.gson.JsonObject;
-import io.github.nickid2018.koishibot.message.action.GroupInfoQuery;
-import io.github.nickid2018.koishibot.message.action.UserInfoQuery;
+import io.github.nickid2018.koishibot.message.query.GroupInfoQuery;
+import io.github.nickid2018.koishibot.message.query.UserInfoQuery;
 import io.github.nickid2018.koishibot.message.network.DataPacketListener;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.Connection;
@@ -95,8 +95,8 @@ public class Environment implements SerializableData {
         return (DataPacketListener) connection.getListener();
     }
 
-    public AtMessage newAt(GroupInfo group, UserInfo user) {
-        return new AtMessage(this).fillAt(group, user);
+    public AtMessage newAt(UserInfo user) {
+        return new AtMessage(this).fillAt(user);
     }
 
     public ChainMessage newChain(AbstractMessage... messages) {

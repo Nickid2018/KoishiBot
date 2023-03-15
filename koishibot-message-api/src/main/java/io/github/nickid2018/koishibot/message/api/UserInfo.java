@@ -1,7 +1,7 @@
 package io.github.nickid2018.koishibot.message.api;
 
-import io.github.nickid2018.koishibot.message.action.NameInGroupQuery;
-import io.github.nickid2018.koishibot.message.action.NudgeEvent;
+import io.github.nickid2018.koishibot.message.query.NameInGroupQuery;
+import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.network.ByteData;
 
 import java.nio.charset.StandardCharsets;
@@ -9,9 +9,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 public class UserInfo extends ContactInfo {
-    private boolean isStranger;
-    private String userId;
-    private String name;
+    protected boolean isStranger;
+    protected String userId;
+    protected String name;
 
     public UserInfo(Environment environment) {
         super(environment);
@@ -26,7 +26,7 @@ public class UserInfo extends ContactInfo {
     }
 
     public void nudge(ContactInfo contact) {
-        NudgeEvent event = new NudgeEvent(env);
+        NudgeAction event = new NudgeAction(env);
         event.user = this;
         event.contact = contact;
         env.getConnection().sendPacket(event);

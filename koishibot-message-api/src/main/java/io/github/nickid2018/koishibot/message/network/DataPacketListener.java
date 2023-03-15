@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.message.network;
 
-import io.github.nickid2018.koishibot.message.action.QueryResultEvent;
+import io.github.nickid2018.koishibot.message.event.QueryResultEvent;
 import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.network.NetworkListener;
 import io.github.nickid2018.koishibot.network.SerializableData;
@@ -52,7 +52,7 @@ public class DataPacketListener implements NetworkListener {
 
     @Override
     public void connectionClosed(Connection connection) {
-        queryExecutor.shutdownNow();
         closed.set(true);
+        queryExecutor.shutdownNow();
     }
 }

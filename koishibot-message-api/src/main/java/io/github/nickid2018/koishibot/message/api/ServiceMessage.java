@@ -6,15 +6,13 @@ import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
 
-public class ServiceMessage implements SerializableData {
-
-    private final Environment env;
+public class ServiceMessage extends AbstractMessage implements SerializableData {
 
     protected String name;
     protected Either<JsonObject, String> data;
 
     public ServiceMessage(Environment env) {
-        this.env = env;
+        super(env);
     }
 
     public ServiceMessage fillService(String name, Either<JsonObject, String> data) {

@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.message.action;
+package io.github.nickid2018.koishibot.message.query;
 
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
@@ -40,6 +40,8 @@ public class GroupInfoQuery implements SerializableData {
     }
 
     public static GroupInfo fromBytes(DataRegistry registry, byte[] data) {
+        if (data == null)
+            return null;
         ByteData buf = new ByteData(Unpooled.wrappedBuffer(data));
         GroupInfo userInfo = buf.readSerializableData(registry, GroupInfo.class);
         buf.release();

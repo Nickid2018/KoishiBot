@@ -7,13 +7,13 @@ import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.SerializableData;
 
-public class NudgeEvent implements SerializableData {
+public class NudgeAction implements SerializableData {
 
     private final Environment env;
     public UserInfo user;
     public ContactInfo contact;
 
-    public NudgeEvent(Environment env) {
+    public NudgeAction(Environment env) {
         this.env = env;
     }
 

@@ -4,7 +4,7 @@ import io.github.nickid2018.koishibot.network.ByteData;
 
 public class TextMessage extends AbstractMessage {
 
-    private String text;
+    protected String text;
 
     public TextMessage(Environment env) {
         super(env);

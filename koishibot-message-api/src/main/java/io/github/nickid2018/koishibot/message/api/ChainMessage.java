@@ -8,7 +8,7 @@ import java.util.List;
 
 public class ChainMessage extends AbstractMessage {
 
-    private AbstractMessage[] messages;
+    protected AbstractMessage[] messages;
 
     public ChainMessage(Environment env) {
         super(env);

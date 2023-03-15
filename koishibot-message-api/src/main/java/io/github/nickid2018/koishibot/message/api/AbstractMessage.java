@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.message.api;
 
-import io.github.nickid2018.koishibot.message.action.SendMessageEvent;
+import io.github.nickid2018.koishibot.message.action.SendMessageAction;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
@@ -19,25 +19,28 @@ public abstract class AbstractMessage implements SerializableData {
     }
 
     public void send(UserInfo contact) {
-        SendMessageEvent event = new SendMessageEvent(env);
+        SendMessageAction event = new SendMessageAction(env);
         event.target = Either.left(contact);
         event.message = this;
         env.getConnection().sendPacket(event);
     }
 
     public void send(GroupInfo group) {
-        SendMessageEvent event = new SendMessageEvent(env);
+        SendMessageAction event = new SendMessageAction(env);
         event.target = Either.right(group);
         event.message = this;
         env.getConnection().sendPacket(event);
     }
 
     public void recall() {
-        source.recall();
+        if (source != null)
+            source.recall();
     }
 
     public long getSentTime() {
-        return source.getSentTime();
+        if (source != null)
+            return source.getSentTime();
+        return -1;
     }
 
     public MessageSource getSource() {
@@ -46,13 +49,13 @@ public abstract class AbstractMessage implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        source = buf.readSerializableData(env.getConnection().getRegistry(), MessageSource.class);
+        source = buf.readSerializableDataOrNull(env.getConnection().getRegistry(), MessageSource.class);
         readAdditional(buf);
     }
 
     @Override
     public void write(ByteData buf) {
-        buf.writeSerializableData(source);
+        buf.writeSerializableDataOrNull(env.getConnection().getRegistry(), source);
         writeAdditional(buf);
     }
 

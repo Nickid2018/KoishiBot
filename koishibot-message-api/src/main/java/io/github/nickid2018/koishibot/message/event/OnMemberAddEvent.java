@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.message.action;
+package io.github.nickid2018.koishibot.message.event;
 
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
@@ -6,33 +6,25 @@ import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.SerializableData;
 
-import java.util.UUID;
-
-public class NameInGroupQuery implements SerializableData {
+public class OnMemberAddEvent implements SerializableData {
 
     private final Environment env;
-
-    public UserInfo user;
     public GroupInfo group;
+    public UserInfo user;
 
-    public UUID queryId = UUID.randomUUID();
-
-    public NameInGroupQuery(Environment env) {
+    public OnMemberAddEvent(Environment env) {
         this.env = env;
     }
 
-
     @Override
     public void read(ByteData buf) {
-        queryId = buf.readUUID();
-        user = buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class);
         group = buf.readSerializableData(env.getConnection().getRegistry(), GroupInfo.class);
+        user = buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class);
     }
 
     @Override
     public void write(ByteData buf) {
-        buf.writeUUID(queryId);
-        buf.writeSerializableData(user);
         buf.writeSerializableData(group);
+        buf.writeSerializableData(user);
     }
 }

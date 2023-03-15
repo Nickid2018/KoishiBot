@@ -1,14 +1,14 @@
 package io.github.nickid2018.koishibot.message.api;
 
-import io.github.nickid2018.koishibot.message.action.RecallEvent;
+import io.github.nickid2018.koishibot.message.action.RecallAction;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.SerializableData;
 
 public class MessageSource implements SerializableData {
 
-    private final Environment env;
-    private String messageUniqueID;
-    private long sentTime;
+    protected final Environment env;
+    protected String messageUniqueID;
+    protected long sentTime;
 
     public MessageSource(Environment env) {
         this.env = env;
@@ -19,7 +19,7 @@ public class MessageSource implements SerializableData {
     }
 
     public void recall() {
-        RecallEvent event = new RecallEvent(env);
+        RecallAction event = new RecallAction(env);
         event.messageUniqueID = messageUniqueID;
         env.getConnection().sendPacket(event);
     }

@@ -7,7 +7,7 @@ import java.net.URL;
 
 public class ImageMessage extends AbstractMessage {
 
-    private URL source;
+    protected URL source;
 
     public ImageMessage(Environment env) {
         super(env);

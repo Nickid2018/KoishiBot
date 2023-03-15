@@ -6,15 +6,13 @@ import javax.annotation.Nonnull;
 
 public class AtMessage extends AbstractMessage {
 
-    private GroupInfo group;
-    private UserInfo user;
+    protected UserInfo user;
 
     public AtMessage(Environment env) {
         super(env);
     }
 
-    public AtMessage fillAt(GroupInfo group, UserInfo contact) {
-        this.group = group;
+    public AtMessage fillAt(UserInfo contact) {
         this.user = contact;
         return this;
     }
@@ -31,13 +29,11 @@ public class AtMessage extends AbstractMessage {
 
     @Override
     public void readAdditional(ByteData buf) {
-        group = buf.readSerializableData(env.getConnection().getRegistry(), GroupInfo.class);
         user = buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class);
     }
 
     @Override
     public void writeAdditional(ByteData buf) {
-        buf.writeSerializableData(group);
         buf.writeSerializableData(user);
     }
 }

@@ -1,4 +1,4 @@
-package io.github.nickid2018.koishibot.message.action;
+package io.github.nickid2018.koishibot.message.query;
 
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
@@ -44,6 +44,8 @@ public class UserInfoQuery implements SerializableData {
     }
 
     public static UserInfo fromBytes(DataRegistry registry, byte[] data) {
+        if (data == null)
+            return null;
         ByteData buf = new ByteData(Unpooled.wrappedBuffer(data));
         UserInfo userInfo = buf.readSerializableData(registry, UserInfo.class);
         buf.release();
