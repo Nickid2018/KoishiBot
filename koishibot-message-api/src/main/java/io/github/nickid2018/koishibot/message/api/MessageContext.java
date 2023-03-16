@@ -55,6 +55,10 @@ public class MessageContext implements SerializableData {
         return group != null ? group : user;
     }
 
+    public void sendMessage(@Nonnull AbstractMessage message) {
+        getSendDest().send(message);
+    }
+
     @Override
     public void read(ByteData buf) {
         DataRegistry registry = environment.getConnection().getRegistry();
