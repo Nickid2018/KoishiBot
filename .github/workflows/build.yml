@@ -53,5 +53,5 @@ jobs:
       - name: Upload signature artifact
         uses: actions/upload-artifact@v2
         with:
-          name: qq-backend
+          name: signatures
           path: build/libs/*.txt
