@@ -39,23 +39,26 @@ tasks.jar.configure {
         .joinToString("") { "libraries/" + it.name }
 }
 
-tasks.register<Sync>("exportApi") {
-    from(configurations.runtimeClasspath)
-    into(layout.buildDirectory.dir("apis"))
-}
-
-tasks.register("computeSignature") {
-    val md = MessageDigest.getInstance("SHA-256")
-    layout.buildDirectory.dir("apis").get().files().files.sorted().forEach {
-        md.update(it.readBytes())
+tasks {
+    register<Sync>("exportApi") {
+        from(configurations.runtimeClasspath)
+        into(layout.buildDirectory.dir("apis"))
     }
-    val signatureAPIs = md.digest().joinToString("") { "%02x".format(it) }
-    val signatureCoreJar = layout.buildDirectory.file("libs/koishibot-core.jar")
-        .map { it.asFile }.map { it.readBytes() }
-        .map { md.digest(it) }.get().joinToString("") { "%02x".format(it) }
-    layout.buildDirectory.file("libs/signature.txt").get().asFile.writeText(
-        "$signatureAPIs\n$signatureCoreJar"
-    )
+
+    register("computeSignature") {
+        doLast {
+            val md = MessageDigest.getInstance("SHA-256")
+            layout.buildDirectory.dir("apis").get().files().files.sorted()
+                .forEach { md.update(it.readBytes()) }
+            val signatureAPIs = md.digest().joinToString("") { "%02x".format(it) }
+            val signatureCoreJar = layout.buildDirectory.file("libs/koishibot-core.jar")
+                .map { it.asFile }.map { it.readBytes() }
+                .map { md.digest(it) }.get().joinToString("") { "%02x".format(it) }
+            layout.buildDirectory.file("libs/signature.txt").get().asFile.writeText(
+                "$signatureAPIs\n$signatureCoreJar"
+            )
+        }
+    }
 }
 
 tasks["exportApi"].dependsOn("jar")

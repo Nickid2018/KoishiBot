@@ -27,10 +27,3 @@ tasks.jar.configure {
     manifest.attributes["Class-Path"] = join(" ", configurations.runtimeClasspath.get()
         .filter{ it.name.endsWith(".jar") }.map { "libraries/" + it.name })
 }
-
-tasks.register<Sync>("exportApi") {
-    from(configurations.runtimeClasspath)
-    into(layout.buildDirectory.dir("apis"))
-}
-
-tasks["build"].dependsOn(tasks["exportApi"])

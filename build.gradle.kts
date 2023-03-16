@@ -1,5 +1,3 @@
-import java.lang.String.join
-
 plugins {
     val kotlinVersion = "1.7.10"
     kotlin("jvm") version kotlinVersion
@@ -51,8 +49,8 @@ repositories {
 
 tasks.jar.configure {
     manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.core.BotStart"
-    manifest.attributes["Class-Path"] = join(" ", configurations.runtimeClasspath.get()
-        .filter{ it.name.endsWith(".jar") }.map { "libraries/" + it.name })
+    manifest.attributes["Class-Path"] = configurations.runtimeClasspath.get()
+        .filter { it.name.endsWith(".jar") }.joinToString(" ") { "libraries/" + it.name }
 }
 
 tasks.register<Sync>("exportApi") {
