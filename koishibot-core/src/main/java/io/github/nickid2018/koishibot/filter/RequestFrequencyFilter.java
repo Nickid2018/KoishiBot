@@ -60,7 +60,7 @@ public class RequestFrequencyFilter implements PreFilter, PostFilter {
             if (ban.getValue()) {
                 if (context.group() != null)
                     environment.getMessageSender().sendMessage(context, environment.newChain(
-                            environment.newAt(context.group(), context.user()),
+                            environment.newAt(context.user()),
                             environment.newText(" 被自动封禁一小时，原因: 过于频繁的操作")
                     ));
                 else

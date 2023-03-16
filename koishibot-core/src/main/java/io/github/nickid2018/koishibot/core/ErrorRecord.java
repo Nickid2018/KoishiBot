@@ -5,8 +5,8 @@ import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.ForwardMessage;
 import io.github.nickid2018.koishibot.message.api.MessageEntry;
 import io.github.nickid2018.koishibot.util.InternalStack;
+import io.github.nickid2018.koishibot.util.Triple;
 import io.github.nickid2018.koishibot.util.value.MutableInt;
-import kotlin.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,16 +33,15 @@ public class ErrorRecord {
         List<Triple<Long, String, Throwable>> copied = new ArrayList<>(ERROR_QUEUE);
         if (copied.size() == 0)
             return null;
-        ForwardMessage forwards = environment.forwards();
         ContactInfo contact = environment.getUser(environment.getBotId(), false);
         List<MessageEntry> entries = new ArrayList<>();
         for (Triple<Long, String, Throwable> entry : copied) {
             StringBuilder builder = new StringBuilder();
-            builder.append("错误时间: ").append(String.format("%tc", new Date(entry.getFirst()))).append("\n");
-            builder.append("错误模块: ").append(entry.getSecond()).append("\n");
-            builder.append("错误描述: ").append(entry.getThird().getClass().getTypeName())
-                    .append(": ").append(entry.getThird().getMessage()).append("\n");
-            StackTraceElement[] stacks = entry.getThird().getStackTrace();
+            builder.append("错误时间: ").append(String.format("%tc", new Date(entry.first()))).append("\n");
+            builder.append("错误模块: ").append(entry.second()).append("\n");
+            builder.append("错误描述: ").append(entry.third().getClass().getTypeName())
+                    .append(": ").append(entry.third().getMessage()).append("\n");
+            StackTraceElement[] stacks = entry.third().getStackTrace();
             if (stacks.length > 0) {
                 int depth = 0;
                 while (depth < stacks.length) {
@@ -69,7 +68,6 @@ public class ErrorRecord {
                     val.getAndIncrease()
             ));
         }
-        forwards.fillForwards(contact, entries.toArray(new MessageEntry[0]));
-        return forwards;
+        return environment.newForwards(contact, entries.toArray(new MessageEntry[0]));
     }
 }
