@@ -48,7 +48,7 @@ tasks {
         doLast {
             val md = MessageDigest.getInstance("SHA-256")
 
-            layout.buildDirectory.dir("apis").get().files().files.sorted()
+            layout.buildDirectory.dir("apis").get().asFileTree.files.sorted()
                 .forEach { md.update(it.readBytes()) }
             val signatureAPIs = md.digest().joinToString("") { "%02x".format(it) }
             layout.projectDirectory.dir("src/main/java").asFileTree.files.sorted()
