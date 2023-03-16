@@ -32,14 +32,14 @@ dependencies {
     api("org.apache.logging.log4j:log4j-slf4j-impl:2.19.0")
 }
 
-tasks.jar.configure {
-    manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.core.BotStart"
-    manifest.attributes["Class-Path"] = configurations.runtimeClasspath.get()
-        .filter { it.name.endsWith(".jar") }
-        .joinToString("") { "libraries/" + it.name }
-}
-
 tasks {
+    jar.configure {
+        manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.core.BotStart"
+        manifest.attributes["Class-Path"] = configurations.runtimeClasspath.get()
+            .filter { it.name.endsWith(".jar") }
+            .joinToString("") { "libraries/" + it.name }
+    }
+
     register<Sync>("exportApi") {
         from(configurations.runtimeClasspath)
         into(layout.buildDirectory.dir("apis"))
