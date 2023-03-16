@@ -4,8 +4,8 @@ import io.github.nickid2018.koishibot.network.ByteData;
 
 public class GroupInfo extends ContactInfo {
 
-    protected String groupId;
-    protected String name;
+    public String groupId;
+    public String name;
 
     public GroupInfo(Environment env) {
         super(env);

@@ -4,16 +4,12 @@ import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.DataRegistry;
-import io.github.nickid2018.koishibot.network.SerializableData;
 import io.netty.buffer.Unpooled;
 
-import java.util.UUID;
-
-public class UserInfoQuery implements SerializableData {
+public class UserInfoQuery extends Query {
 
     private final Environment env;
 
-    public UUID queryId = UUID.randomUUID();
     public String id;
     public boolean isStranger;
 
@@ -23,14 +19,14 @@ public class UserInfoQuery implements SerializableData {
 
     @Override
     public void write(ByteData buf) {
-        buf.writeUUID(queryId);
+        super.write(buf);
         buf.writeString(id);
         buf.writeBoolean(isStranger);
     }
 
     @Override
     public void read(ByteData buf) {
-        queryId = buf.readUUID();
+        super.read(buf);
         id = buf.readString();
         isStranger = buf.readBoolean();
     }

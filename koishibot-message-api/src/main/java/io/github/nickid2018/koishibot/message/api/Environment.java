@@ -1,28 +1,28 @@
 package io.github.nickid2018.koishibot.message.api;
 
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.message.network.DataPacketListener;
 import io.github.nickid2018.koishibot.message.query.GroupInfoQuery;
 import io.github.nickid2018.koishibot.message.query.UserInfoQuery;
-import io.github.nickid2018.koishibot.message.network.DataPacketListener;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
 
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class Environment implements SerializableData {
 
-    private final Connection connection;
-    private String botID;
-    private String environmentName;
-    private String environmentUserPrefix;
-    private boolean forwardMessageSupported;
-    private boolean audioSupported;
-    private boolean audioToFriendSupported;
-    private boolean quoteSupported;
+    protected final Connection connection;
+    protected String botID;
+    protected String environmentName;
+    protected String environmentUserPrefix;
+    protected boolean forwardMessageSupported;
+    protected boolean audioSupported;
+    protected boolean audioToFriendSupported;
+    protected boolean quoteSupported;
 
     public Environment(Connection connection) {
         this.connection = connection;
@@ -32,8 +32,7 @@ public class Environment implements SerializableData {
         UserInfoQuery query = new UserInfoQuery(this);
         query.id = id;
         query.isStranger = isStranger;
-        Future<byte[]> future = getListener().queryData(query.queryId);
-        connection.sendPacket(query);
+        CompletableFuture<byte[]> future = getListener().queryData(connection, query);
         try {
             return UserInfoQuery.fromBytes(connection.getRegistry(), future.get());
         } catch (InterruptedException | ExecutionException e) {
@@ -44,8 +43,7 @@ public class Environment implements SerializableData {
     public GroupInfo getGroup(String id) {
         GroupInfoQuery query = new GroupInfoQuery(this);
         query.id = id;
-        Future<byte[]> future = getListener().queryData(query.queryId);
-        connection.sendPacket(query);
+        CompletableFuture<byte[]> future = getListener().queryData(connection, query);
         try {
             return GroupInfoQuery.fromBytes(connection.getRegistry(), future.get());
         } catch (InterruptedException | ExecutionException e) {
@@ -84,7 +82,6 @@ public class Environment implements SerializableData {
 //    Future<File[]> parseAudioFile(String suffix, URL url) throws IOException;
 
     public void close() {
-
     }
 
     public Connection getConnection() {

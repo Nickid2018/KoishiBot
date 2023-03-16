@@ -18,7 +18,16 @@ public class QQEnvironment extends Environment {
         super(connection);
         this.bot = bot;
         this.nudgeEnabled = nudgeEnabled;
+
         publisher = new QQMessagePublisher(this);
+
+        botID = "qq.user" + bot.getId();
+        environmentName = "QQ";
+        environmentUserPrefix = "qq.user";
+        forwardMessageSupported = true;
+        audioSupported = true;
+        audioToFriendSupported = false;
+        quoteSupported = true;
     }
 
     public User getQQUser(String id, boolean isStranger) {
@@ -42,41 +51,6 @@ public class QQEnvironment extends Environment {
     @Override
     public GroupInfo getGroup(String id) {
         return id.startsWith("qq.group") ? new QQGroup(this, getQQGroup(id)) : null;
-    }
-
-    @Override
-    public String getBotId() {
-        return "qq.user" + bot.getId();
-    }
-
-    @Override
-    public boolean forwardMessageSupported() {
-        return true;
-    }
-
-    @Override
-    public boolean audioSupported() {
-        return true;
-    }
-
-    @Override
-    public boolean audioToFriendSupported() {
-        return false;
-    }
-
-    @Override
-    public boolean quoteSupported() {
-        return true;
-    }
-
-    @Override
-    public String getEnvironmentName() {
-        return "QQ";
-    }
-
-    @Override
-    public String getEnvironmentUserPrefix() {
-        return "qq.user";
     }
 
     public void close() {

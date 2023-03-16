@@ -1,10 +1,13 @@
 package io.github.nickid2018.koishibot.message.qq;
 
+import io.github.nickid2018.koishibot.util.TimeoutCache;
 import net.mamoe.mirai.message.data.MessageSource;
 
 import java.util.Arrays;
 
 public class QQMessageSource extends io.github.nickid2018.koishibot.message.api.MessageSource {
+
+    public static TimeoutCache<QQMessageSource> messageCache = new TimeoutCache<>();
 
     private final MessageSource source;
 
@@ -15,6 +18,7 @@ public class QQMessageSource extends io.github.nickid2018.koishibot.message.api.
         this.messageUniqueID = "%d %d %d %s %s".formatted(
                 source.getFromId(), source.getTargetId(),  source.getTime(),
                 Arrays.toString(source.getIds()), Arrays.toString(source.getInternalIds()));
+        messageCache.put(messageUniqueID, this, 1000 * 60 * 5);
     }
 
     public MessageSource getSource() {

@@ -4,16 +4,12 @@ import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.DataRegistry;
-import io.github.nickid2018.koishibot.network.SerializableData;
 import io.netty.buffer.Unpooled;
 
-import java.util.UUID;
-
-public class GroupInfoQuery implements SerializableData {
+public class GroupInfoQuery extends Query {
 
     private final Environment env;
     public String id;
-    public UUID queryId = UUID.randomUUID();
 
     public GroupInfoQuery(Environment env) {
         this.env = env;
@@ -21,13 +17,13 @@ public class GroupInfoQuery implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        queryId = buf.readUUID();
+        super.read(buf);
         id = buf.readString();
     }
 
     @Override
     public void write(ByteData buf) {
-        buf.writeUUID(queryId);
+        super.write(buf);
         buf.writeString(id);
     }
 
