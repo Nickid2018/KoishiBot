@@ -56,7 +56,6 @@ public class QQEnvironment extends Environment {
     }
 
     public void close() {
-        bot.close();
     }
 
     public boolean isNudgeEnabled() {
@@ -68,22 +67,22 @@ public class QQEnvironment extends Environment {
     }
 
     public AbstractMessage cast(Message message) {
-        if (message instanceof MessageChain)
-            return new QQChain(this, (MessageChain) message);
-        else if (message instanceof At)
-            return new QQAt(this, (At) message);
-        else if (message instanceof PlainText)
-            return new QQText(this, (PlainText) message);
-        else if (message instanceof Audio)
-            return new QQAudio(this, (Audio) message);
-        else if (message instanceof Image)
-            return new QQImage(this, (Image) message);
-        else if (message instanceof QuoteReply)
-            return new QQQuote(this, (QuoteReply) message);
-        else if (message instanceof net.mamoe.mirai.message.data.ForwardMessage)
-            return new QQForward(this, (net.mamoe.mirai.message.data.ForwardMessage) message);
-        else if (message instanceof RichMessage)
-            return new QQService(this, (RichMessage) message);
+        if (message instanceof MessageChain chain)
+            return new QQChain(this, chain);
+        else if (message instanceof At at)
+            return new QQAt(this, at);
+        else if (message instanceof PlainText text)
+            return new QQText(this, text);
+        else if (message instanceof Audio audio)
+            return new QQAudio(this, audio);
+        else if (message instanceof Image image)
+            return new QQImage(this, image);
+        else if (message instanceof QuoteReply quoteReply)
+            return new QQQuote(this, quoteReply);
+        else if (message instanceof net.mamoe.mirai.message.data.ForwardMessage forwardMessage)
+            return new QQForward(this, forwardMessage);
+        else if (message instanceof RichMessage rich)
+            return new QQService(this, rich);
         else
             return new UnsupportedMessage(this);
     }
