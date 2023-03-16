@@ -46,7 +46,7 @@ tasks {
                 .forEach { md.update(it.readBytes()) }
             val signatureCoreJar = md.digest().joinToString("") { "%02x".format(it) }
 
-            layout.buildDirectory.file("libs/signature.txt").get().asFile.writeText(
+            parent!!.layout.buildDirectory.file("libs/qq-backend-signature.txt").get().asFile.writeText(
                 "$signatureAPIs\n$signatureCoreJar"
             )
         }

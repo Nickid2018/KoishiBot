@@ -20,12 +20,14 @@ public class Settings {
     public static int PROXY_PORT = -1;
     public static String PROXY_HOST = null;
     public static String PROXY_TYPE = null;
+    public static String[] ENABLE_BACKENDS;
 
     public static void loadSettings() throws IOException {
         JsonObject settings = JsonParser.parseString(IOUtils.toString(new FileReader("settings.json"))).getAsJsonObject();
         CORE_PORT = JsonUtil.getIntOrElse(settings, "core_port", 23333);
         GITHUB_TOKEN = JsonUtil.getStringOrNull(settings, "github_token");
         ACTION_REPO = JsonUtil.getStringOrElse(settings, "action_repo", "Nickid2018/KoishiBot;build.yml");
+        ENABLE_BACKENDS = JsonUtil.getString(settings, "enable_backends").map(s -> s.split(",")).orElse(new String[0]);
         loadProxy(settings);
     }
 

@@ -36,16 +36,22 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: core
-          path: koishibot-core/build/libs/*.*
+          path: koishibot-core/build/libs/*.jar
 
       - name: Upload qq backend artifact
         uses: actions/upload-artifact@v2
         with:
           name: qq-backend
-          path: koishibot-qq-backend/build/libs/*.*
+          path: koishibot-qq-backend/build/libs/*.jar
 
       - name: Upload monitor artifact
         uses: actions/upload-artifact@v2
         with:
           name: monitor
-          path: koishibot-monitor/build/libs/*.*
+          path: koishibot-monitor/build/libs/koishibot-monitor-all.jar
+
+      - name: Upload signature artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: qq-backend
+          path: build/libs/*.txt
