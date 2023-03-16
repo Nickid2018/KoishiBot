@@ -4,6 +4,7 @@ on:
 
 jobs:
   build:
+    if: ${{ !startsWith(github.event.ref, 'refs/tags/') && contains(github.event.head_commit.message, '*') == false }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out Git repository
@@ -16,10 +17,20 @@ jobs:
           java-version: 17
           cache: gradle
 
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ubuntu-gradle-${{ hashFiles('*.gradle', 'gradle.properties') }}
+          restore-keys: ubuntu-gradle-
+
       - name: Run Gradle build
         run: |
           chmod +x gradlew
           ./gradlew build
+          ./gradlew :koishibot-monitor:shadowJar
 
       - name: Upload core artifact
         uses: actions/upload-artifact@v2
@@ -30,5 +41,11 @@ jobs:
       - name: Upload qq backend artifact
         uses: actions/upload-artifact@v2
         with:
-          name: core
+          name: qq-backend
           path: koishibot-qq-backend/build/libs/*.*
+
+      - name: Upload monitor artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: monitor
+          path: koishibot-monitor/build/libs/*.*

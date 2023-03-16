@@ -23,7 +23,7 @@ dependencies {
 }
 
 tasks {
-    jar.configure {
+    jar {
         manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.backend.Main"
         manifest.attributes["Class-Path"] = configurations.runtimeClasspath.get()
             .filter { it.name.endsWith(".jar") }
