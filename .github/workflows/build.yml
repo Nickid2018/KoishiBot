@@ -26,3 +26,9 @@ jobs:
         with:
           name: core
           path: koishibot-core/build/libs/*.*
+
+      - name: Upload qq backend artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: core
+          path: koishibot-qq-backend/build/libs/*.*
