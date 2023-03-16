@@ -7,7 +7,6 @@ var subProjectNames = listOf(
     "koishibot-qq-backend",
     "koishibot-kook-backend",
     "koishibot-telegram-backend",
-    "koishibot-delegate-backend",
     "koishibot-monitor"
 )
 

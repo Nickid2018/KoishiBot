@@ -3,7 +3,7 @@ package io.github.nickid2018.koishibot.message.query;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.network.ByteData;
-import io.github.nickid2018.koishibot.network.DataRegistry;
+import io.github.nickid2018.koishibot.network.Connection;
 import io.netty.buffer.Unpooled;
 
 public class UserInfoQuery extends Query {
@@ -39,11 +39,11 @@ public class UserInfoQuery extends Query {
         return data;
     }
 
-    public static UserInfo fromBytes(DataRegistry registry, byte[] data) {
+    public static UserInfo fromBytes(Connection connection, byte[] data) {
         if (data == null)
             return null;
         ByteData buf = new ByteData(Unpooled.wrappedBuffer(data));
-        UserInfo userInfo = buf.readSerializableData(registry, UserInfo.class);
+        UserInfo userInfo = buf.readSerializableData(connection, UserInfo.class);
         buf.release();
         return userInfo;
     }

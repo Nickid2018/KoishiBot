@@ -84,7 +84,7 @@ public class Connection extends SimpleChannelInboundHandler<SerializableData> {
                 }
                 channel.pipeline().addLast("timeout", new ReadTimeoutHandler(timeout))
                         .addLast("splitter", new SplitterHandler())
-                        .addLast("decoder", new PacketDecoder(registry))
+                        .addLast("decoder", new PacketDecoder(connection))
                         .addLast("prepender", new SizePrepender())
                         .addLast("encoder", new PacketEncoder(registry))
                         .addLast("packet_handler", connection);

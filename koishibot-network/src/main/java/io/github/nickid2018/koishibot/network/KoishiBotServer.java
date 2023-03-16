@@ -52,6 +52,8 @@ public class KoishiBotServer {
         future = new ServerBootstrap().channel(clazz).childHandler(new ChannelInitializer<>() {
             @Override
             protected void initChannel(Channel channel) {
+                Connection connection = new Connection(registry, listener);
+                connections.add(connection);
                 try {
                     channel.config().setOption(ChannelOption.TCP_NODELAY, Boolean.TRUE);
                 } catch (ChannelException ignored) {
@@ -59,11 +61,9 @@ public class KoishiBotServer {
                 channel.pipeline()
                         .addLast("timeout", new ReadTimeoutHandler(timeout))
                         .addLast("splitter", new SplitterHandler())
-                        .addLast("decoder", new PacketDecoder(registry))
+                        .addLast("decoder", new PacketDecoder(connection))
                         .addLast("prepender", new SizePrepender())
                         .addLast("encoder", new PacketEncoder(registry));
-                Connection connection = new Connection(registry, listener);
-                connections.add(connection);
                 channel.pipeline().addLast("packet_handler", connection);
             }
         }).group((EventLoopGroup) lazyLoadedValue.get()).localAddress((InetAddress) null, port).bind().syncUninterruptibly();

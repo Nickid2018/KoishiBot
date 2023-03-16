@@ -49,7 +49,7 @@ public abstract class AbstractMessage implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        source = buf.readSerializableDataOrNull(env.getConnection().getRegistry(), MessageSource.class);
+        source = buf.readSerializableDataOrNull(env.getConnection(), MessageSource.class);
         readAdditional(buf);
     }
 

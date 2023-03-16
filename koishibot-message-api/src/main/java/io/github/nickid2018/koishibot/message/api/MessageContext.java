@@ -61,10 +61,9 @@ public class MessageContext implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        DataRegistry registry = environment.getConnection().getRegistry();
-        group = buf.readSerializableDataOrNull(registry, GroupInfo.class);
-        user = buf.readSerializableData(registry, UserInfo.class);
-        message = buf.readSerializableData(registry, ChainMessage.class);
+        group = buf.readSerializableDataOrNull(environment.getConnection(), GroupInfo.class);
+        user = buf.readSerializableData(environment.getConnection(), UserInfo.class);
+        message = buf.readSerializableData(environment.getConnection(), ChainMessage.class);
         sentTime = buf.readLong();
     }
 

@@ -19,8 +19,8 @@ public class OnGroupRecallEvent implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        group = buf.readSerializableData(env.getConnection().getRegistry(), GroupInfo.class);
-        user = buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class);
+        group = buf.readSerializableData(env.getConnection(), GroupInfo.class);
+        user = buf.readSerializableData(env.getConnection(), UserInfo.class);
         time = buf.readLong();
     }
 

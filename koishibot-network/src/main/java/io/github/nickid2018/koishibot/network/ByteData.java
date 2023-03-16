@@ -99,30 +99,30 @@ public record ByteData(ByteBuf buf) {
         writeLongArray(bitset.toLongArray());
     }
 
-    public SerializableData readSerializableData(DataRegistry registry) {
+    public SerializableData readSerializableData(Connection connection) {
         int i = readVarInt();
-        Class<? extends SerializableData> clazz = registry.getDataClass(i);
+        Class<? extends SerializableData> clazz = connection.getRegistry().getDataClass(i);
         if (clazz == null)
             throw new DecoderException("Unknown data id " + i);
-        SerializableData data = registry.createData(clazz);
+        SerializableData data = connection.getRegistry().createData(connection, clazz);
         data.read(this);
         return data;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends SerializableData> T readSerializableDataOrNull(DataRegistry registry, Class<T> clazz) {
+    public <T extends SerializableData> T readSerializableDataOrNull(Connection connection, Class<T> clazz) {
         int i = readVarInt();
-        Class<? extends SerializableData> clazzReal = registry.getDataClass(i);
+        Class<? extends SerializableData> clazzReal = connection.getRegistry().getDataClass(i);
         if (clazz != clazzReal)
             return null;
-        T data = (T) registry.createData(clazzReal);
+        T data = (T) connection.getRegistry().createData(connection, clazzReal);
         data.read(this);
         return data;
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends SerializableData> T readSerializableData(DataRegistry registry, Class<T> clazz) {
-        T data = (T) registry.createData(clazz);
+    public <T extends SerializableData> T readSerializableData(Connection connection, Class<T> clazz) {
+        T data = (T) connection.getRegistry().createData(connection, clazz);
         data.read(this);
         return data;
     }

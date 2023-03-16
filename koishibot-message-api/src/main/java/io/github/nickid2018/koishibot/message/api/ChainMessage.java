@@ -35,7 +35,7 @@ public class ChainMessage extends AbstractMessage {
         int size = buf.readInt();
         messages = new AbstractMessage[size];
         for (int i = 0; i < size; i++)
-            messages[i] = (AbstractMessage) buf.readSerializableData(env.getConnection().getRegistry());
+            messages[i] = (AbstractMessage) buf.readSerializableData(env.getConnection());
     }
 
     @Override

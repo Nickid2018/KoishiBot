@@ -4,7 +4,6 @@ import io.github.nickid2018.koishibot.message.api.ContactInfo;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.network.ByteData;
-import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.SerializableData;
 
 public class NudgeAction implements SerializableData {
@@ -19,9 +18,8 @@ public class NudgeAction implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        DataRegistry registry = env.getConnection().getRegistry();
-        user = buf.readSerializableData(registry, UserInfo.class);
-        contact = buf.readSerializableData(registry, ContactInfo.class);
+        user = buf.readSerializableData(env.getConnection(), UserInfo.class);
+        contact = buf.readSerializableData(env.getConnection(), ContactInfo.class);
     }
 
     @Override

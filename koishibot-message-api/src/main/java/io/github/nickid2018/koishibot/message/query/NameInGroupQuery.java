@@ -20,8 +20,8 @@ public class NameInGroupQuery extends Query {
     @Override
     public void read(ByteData buf) {
         super.read(buf);
-        user = buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class);
-        group = buf.readSerializableData(env.getConnection().getRegistry(), GroupInfo.class);
+        user = buf.readSerializableData(env.getConnection(), UserInfo.class);
+        group = buf.readSerializableData(env.getConnection(), GroupInfo.class);
     }
 
     @Override

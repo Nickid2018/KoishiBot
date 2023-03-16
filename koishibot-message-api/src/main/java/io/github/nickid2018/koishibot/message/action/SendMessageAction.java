@@ -21,11 +21,11 @@ public class SendMessageAction implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        message = buf.readSerializableData(env.getConnection().getRegistry(), AbstractMessage.class);
+        message = buf.readSerializableData(env.getConnection(), AbstractMessage.class);
         if (buf.readBoolean())
-            target = Either.left(buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class));
+            target = Either.left(buf.readSerializableData(env.getConnection(), UserInfo.class));
         else
-            target = Either.right(buf.readSerializableData(env.getConnection().getRegistry(), GroupInfo.class));
+            target = Either.right(buf.readSerializableData(env.getConnection(), GroupInfo.class));
     }
 
     @Override

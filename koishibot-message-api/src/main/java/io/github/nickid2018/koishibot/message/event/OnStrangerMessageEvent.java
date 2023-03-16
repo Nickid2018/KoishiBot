@@ -19,8 +19,8 @@ public class OnStrangerMessageEvent implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        user = buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class);
-        message = buf.readSerializableData(env.getConnection().getRegistry(), ChainMessage.class);
+        user = buf.readSerializableData(env.getConnection(), UserInfo.class);
+        message = buf.readSerializableData(env.getConnection(), ChainMessage.class);
         time = buf.readLong();
     }
 

@@ -28,6 +28,8 @@ public class QQEnvironment extends Environment {
         audioSupported = true;
         audioToFriendSupported = false;
         quoteSupported = true;
+        needAntiFilter = true;
+        audioSilk = true;
     }
 
     public User getQQUser(String id, boolean isStranger) {

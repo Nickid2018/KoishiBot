@@ -19,11 +19,11 @@ public class ForwardMessage extends AbstractMessage {
 
     @Override
     protected void readAdditional(ByteData buf) {
-        group = buf.readSerializableData(env.getConnection().getRegistry(), ContactInfo.class);
+        group = buf.readSerializableData(env.getConnection(), ContactInfo.class);
         int len = buf.readVarInt();
         entries = new MessageEntry[len];
         for (int i = 0; i < len; i++)
-            entries[i] = buf.readSerializableData(env.getConnection().getRegistry(), MessageEntry.class);
+            entries[i] = buf.readSerializableData(env.getConnection(), MessageEntry.class);
     }
 
     @Override

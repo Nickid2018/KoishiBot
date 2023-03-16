@@ -3,7 +3,6 @@ package io.github.nickid2018.koishibot.backend;
 import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
 import io.github.nickid2018.koishibot.message.action.SendMessageAction;
-import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.message.event.*;
@@ -19,7 +18,7 @@ import io.github.nickid2018.koishibot.util.Either;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class BackendDataListener extends DataPacketListener {
@@ -31,15 +30,15 @@ public class BackendDataListener extends DataPacketListener {
     public BackendDataListener(Supplier<QQEnvironment> environment, CompletableFuture<Void> disconnectFuture) {
         this.environment = environment;
         this.disconnectFuture = disconnectFuture;
-        Function<Class<? extends SerializableData>, ? extends SerializableData> dataFactory = c -> {
+        BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory = (c, cn) -> {
             try {
-                return c.getConstructor(Environment.class).newInstance(environment.get());
+                return c.getConstructor(QQEnvironment.class).newInstance(environment.get());
             } catch (Exception e) {
                 return null;
             }
         };
 
-        registry.registerData(QQEnvironment.class, c -> null);
+        registry.registerData(QQEnvironment.class, (c, cn) -> null);
 
         registry.registerData(QQAt.class, dataFactory);
         registry.registerData(QQAudio.class, dataFactory);

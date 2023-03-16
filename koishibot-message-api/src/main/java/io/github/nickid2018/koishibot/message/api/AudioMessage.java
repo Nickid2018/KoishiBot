@@ -22,7 +22,7 @@ public class AudioMessage extends AbstractMessage {
 
     @Override
     protected void readAdditional(ByteData buf) {
-        group = buf.readSerializableDataOrNull(env.getConnection().getRegistry(), GroupInfo.class);
+        group = buf.readSerializableDataOrNull(env.getConnection(), GroupInfo.class);
         try {
             source = new URL(buf.readString());
         } catch (MalformedURLException e) {

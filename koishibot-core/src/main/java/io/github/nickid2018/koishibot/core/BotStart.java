@@ -39,6 +39,7 @@ public class BotStart {
     private static void start() throws IOException {
         PluginProcessor.initProcess();
         Settings.load();
+        Environments.startServer();
         PluginProcessor.init();
     }
 

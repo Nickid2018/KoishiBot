@@ -31,7 +31,7 @@ public class MessageEntry implements SerializableData {
     public void read(ByteData buf) {
         id = buf.readString();
         name = buf.readString();
-        message = (AbstractMessage) buf.readSerializableData(env.getConnection().getRegistry());
+        message = (AbstractMessage) buf.readSerializableData(env.getConnection());
         time = buf.readInt();
     }
 

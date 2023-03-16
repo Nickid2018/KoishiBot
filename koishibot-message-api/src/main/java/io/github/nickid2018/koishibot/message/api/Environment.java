@@ -23,6 +23,8 @@ public class Environment implements SerializableData {
     protected boolean audioSupported;
     protected boolean audioToFriendSupported;
     protected boolean quoteSupported;
+    protected boolean needAntiFilter;
+    protected boolean audioSilk;
 
     public Environment(Connection connection) {
         this.connection = connection;
@@ -34,7 +36,7 @@ public class Environment implements SerializableData {
         query.isStranger = isStranger;
         CompletableFuture<byte[]> future = getListener().queryData(connection, query);
         try {
-            return UserInfoQuery.fromBytes(connection.getRegistry(), future.get());
+            return UserInfoQuery.fromBytes(connection, future.get());
         } catch (InterruptedException | ExecutionException e) {
             return null;
         }
@@ -45,7 +47,7 @@ public class Environment implements SerializableData {
         query.id = id;
         CompletableFuture<byte[]> future = getListener().queryData(connection, query);
         try {
-            return GroupInfoQuery.fromBytes(connection.getRegistry(), future.get());
+            return GroupInfoQuery.fromBytes(connection, future.get());
         } catch (InterruptedException | ExecutionException e) {
             return null;
         }
@@ -137,6 +139,8 @@ public class Environment implements SerializableData {
         audioSupported = buf.readBoolean();
         audioToFriendSupported = buf.readBoolean();
         quoteSupported = buf.readBoolean();
+        needAntiFilter = buf.readBoolean();
+        audioSilk = buf.readBoolean();
     }
 
     @Override
@@ -148,5 +152,7 @@ public class Environment implements SerializableData {
         buf.writeBoolean(audioSupported);
         buf.writeBoolean(audioToFriendSupported);
         buf.writeBoolean(quoteSupported);
+        buf.writeBoolean(needAntiFilter);
+        buf.writeBoolean(audioSilk);
     }
 }

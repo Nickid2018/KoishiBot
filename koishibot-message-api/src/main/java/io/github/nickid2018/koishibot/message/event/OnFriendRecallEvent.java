@@ -17,7 +17,7 @@ public class OnFriendRecallEvent implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        user = buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class);
+        user = buf.readSerializableData(env.getConnection(), UserInfo.class);
         time = buf.readLong();
     }
 

@@ -29,7 +29,7 @@ public class AtMessage extends AbstractMessage {
 
     @Override
     public void readAdditional(ByteData buf) {
-        user = buf.readSerializableData(env.getConnection().getRegistry(), UserInfo.class);
+        user = buf.readSerializableData(env.getConnection(), UserInfo.class);
     }
 
     @Override

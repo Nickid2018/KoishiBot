@@ -21,12 +21,15 @@ public class Settings {
     public static int PROXY_PORT;
     public static String PROXY_TYPE;
 
+    public static int DELEGATE_PORT;
+
     public static void load() throws IOException {
         String data = IOUtils.toString(new FileReader("botKoishi.json"));
         JsonObject settingsRoot = JsonParser.parseString(data).getAsJsonObject();
 
         LOCAL_IP = JsonUtil.getStringOrElse(settingsRoot, "local_ip", "localhost");
         OPEN_PORT = JsonUtil.getIntOrElse(settingsRoot, "port", -1);
+        DELEGATE_PORT = JsonUtil.getIntOrElse(settingsRoot, "delegate_port", 52514);
 
         System.err.close();
         PluginProcessor.set(settingsRoot);
