@@ -16,7 +16,7 @@ import java.util.Set;
 public class EnvironmentCheck {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("Creating Process");
-    public static final File MONITOR_DATA_FILE = new File("monitor_data.json");
+    public static final File MONITOR_DATA_FILE = new File("monitor-data.json");
 
     public static boolean checkAndCreate() {
         if (!MONITOR_DATA_FILE.isFile()) {
