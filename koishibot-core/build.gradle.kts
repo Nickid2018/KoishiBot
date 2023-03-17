@@ -44,7 +44,7 @@ tasks {
         into(layout.buildDirectory.dir("apis"))
     }
 
-    register("computeSignature") {
+    register("computeChecksum") {
         doLast {
             val md = MessageDigest.getInstance("SHA-256")
 
@@ -55,7 +55,7 @@ tasks {
                 .forEach { md.update(it.readBytes()) }
             val signatureCoreJar = md.digest().joinToString("") { "%02x".format(it) }
 
-            parent!!.layout.buildDirectory.file("libs/core-signature.txt").get().asFile.writeText(
+            parent!!.layout.buildDirectory.file("libs/core-checksum.txt").get().asFile.writeText(
                 "$signatureAPIs\n$signatureCoreJar"
             )
         }
@@ -63,5 +63,5 @@ tasks {
 }
 
 tasks["exportApi"].dependsOn("jar")
-tasks["computeSignature"].dependsOn("exportApi")
-tasks["build"].dependsOn("computeSignature")
+tasks["computeChecksum"].dependsOn("exportApi")
+tasks["build"].dependsOn("computeChecksum")

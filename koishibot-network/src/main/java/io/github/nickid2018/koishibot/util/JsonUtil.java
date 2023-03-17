@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive;
 
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 public class JsonUtil {
 
@@ -66,6 +67,18 @@ public class JsonUtil {
         return getString(root, path).orElse(other);
     }
 
+    public static Optional<String> getStringInPath(JsonObject root, String path) {
+        return getDataInPath(root, path, JsonPrimitive.class).map(JsonPrimitive::getAsString);
+    }
+
+    public static String getStringInPathOrNull(JsonObject root, String path) {
+        return getStringInPath(root, path).orElse(null);
+    }
+
+    public static String getStringInPathOrElse(JsonObject root, String path, String other) {
+        return getStringInPath(root, path).orElse(other);
+    }
+
     public static OptionalInt getInt(JsonObject root, String path) {
         return getData(root, path, JsonPrimitive.class)
                 .map(JsonPrimitive::getAsInt).map(OptionalInt::of).orElse(OptionalInt.empty());
@@ -92,15 +105,29 @@ public class JsonUtil {
         return getIntInPath(root, path).orElse(other);
     }
 
-    public static Optional<String> getStringInPath(JsonObject root, String path) {
-        return getDataInPath(root, path, JsonPrimitive.class).map(JsonPrimitive::getAsString);
+    public static OptionalLong getLong(JsonObject root, String path) {
+        return getData(root, path, JsonPrimitive.class)
+                .map(JsonPrimitive::getAsLong).map(OptionalLong::of).orElse(OptionalLong.empty());
     }
 
-    public static String getStringInPathOrNull(JsonObject root, String path) {
-        return getStringInPath(root, path).orElse(null);
+    public static long getLongOrZero(JsonObject root, String path) {
+        return getLong(root, path).orElse(0);
     }
 
-    public static String getStringInPathOrElse(JsonObject root, String path, String other) {
-        return getStringInPath(root, path).orElse(other);
+    public static long getLongOrElse(JsonObject root, String path, long other) {
+        return getLong(root, path).orElse(other);
+    }
+
+    public static OptionalLong getLongInPath(JsonObject root, String path) {
+        return getDataInPath(root, path, JsonPrimitive.class)
+                .map(JsonPrimitive::getAsLong).map(OptionalLong::of).orElse(OptionalLong.empty());
+    }
+
+    public static long getLongInPathOrZero(JsonObject root, String path) {
+        return getLongInPath(root, path).orElse(0);
+    }
+
+    public static long getLongInPathOrElse(JsonObject root, String path, long other) {
+        return getLongInPath(root, path).orElse(other);
     }
 }

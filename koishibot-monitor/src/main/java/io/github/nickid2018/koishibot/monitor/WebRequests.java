@@ -58,4 +58,21 @@ public class WebRequests {
             });
         }
     }
+
+    public static byte[] fetchDataInBytes(HttpUriRequest request) throws IOException {
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .disableCookieManagement()
+                .useSystemProperties()
+                .build()) {
+            return httpClient.execute(request, response -> {
+                int status = response.getCode();
+                if (status / 100 != 2) {
+                    WEB_LOGGER.debug("Incorrect return code in requesting {}: {}", request.getRequestUri(), status);
+                    throw new IOException("Incorrect return code: " + status);
+                }
+                HttpEntity httpEntity = response.getEntity();
+                return EntityUtils.toByteArray(httpEntity);
+            });
+        }
+    }
 }

@@ -50,8 +50,8 @@ jobs:
           name: monitor
           path: koishibot-monitor/build/libs/koishibot-monitor-all.jar
 
-      - name: Upload signature artifact
+      - name: Upload checksum artifact
         uses: actions/upload-artifact@v2
         with:
-          name: signatures
+          name: checksums
           path: build/libs/*.txt
