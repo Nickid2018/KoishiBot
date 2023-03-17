@@ -25,7 +25,6 @@ dependencies {
 tasks {
     test {
         useJUnitPlatform()
-        workingDir = file("run")
     }
 
     jar {

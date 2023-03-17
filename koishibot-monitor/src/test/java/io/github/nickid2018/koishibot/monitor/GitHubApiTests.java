@@ -8,5 +8,7 @@ public class GitHubApiTests {
 
     @Test
     public void testWorkflow() throws IOException {
+        Settings.ACTION_REPO = "Nickid2018/KoishiBot;build.yml";
+        System.out.println(GitHubWebRequests.getArtifacts(GitHubWebRequests.getNowActionID()));
     }
 }
