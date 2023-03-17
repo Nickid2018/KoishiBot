@@ -132,3 +132,4 @@ src/test/kotlin/RunTerminal.kt
 
 /test/
 logs/
+monitor-logs/

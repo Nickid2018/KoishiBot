@@ -7,7 +7,6 @@ import io.github.nickid2018.koishibot.util.JsonUtil;
 import org.apache.commons.io.IOUtils;
 
 import java.io.FileReader;
-import java.io.IOException;
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.util.Optional;
@@ -22,8 +21,8 @@ public class Settings {
     public static String PROXY_TYPE = null;
     public static String[] ENABLE_BACKENDS;
 
-    public static void loadSettings() throws IOException {
-        JsonObject settings = JsonParser.parseString(IOUtils.toString(new FileReader("settings.json"))).getAsJsonObject();
+    public static void loadSettings() throws Exception {
+        JsonObject settings = JsonParser.parseString(IOUtils.toString(new FileReader("monitor-settings.json"))).getAsJsonObject();
         CORE_PORT = JsonUtil.getIntOrElse(settings, "core_port", 23333);
         GITHUB_TOKEN = JsonUtil.getStringOrNull(settings, "github_token");
         ACTION_REPO = JsonUtil.getStringOrElse(settings, "action_repo", "Nickid2018/KoishiBot;build.yml");

@@ -1,6 +1,8 @@
 name: build
 on:
   push:
+  schedule:
+    - cron: '0 0 1 * *'
 
 jobs:
   build:
@@ -38,11 +40,23 @@ jobs:
           name: core
           path: koishibot-core/build/libs/*.jar
 
+      - name: Upload core libraries artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: core-libraries
+          path: koishibot-core/build/apis/*.jar
+
       - name: Upload qq backend artifact
         uses: actions/upload-artifact@v2
         with:
           name: qq-backend
           path: koishibot-qq-backend/build/libs/*.jar
+
+      - name: Upload qq backend libraries artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: core-libraries
+          path: koishibot-qq-backend/build/apis/*.jar
 
       - name: Upload monitor artifact
         uses: actions/upload-artifact@v2
