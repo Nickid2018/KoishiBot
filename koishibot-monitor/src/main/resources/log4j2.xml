@@ -21,6 +21,7 @@
 			<AppenderRef ref="SysOut"/>
 			<AppenderRef ref="File"/>
 		</Root>
+		<logger name="org.apache.hc.client5.http" level="ERROR"/>
 		<logger name="org.asynchttpclient.netty.channel" level="ERROR"/>
 		<logger name="org.asynchttpclient.netty.handler" level="ERROR"/>
 		<logger name="org.asynchttpclient.netty.request" level="ERROR"/>

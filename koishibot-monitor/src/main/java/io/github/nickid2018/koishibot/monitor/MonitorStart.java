@@ -18,7 +18,7 @@ public class MonitorStart {
             LogUtils.error(LOGGER, "Failed to load settings", e);
             return;
         }
-        if (!CreateAStart.checkAndCreate()) {
+        if (!EnvironmentCheck.checkAndCreate()) {
             LogUtils.info(LogUtils.FontColor.GREEN, LOGGER,
                     "Created a bot environment, please configure it correctly and restart the monitor.");
             return;

@@ -44,9 +44,9 @@ public class GitHubWebRequests {
     public static File getArtifact(long id) throws IOException {
         String[] args = Settings.ACTION_REPO.split(";");
         HttpGet get = new HttpGet("https://api.github.com/repos/%s/actions/artifacts/%d/zip".formatted(args[0], id));
-        WebRequests.addGitHubHeaders(get);
+        WebRequests.addGitHubHeadersNoAccepts(get);
         byte[] data = WebRequests.fetchDataInBytes(get);
-        File file = File.createTempFile("", ".zip");
+        File file = File.createTempFile("koishibot", ".zip");
         file.deleteOnExit();
         try (FileOutputStream fos = new FileOutputStream(file)) {
             IOUtils.write(data, fos);

@@ -25,6 +25,11 @@ public class WebRequests {
         request.addHeader("Accept", "application/vnd.github.v3+json");
     }
 
+    public static void addGitHubHeadersNoAccepts(HttpUriRequest request) {
+        if (Settings.GITHUB_TOKEN != null)
+            request.addHeader("Authorization", "Bearer " + Settings.GITHUB_TOKEN);
+    }
+
     public static JsonElement fetchDataInJson(HttpUriRequest request) throws IOException {
         return fetchDataInJson(request, true);
     }

@@ -8,40 +8,53 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 public class StatusCheck {
 
     public static Pair<Set<String>, Set<String>> needUpdates(File checksumsFile) throws IOException {
+        Set<String> allCores = new HashSet<>();
         Set<String> needUpdateCores = new HashSet<>();
+        Set<String> allLibs = new HashSet<>();
         Set<String> needUpdateLibs = new HashSet<>();
         try (ZipFile zipFile = new ZipFile(checksumsFile)) {
-            readNowStatus().forEach((key, checksums) -> {
+            Objects.<Map<String, Pair<String, String>>>requireNonNullElse(readNowStatus(), new HashMap<>()).forEach((key, checksums) -> {
+                allCores.add(key);
+                allLibs.add(key);
                 try {
                     Pair<String, String> checksumsNow = getChecksumNowAction(zipFile, key);
                     if (checksumsNow == null) {
                         MonitorStart.LOGGER.error("Can't resolve key \"%s\"".formatted(key));
                         return;
                     }
-                    if (!checksumsNow.first().equals(checksums.first()))
-                        needUpdateCores.add(key);
-                    if (!checksumsNow.second().equals(checksums.second()))
-                        needUpdateLibs.add(key);
+                    if (checksumsNow.first() != null) {
+                        allCores.add(key);
+                        if (!checksumsNow.first().equals(checksums.first()))
+                            needUpdateCores.add(key);
+                    }
+                    if (checksumsNow.second() != null) {
+                        allLibs.add(key);
+                        if (!checksumsNow.second().equals(checksums.second()))
+                            needUpdateLibs.add(key);
+                    }
                 } catch (IOException e) {
                     MonitorStart.LOGGER.error("Error when checking status of " + key, e);
                 }
             });
         }
+        for (String backend : Settings.ENABLE_BACKENDS) {
+            if (!allCores.contains(backend))
+                needUpdateCores.add(backend);
+            if (!allLibs.contains(backend))
+                needUpdateLibs.add(backend);
+        }
         return new Pair<>(needUpdateCores, needUpdateLibs);
     }
 
     public static void updateChecksums(File checksumsFile, Set<String> moduleNames) throws IOException {
-        Map<String, Pair<String, String>> map = new HashMap<>();
+        Map<String, Pair<String, String>> map = Objects.requireNonNullElse(readNowStatus(), new HashMap<>());
         try (ZipFile zipFile = new ZipFile(checksumsFile)) {
             for (String key : moduleNames) {
                 Pair<String, String> checksumsNow = getChecksumNowAction(zipFile, key);
@@ -59,13 +72,18 @@ public class StatusCheck {
             obj.addProperty("checksum_libraries", checksums.second());
             json.add(key, obj);
         });
-        try (FileWriter fw = new FileWriter(CreateAStart.MONITOR_DATA_FILE)) {
+        try (FileWriter fw = new FileWriter(EnvironmentCheck.MONITOR_DATA_FILE)) {
             fw.write(json.toString());
         }
     }
 
     public static Map<String, Pair<String, String>> readNowStatus() throws IOException {
-        JsonObject json = JsonParser.parseString(IOUtils.toString(new FileReader(CreateAStart.MONITOR_DATA_FILE))).getAsJsonObject();
+        JsonObject json;
+        try {
+            json = JsonParser.parseString(IOUtils.toString(new FileReader(EnvironmentCheck.MONITOR_DATA_FILE))).getAsJsonObject();
+        } catch (FileNotFoundException e) {
+            return null;
+        }
         Map<String, Pair<String, String>> map = new HashMap<>();
         for (String key : json.keySet()) {
             JsonObject obj = json.getAsJsonObject(key);
@@ -77,7 +95,7 @@ public class StatusCheck {
     }
 
     public static Pair<String, String> getChecksumNowAction(ZipFile checksumZip, String key) throws IOException {
-        ZipEntry entry = checksumZip.getEntry(key);
+        ZipEntry entry = checksumZip.getEntry(key + "-checksum.txt");
         if (entry == null)
             return null;
         String[] args = IOUtils.toString(checksumZip.getInputStream(entry), StandardCharsets.UTF_8).split("\n");
