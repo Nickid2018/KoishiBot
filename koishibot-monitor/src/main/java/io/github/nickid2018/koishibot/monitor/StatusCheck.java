@@ -45,6 +45,10 @@ public class StatusCheck {
                 }
             });
         }
+        if (!allCores.contains("core"))
+            needUpdateCores.add("core");
+        if (!allLibs.contains("core"))
+            needUpdateLibs.add("core");
         for (String backend : Settings.ENABLE_BACKENDS) {
             if (!allCores.contains(backend))
                 needUpdateCores.add(backend);

@@ -86,12 +86,12 @@ public class EnvironmentCheck {
                                       Set<String> backendCore, Set<String> backendLibs) throws Exception {
         for (String backend : backendCore) {
             File core = GitHubWebRequests.getArtifact(artifacts.getLong(backend));
-            ZipUtil.unzipTo(core, new File(backend));
+            ZipUtil.unzipTo(core, new File(backend.equals("core") ? "." : backend));
             LogUtils.info(LogUtils.FontColor.GREEN, LOGGER, "Updated {} successfully", backend);
         }
         for (String backendLib : backendLibs) {
             File lib = GitHubWebRequests.getArtifact(artifacts.getLong(backendLibs + "-libraries"));
-            File toFile = new File(backendLib + "/libraries");
+            File toFile = new File(backendLib.equals("core") ? "libraries" : backendLib + "/libraries");
             if (toFile.isDirectory())
                 Arrays.stream(Objects.requireNonNullElse(toFile.listFiles(), new File[0])).forEach(File::delete);
             ZipUtil.unzipTo(lib, toFile);

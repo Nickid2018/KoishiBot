@@ -25,7 +25,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ubuntu-gradle-${{ hashFiles('*.gradle', 'gradle.properties') }}
+          key: ubuntu-gradle-${{ hashFiles('*.gradle.kts', 'gradle.properties') }}
           restore-keys: ubuntu-gradle-
 
       - name: Run Gradle build

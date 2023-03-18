@@ -63,7 +63,7 @@ public class ProcessManager {
     public static void startCore() throws IOException {
         if (PROCESSES.containsKey("core"))
             return;
-        SubProgramProcess process = new SubProgramProcess("core", List.of("java", "-jar", "koishibot-core.jar"));
+        SubProgramProcess process = new SubProgramProcess("core", List.of("java", "-jar", "koishibot-core.jar"), ".");
         PROCESS_EXECUTOR.execute(process);
         PROCESSES.put("core", process);
     }
@@ -71,7 +71,8 @@ public class ProcessManager {
     public static void startBackend(String name) throws IOException {
         if (PROCESSES.containsKey(name))
             return;
-        SubProgramProcess process = new SubProgramProcess(name, List.of("java", "-jar", "%s/koishibot-%s.jar".formatted(name, name)));
+        SubProgramProcess process = new SubProgramProcess(
+                name, List.of("java", "-jar", "%s/koishibot-%s.jar".formatted(name, name)), name);
         PROCESS_EXECUTOR.execute(process);
         PROCESSES.put(name, process);
     }

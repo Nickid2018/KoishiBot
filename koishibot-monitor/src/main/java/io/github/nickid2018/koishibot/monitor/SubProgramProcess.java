@@ -18,9 +18,10 @@ public class SubProgramProcess implements Runnable {
     private final Process process;
     private BufferedWriter output;
 
-    public SubProgramProcess(String name, List<String> cmd) throws IOException {
+    public SubProgramProcess(String name, List<String> cmd, String runDir) throws IOException {
         this.name = name;
         ProcessBuilder builder = new ProcessBuilder(cmd);
+        builder.directory(new File(runDir));
         builder.redirectErrorStream(true);
         process = builder.start();
         programInput = new BufferedWriter(new OutputStreamWriter(process.getOutputStream(), StandardCharsets.UTF_8));

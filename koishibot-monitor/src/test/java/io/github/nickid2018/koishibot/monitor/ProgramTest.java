@@ -7,7 +7,7 @@ import java.util.Scanner;
 public class ProgramTest {
 
     public static void main(String[] args) throws IOException {
-        SubProgramProcess programProcess = new SubProgramProcess("test", List.of("cmd", "/d", "ss"));
+        SubProgramProcess programProcess = new SubProgramProcess("test", List.of("cmd", "/d", "ss"), ".");
         programProcess.setOutput(System.out);
         Thread thread = new Thread(programProcess);
         thread.start();
