@@ -53,19 +53,17 @@ public class SubProgramProcess implements Runnable {
 
     @Override
     public void run() {
-        String line;
-        try {
-            while (process.isAlive() && (line = programOutput.readLine()) != null) {
-                try {
-                    output.write(line);
-                    output.newLine();
-                    output.flush();
-                } catch (IOException e) {
-                    LogUtils.error(LOGGER, "Error when writing to output", e);
-                }
+        while (process.isAlive()) {
+            try {
+                String line = programOutput.readLine();
+                if (line == null)
+                    continue;
+                output.write(line);
+                output.newLine();
+                output.flush();
+            } catch (IOException e) {
+                LogUtils.error(LOGGER, "Error when writing to output", e);
             }
-        } catch (IOException e) {
-            LogUtils.error(LOGGER, "Error when reading from program output", e);
         }
         LogUtils.info(LogUtils.FontColor.YELLOW, LOGGER, "Sub-process {} exited with code {}", name, process.exitValue());
     }

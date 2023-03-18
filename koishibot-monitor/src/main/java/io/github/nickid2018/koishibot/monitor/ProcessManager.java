@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.monitor;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -72,7 +73,7 @@ public class ProcessManager {
         if (PROCESSES.containsKey(name))
             return;
         SubProgramProcess process = new SubProgramProcess(
-                name, List.of("java", "-jar", "%s/koishibot-%s.jar".formatted(name, name)), name);
+                name, List.of("java", "-jar", new File("%s/koishibot-%s.jar".formatted(name, name)).getAbsolutePath()), name);
         PROCESS_EXECUTOR.execute(process);
         PROCESSES.put(name, process);
     }

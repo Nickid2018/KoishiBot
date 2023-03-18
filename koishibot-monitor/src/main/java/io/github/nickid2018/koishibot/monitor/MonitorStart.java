@@ -25,9 +25,9 @@ public class MonitorStart {
         }
         try {
             ProcessManager.startCore();
-            ProcessManager.setInteract("core");
             for (String backend : Settings.ENABLE_BACKENDS)
                 ProcessManager.startBackend(backend);
+            ProcessManager.setInteract("core");
         } catch (IOException e) {
             LogUtils.error(LOGGER, "Failed to start core or backends", e);
         }

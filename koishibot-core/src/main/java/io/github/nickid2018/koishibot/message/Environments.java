@@ -1,8 +1,10 @@
 package io.github.nickid2018.koishibot.message;
 
+import io.github.nickid2018.koishibot.core.BotStart;
 import io.github.nickid2018.koishibot.core.Settings;
 import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.network.KoishiBotServer;
+import io.github.nickid2018.koishibot.util.LogUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ public class Environments {
     public static void startServer() {
         server = new KoishiBotServer(Settings.DELEGATE_PORT, MessageDataListener.REGISTRY, new MessageDataListener());
         server.start(30);
+        LogUtils.info(LogUtils.FontColor.CYAN, BotStart.LOGGER, "Delegate server started");
     }
 
     public static void putEnvironment(String id, DelegateEnvironment environment) {

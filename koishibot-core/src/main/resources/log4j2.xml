@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Appenders>
+		<Console name="SysOut" target="SYSTEM_OUT">
+			<PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg%n"/>
+			<ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+		</Console>
+		<RollingRandomAccessFile name="File" fileName="monitor-logs/latest.log" filePattern="monitor-logs/%d{yyyy-MM-dd}-%i.log.gz">
+			<PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg%n"/>
+			<ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+			<Policies>
+				<TimeBasedTriggeringPolicy/>
+				<OnStartupTriggeringPolicy/>
+				<SizeBasedTriggeringPolicy size="20 MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="50"/>
+		</RollingRandomAccessFile>
+	</Appenders>
+	<Loggers>
+		<Root level="DEBUG">
+			<AppenderRef ref="SysOut"/>
+			<AppenderRef ref="File"/>
+		</Root>
+		<logger name="org.apache.hc.client5.http" level="ERROR"/>
+		<logger name="org.asynchttpclient.netty.channel" level="ERROR"/>
+		<logger name="org.asynchttpclient.netty.handler" level="ERROR"/>
+		<logger name="org.asynchttpclient.netty.request" level="ERROR"/>
+		<logger name="io.netty.util" level="ERROR"/>
+		<logger name="io.netty.util.internal" level="ERROR"/>
+		<logger name="io.netty.handler.ssl" level="ERROR"/>
+		<logger name="io.netty.channel.nio" level="ERROR"/>
+		<logger name="io.netty.buffer" level="ERROR"/>
+	</Loggers>
+</Configuration>

@@ -1,6 +1,9 @@
 package io.github.nickid2018.koishibot.core;
 
 import io.github.nickid2018.koishibot.message.Environments;
+import io.github.nickid2018.koishibot.util.LogUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -9,13 +12,13 @@ import java.util.Scanner;
 public class BotStart {
 
     public static final long START_TIME = System.currentTimeMillis();
+    public static final Logger LOGGER = LoggerFactory.getLogger("Bot Core");
 
     public static void main(String[] args) {
         try {
             start();
         } catch (Exception e) {
-            System.err.println("Cannot start bot");
-            e.printStackTrace();
+            LogUtils.error(LOGGER, "Failed to start bot", e);
             return;
         }
         Scanner scanner = new Scanner(System.in);
@@ -26,7 +29,7 @@ public class BotStart {
                     try {
                         Settings.reload();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        LogUtils.error(LOGGER, "Failed to reload settings", e);
                     }
                     break;
                 case "stop":
