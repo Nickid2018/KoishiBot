@@ -58,6 +58,7 @@ public class SubProgramProcess implements Runnable {
                 String line = programOutput.readLine();
                 if (line == null)
                     continue;
+                output.write("\33[0;32m<%s>\33[0m ".formatted(name));
                 output.write(line);
                 output.newLine();
                 output.flush();
