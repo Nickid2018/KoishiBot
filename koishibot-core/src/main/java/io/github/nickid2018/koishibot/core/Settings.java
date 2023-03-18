@@ -31,7 +31,6 @@ public class Settings {
         OPEN_PORT = JsonUtil.getIntOrElse(settingsRoot, "port", -1);
         DELEGATE_PORT = JsonUtil.getIntOrElse(settingsRoot, "delegate_port", 52514);
 
-        System.err.close();
         PluginProcessor.set(settingsRoot);
     }
 
