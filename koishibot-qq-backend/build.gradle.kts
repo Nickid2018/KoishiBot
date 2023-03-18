@@ -27,7 +27,7 @@ tasks {
         manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.backend.Main"
         manifest.attributes["Class-Path"] = configurations.runtimeClasspath.get()
             .filter { it.name.endsWith(".jar") }
-            .joinToString("") { "libraries/" + it.name }
+            .joinToString(" ") { "libraries/" + it.name }
     }
 
     register<Sync>("exportApi") {

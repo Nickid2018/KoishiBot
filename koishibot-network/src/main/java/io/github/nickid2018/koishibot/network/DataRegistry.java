@@ -17,6 +17,7 @@ public class DataRegistry {
 
     public DataRegistry() {
         registerData(NullData.class, (s, cn) -> NullData.INSTANCE);
+        registerData(StringData.class, (s, cn) -> new StringData());
     }
 
     public void registerData(Class<? extends SerializableData> dataClass) {

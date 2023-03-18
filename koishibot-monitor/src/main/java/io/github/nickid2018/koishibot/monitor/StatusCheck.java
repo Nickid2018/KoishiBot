@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.monitor;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.nickid2018.koishibot.util.JsonUtil;
+import io.github.nickid2018.koishibot.util.LogUtils;
 import io.github.nickid2018.koishibot.util.Pair;
 import org.apache.commons.io.IOUtils;
 
@@ -26,7 +27,7 @@ public class StatusCheck {
                 try {
                     Pair<String, String> checksumsNow = getChecksumNowAction(zipFile, key);
                     if (checksumsNow == null) {
-                        MonitorStart.LOGGER.error("Can't resolve key \"%s\"".formatted(key));
+                        LogUtils.error(MonitorStart.LOGGER, "Can't resolve key \"%s\"".formatted(key), null);
                         return;
                     }
                     if (checksumsNow.first() != null) {
@@ -40,7 +41,7 @@ public class StatusCheck {
                             needUpdateLibs.add(key);
                     }
                 } catch (IOException e) {
-                    MonitorStart.LOGGER.error("Error when checking status of " + key, e);
+                    LogUtils.error(MonitorStart.LOGGER, "Error when checking status of %s".formatted(key), e);
                 }
             });
         }
@@ -59,7 +60,7 @@ public class StatusCheck {
             for (String key : moduleNames) {
                 Pair<String, String> checksumsNow = getChecksumNowAction(zipFile, key);
                 if (checksumsNow == null) {
-                    MonitorStart.LOGGER.error("Can't resolve key \"%s\"".formatted(key));
+                    LogUtils.error(MonitorStart.LOGGER, "Can't resolve key \"%s\"".formatted(key), null);
                     continue;
                 }
                 map.put(key, checksumsNow);

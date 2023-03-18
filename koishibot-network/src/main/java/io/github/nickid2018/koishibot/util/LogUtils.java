@@ -14,9 +14,11 @@ public class LogUtils {
         CYAN("36"),
         WHITE("37");
         private final String code;
+
         FontColor(String code) {
             this.code = code;
         }
+
         public String getCode() {
             return code;
         }
@@ -27,6 +29,9 @@ public class LogUtils {
     }
 
     public static void error(Logger logger, String message, Throwable throwable) {
-        logger.error("\33[0;31m%s\33[0m".formatted(message), throwable);
+        if (throwable == null)
+            logger.error("\33[0;31m%s\33[0m".formatted(message));
+        else
+            logger.error("\33[0;31m%s\33[0m".formatted(message), throwable);
     }
 }

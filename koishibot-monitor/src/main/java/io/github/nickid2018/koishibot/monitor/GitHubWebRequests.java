@@ -23,7 +23,12 @@ public class GitHubWebRequests {
         int count = JsonUtil.getIntOrZero(json, "total_count");
         if (count == 0)
             throw new IOException("No action runs.");
-        return JsonUtil.getLongInPathOrZero(json, "workflow_runs.0.id");
+        for (int i = 0; i < count; i++) {
+            String status = JsonUtil.getStringInPathOrNull(json, "workflow_runs.%d.conclusion".formatted(i));
+            if (status != null && status.equals("success"))
+                return JsonUtil.getLongInPathOrZero(json, "workflow_runs.%d.id".formatted(i));
+        }
+        throw new IOException("No successful action runs.");
     }
 
     public static Object2LongMap<String> getArtifacts(long id) throws IOException {
