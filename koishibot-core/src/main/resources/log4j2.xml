@@ -5,7 +5,7 @@
 			<PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg%n"/>
 			<ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
 		</Console>
-		<RollingRandomAccessFile name="File" fileName="monitor-logs/latest.log" filePattern="monitor-logs/%d{yyyy-MM-dd}-%i.log.gz">
+		<RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="monitor-logs/%d{yyyy-MM-dd}-%i.log.gz">
 			<PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %msg%n"/>
 			<ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
 			<Policies>

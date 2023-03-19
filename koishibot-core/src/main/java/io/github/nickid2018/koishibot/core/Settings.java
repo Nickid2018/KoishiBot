@@ -16,6 +16,7 @@ public class Settings {
 
     public static String LOCAL_IP;
     public static int OPEN_PORT;
+    public static int CORE_PORT;
 
     public static String PROXY_HOST;
     public static int PROXY_PORT;
@@ -30,6 +31,7 @@ public class Settings {
         LOCAL_IP = JsonUtil.getStringOrElse(settingsRoot, "local_ip", "localhost");
         OPEN_PORT = JsonUtil.getIntOrElse(settingsRoot, "port", -1);
         DELEGATE_PORT = JsonUtil.getIntOrElse(settingsRoot, "delegate_port", 52514);
+        CORE_PORT = JsonUtil.getIntOrElse(settingsRoot, "core_port", 23333);
 
         PluginProcessor.set(settingsRoot);
     }

@@ -40,6 +40,7 @@ public class BotStart {
     }
 
     private static void start() throws IOException {
+        MonitorListener.startLink();
         PluginProcessor.initProcess();
         Settings.load();
         Environments.startServer();
