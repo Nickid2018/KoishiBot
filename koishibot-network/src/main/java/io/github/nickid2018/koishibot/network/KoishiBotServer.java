@@ -10,7 +10,6 @@ import io.netty.channel.*;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,7 @@ public class KoishiBotServer {
         this.listener = listener;
     }
 
-    public void start(int timeout) {
+    public void start() {
         Class<? extends ServerChannel> clazz;
         LazyLoadedValue<?> lazyLoadedValue;
         if (Epoll.isAvailable()) {
@@ -59,7 +58,6 @@ public class KoishiBotServer {
                 } catch (ChannelException ignored) {
                 }
                 channel.pipeline()
-                        .addLast("timeout", new ReadTimeoutHandler(timeout))
                         .addLast("splitter", new SplitterHandler())
                         .addLast("decoder", new PacketDecoder(connection))
                         .addLast("prepender", new SizePrepender())

@@ -26,7 +26,7 @@ public class MonitorStart {
             return;
         }
         KoishiBotServer server = new KoishiBotServer(Settings.CORE_PORT, CoreListener.REGISTRY, new CoreListener());
-        server.start(30);
+        server.start();
         LogUtils.info(LogUtils.FontColor.GREEN, LOGGER, "Core server started");
         try {
             ProcessManager.startCore();

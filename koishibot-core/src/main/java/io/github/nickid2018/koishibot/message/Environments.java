@@ -19,7 +19,7 @@ public class Environments {
 
     public static void startServer() {
         server = new KoishiBotServer(Settings.DELEGATE_PORT, MessageDataListener.REGISTRY, new MessageDataListener());
-        server.start(30);
+        server.start();
         LogUtils.info(LogUtils.FontColor.CYAN, BotStart.LOGGER, "Delegate server started");
     }
 

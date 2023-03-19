@@ -13,7 +13,6 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.TimeoutException;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
@@ -61,10 +60,6 @@ public class Connection extends SimpleChannelInboundHandler<SerializableData> {
     }
 
     public static Connection connectToTcpServer(DataRegistry registry, NetworkListener listener, InetAddress addr, int port) {
-        return connectToTcpServer(registry, listener, addr, port, 30);
-    }
-
-    public static Connection connectToTcpServer(DataRegistry registry, NetworkListener listener, InetAddress addr, int port, int timeout) {
         Connection connection = new Connection(registry, listener);
         Class<? extends Channel> clazz;
         LazyLoadedValue<?> lazyLoadedValue;
@@ -82,7 +77,7 @@ public class Connection extends SimpleChannelInboundHandler<SerializableData> {
                     channel.config().setOption(ChannelOption.TCP_NODELAY, true);
                 } catch (ChannelException ignored) {
                 }
-                channel.pipeline().addLast("timeout", new ReadTimeoutHandler(timeout))
+                channel.pipeline()
                         .addLast("splitter", new SplitterHandler())
                         .addLast("decoder", new PacketDecoder(connection))
                         .addLast("prepender", new SizePrepender())

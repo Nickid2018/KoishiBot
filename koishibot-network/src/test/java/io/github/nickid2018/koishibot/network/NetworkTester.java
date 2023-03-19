@@ -30,7 +30,7 @@ public class NetworkTester {
                     logger.info("Server connection closed.");
                 }
             });
-            server.start(30);
+            server.start();
             long lastCheckHaveClients = System.currentTimeMillis();
             while (true) {
                 try {
