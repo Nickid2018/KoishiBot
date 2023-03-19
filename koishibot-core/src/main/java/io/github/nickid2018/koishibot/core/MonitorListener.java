@@ -1,6 +1,9 @@
 package io.github.nickid2018.koishibot.core;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.github.nickid2018.koishibot.network.*;
+import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.LogUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +35,22 @@ public class MonitorListener implements NetworkListener {
 
     @Override
     public void receivePacket(Connection connection, SerializableData packet) {
-
+        if (packet instanceof StringData strData) {
+            String str = strData.getStr();
+            JsonObject obj = JsonParser.parseString(str).getAsJsonObject();
+            String action = JsonUtil.getStringOrNull(obj, "action");
+            switch (action) {
+                case "exit" -> doExit();
+            }
+        }
     }
 
     @Override
     public void connectionClosed(Connection connection) {
         LogUtils.error(LOGGER, "Core connection closed!", null);
+    }
+
+    private void doExit() {
+
     }
 }

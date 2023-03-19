@@ -25,7 +25,7 @@ public class MonitorStart {
                     "Created a bot environment, please configure it correctly and restart the monitor.");
             return;
         }
-        KoishiBotServer server = new KoishiBotServer(Settings.CORE_PORT, CoreListener.REGISTRY, new CoreListener());
+        KoishiBotServer server = new KoishiBotServer(Settings.CORE_PORT, CoreListener.REGISTRY, CoreListener.INSTANCE);
         server.start();
         LogUtils.info(LogUtils.FontColor.GREEN, LOGGER, "Core server started");
         try {
@@ -90,7 +90,13 @@ public class MonitorStart {
                 }
             }
             case "exit" -> {
-
+                CoreListener.INSTANCE.send("{\"action\":\"exit\"}");
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    LogUtils.error(LOGGER, "Interrupted", e);
+                }
+                System.exit(0);
             }
         }
     }
