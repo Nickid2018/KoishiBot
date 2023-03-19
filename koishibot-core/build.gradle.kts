@@ -35,8 +35,10 @@ tasks {
     jar {
         manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.core.BotStart"
         manifest.attributes["Class-Path"] = configurations.runtimeClasspath.get()
-            .filter { it.name.endsWith(".jar") }
-            .joinToString(" ") { "libraries/" + it.name }
+            .map { it.name }
+            .filter { it.endsWith(".jar") }
+            .sorted()
+            .joinToString(" ") { "libraries/$it" }
     }
 
     register<Sync>("exportApi") {
@@ -48,10 +50,14 @@ tasks {
         doLast {
             val md = MessageDigest.getInstance("SHA-256")
 
-            layout.buildDirectory.dir("apis").get().asFileTree.files.sorted()
+            layout.buildDirectory.dir("apis").get().asFileTree.files
+                .filter { it.isFile }
+                .sortedBy { it.name }
                 .forEach { md.update(it.readBytes()) }
             val signatureAPIs = md.digest().joinToString("") { "%02x".format(it) }
-            layout.projectDirectory.dir("src/main/java").asFileTree.files.sorted()
+            layout.projectDirectory.dir("src/main/java").asFileTree.files
+                .filter { it.isFile }
+                .sortedBy { it.name }
                 .forEach { md.update(it.readBytes()) }
             val signatureCoreJar = md.digest().joinToString("") { "%02x".format(it) }
 
