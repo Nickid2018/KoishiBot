@@ -43,17 +43,26 @@ tasks {
 
             layout.buildDirectory.dir("apis").get().asFileTree.files
                 .filter { it.isFile }
+                .filter { !it.name.contains("koishibot") }
                 .sortedBy { it.name }
                 .forEach { md.update(it.readBytes()) }
-            val signatureAPIs = md.digest().joinToString("") { "%02x".format(it) }
+            parent!!.layout.projectDirectory.dir("koishibot-message-api/src/main/java").asFileTree.files
+                .filter { it.isFile }
+                .sortedBy { it.name }
+                .forEach { md.update(it.readBytes()) }
+            parent!!.layout.projectDirectory.dir("koishibot-network/src/main/java").asFileTree.files
+                .filter { it.isFile }
+                .sortedBy { it.name }
+                .forEach { md.update(it.readBytes()) }
+            val checksumAPI = md.digest().joinToString("") { "%02x".format(it) }
             layout.projectDirectory.dir("src/main/java").asFileTree.files
                 .filter { it.isFile }
                 .sortedBy { it.name }
                 .forEach { md.update(it.readBytes()) }
-            val signatureCoreJar = md.digest().joinToString("") { "%02x".format(it) }
+            val checksumJar = md.digest().joinToString("") { "%02x".format(it) }
 
             parent!!.layout.buildDirectory.file("libs/qq-backend-checksum.txt").get().asFile.writeText(
-                "$signatureAPIs\n$signatureCoreJar"
+                "$checksumJar\n$checksumAPI"
             )
         }
     }
