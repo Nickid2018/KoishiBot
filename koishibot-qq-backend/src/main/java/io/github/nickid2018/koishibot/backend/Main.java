@@ -19,7 +19,6 @@ public class Main {
     public static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot QQ Backend");
 
     public static AtomicBoolean stopped = new AtomicBoolean();
-    private static QQEnvironment environment;
 
     public static void main(String[] args) {
         try {
@@ -53,13 +52,15 @@ public class Main {
             try {
                 Connection connection = Connection.connectToTcpServer(
                         listener.registry, listener, InetAddress.getLocalHost(), Settings.delegatePort);
-                environment = new QQEnvironment(bot, nudgeEnabled.get(), connection);
+                QQEnvironment environment = new QQEnvironment(bot, nudgeEnabled.get(), connection);
                 env.complete(environment);
                 retry = 0;
                 disconnected.get();
             } catch (Exception e) {
                 LOGGER.error("Failed to link.", e);
             }
+            if (stopped.get())
+                System.exit(0);
             LOGGER.info("Disconnected. Waiting 1min to reconnect.");
             retry++;
             try {

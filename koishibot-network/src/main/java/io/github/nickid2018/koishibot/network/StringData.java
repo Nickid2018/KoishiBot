@@ -17,11 +17,11 @@ public class StringData implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        buf.writeString(str);
+        str = buf.readString();
     }
 
     @Override
     public void write(ByteData buf) {
-        str = buf.readString();
+        buf.writeString(str);
     }
 }

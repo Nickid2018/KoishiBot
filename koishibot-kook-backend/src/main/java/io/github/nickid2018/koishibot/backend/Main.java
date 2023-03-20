@@ -18,7 +18,6 @@ public class Main {
     public static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot KOOK Backend");
 
     public static AtomicBoolean stopped = new AtomicBoolean();
-    private static KOOKEnvironment environment;
 
     public static void main(String[] args) {
         try {
@@ -39,13 +38,15 @@ public class Main {
             try {
                 Connection connection = Connection.connectToTcpServer(
                         listener.registry, listener, InetAddress.getLocalHost(), Settings.delegatePort);
-                environment = new KOOKEnvironment(kookClient, self, connection);
+                KOOKEnvironment environment = new KOOKEnvironment(kookClient, self, connection);
                 env.complete(environment);
                 retry = 0;
                 disconnected.get();
             } catch (Exception e) {
                 LOGGER.error("Failed to link.", e);
             }
+            if (stopped.get())
+                System.exit(0);
             LOGGER.info("Disconnected. Waiting 1min to reconnect.");
             retry++;
             try {
