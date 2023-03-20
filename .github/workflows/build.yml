@@ -58,6 +58,18 @@ jobs:
           name: qq-backend-libraries
           path: koishibot-qq-backend/build/apis/*.jar
 
+      - name: Upload kook backend artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: kook-backend
+          path: koishibot-kook-backend/build/libs/*.jar
+
+      - name: Upload kook backend libraries artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: kook-backend-libraries
+          path: koishibot-kook-backend/build/apis/*.jar
+
       - name: Upload monitor artifact
         uses: actions/upload-artifact@v2
         with:
