@@ -9,7 +9,11 @@ public class QQMessageSource extends io.github.nickid2018.koishibot.message.api.
 
     public static TimeoutCache<QQMessageSource> messageCache = new TimeoutCache<>();
 
-    private final MessageSource source;
+    private MessageSource source;
+
+    public QQMessageSource(QQEnvironment environment) {
+        super(environment);
+    }
 
     public QQMessageSource(QQEnvironment environment, MessageSource source) {
         super(environment);

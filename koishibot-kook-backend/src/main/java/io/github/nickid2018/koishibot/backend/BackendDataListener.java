@@ -4,12 +4,10 @@ import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
 import io.github.nickid2018.koishibot.message.action.SendMessageAction;
 import io.github.nickid2018.koishibot.message.action.StopAction;
-import io.github.nickid2018.koishibot.message.api.Environment;
-import io.github.nickid2018.koishibot.message.api.GroupInfo;
-import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.event.*;
+import io.github.nickid2018.koishibot.message.kook.*;
 import io.github.nickid2018.koishibot.message.network.DataPacketListener;
-import io.github.nickid2018.koishibot.message.qq.*;
 import io.github.nickid2018.koishibot.message.query.GroupInfoQuery;
 import io.github.nickid2018.koishibot.message.query.NameInGroupQuery;
 import io.github.nickid2018.koishibot.message.query.UserInfoQuery;
@@ -26,36 +24,36 @@ import java.util.function.Supplier;
 public class BackendDataListener extends DataPacketListener {
 
     public final DataRegistry registry = new DataRegistry();
-    private final Supplier<QQEnvironment> environment;
+    private final Supplier<KOOKEnvironment> environment;
     private final CompletableFuture<Void> disconnectFuture;
 
-    public BackendDataListener(Supplier<QQEnvironment> environment, CompletableFuture<Void> disconnectFuture) {
+    public BackendDataListener(Supplier<KOOKEnvironment> environment, CompletableFuture<Void> disconnectFuture) {
         this.environment = environment;
         this.disconnectFuture = disconnectFuture;
         BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory = (c, cn) -> {
             try {
-                return (c.getTypeName().contains("qq") ?
-                        c.getConstructor(QQEnvironment.class) :
+                return (c.getTypeName().contains("kook") ?
+                        c.getConstructor(KOOKEnvironment.class) :
                         c.getConstructor(Environment.class)).newInstance(environment.get());
             } catch (Exception e) {
                 return null;
             }
         };
 
-        registry.registerData(QQEnvironment.class, (c, cn) -> null);
+        registry.registerData(KOOKEnvironment.class, (c, cn) -> null);
 
-        registry.registerData(QQAt.class, dataFactory);
-        registry.registerData(QQAudio.class, dataFactory);
-        registry.registerData(QQChain.class, dataFactory);
-        registry.registerData(QQForward.class, dataFactory);
-        registry.registerData(QQGroup.class, dataFactory);
-        registry.registerData(QQImage.class, dataFactory);
-        registry.registerData(QQMessageEntry.class, dataFactory);
-        registry.registerData(QQMessageSource.class, dataFactory);
-        registry.registerData(QQQuote.class, dataFactory);
-        registry.registerData(QQService.class, dataFactory);
-        registry.registerData(QQText.class, dataFactory);
-        registry.registerData(QQUser.class, dataFactory);
+        registry.registerData(KOOKAt.class, dataFactory);
+        registry.registerData(AudioMessage.class, dataFactory);
+        registry.registerData(KOOKChain.class, dataFactory);
+        registry.registerData(ForwardMessage.class, dataFactory);
+        registry.registerData(KOOKTextChannel.class, dataFactory);
+        registry.registerData(KOOKImage.class, dataFactory);
+        registry.registerData(MessageEntry.class, dataFactory);
+        registry.registerData(KOOKMessageSource.class, dataFactory);
+        registry.registerData(KOOKQuote.class, dataFactory);
+        registry.registerData(ServiceMessage.class, dataFactory);
+        registry.registerData(KOOKText.class, dataFactory);
+        registry.registerData(KOOKUser.class, dataFactory);
 
         registry.registerData(QueryResultEvent.class, dataFactory);
         registry.registerData(OnFriendMessageEvent.class, dataFactory);
@@ -90,8 +88,6 @@ public class BackendDataListener extends DataPacketListener {
             nameInGroupQuery(connection, nameInGroupQuery);
         else if (packet instanceof UserInfoQuery userInfoQuery)
             userInfoQuery(connection, userInfoQuery);
-        else if (packet instanceof NudgeAction action)
-            nudgeAction(connection, action);
         else if (packet instanceof RecallAction action)
             recallAction(connection, action);
         else if (packet instanceof SendMessageAction action)
@@ -103,7 +99,6 @@ public class BackendDataListener extends DataPacketListener {
     @Override
     public void connectionClosed(Connection connection) {
         super.connectionClosed(connection);
-        QQMessageSource.messageCache.clear();
         disconnectFuture.complete(null);
     }
 
@@ -135,7 +130,7 @@ public class BackendDataListener extends DataPacketListener {
     }
 
     private void nameInGroupQuery(Connection connection, NameInGroupQuery query) {
-        String info = query.user.getNameInGroup(query.group);
+        String info = KOOKUser.getNameInGroup(((KOOKUser) query.user).getUser(), query.group);
         QueryResultEvent event = new QueryResultEvent(environment.get());
         event.queryId = query.queryId;
         event.payload = info.getBytes(StandardCharsets.UTF_8);
@@ -143,22 +138,16 @@ public class BackendDataListener extends DataPacketListener {
     }
 
     private void recallAction(Connection connection, RecallAction action) {
-        if (QQMessageSource.messageCache.containsKey(action.messageUniqueID)) {
-            QQMessageSource.messageCache.get(action.messageUniqueID).recall();
-            QQMessageSource.messageCache.remove(action.messageUniqueID);
+        if (KOOKMessageSource.messageCache.containsKey(action.messageUniqueID)) {
+            KOOKMessageSource.messageCache.get(action.messageUniqueID).recall();
+            KOOKMessageSource.messageCache.remove(action.messageUniqueID);
         }
-    }
-
-    private void nudgeAction(Connection connection, NudgeAction action) {
-        QQUser.nudge((QQUser) action.user, action.contact);
     }
 
     private void sendMessageAction(Connection connection, SendMessageAction action) {
         Either<UserInfo, GroupInfo> contact = action.target;
-        if (contact.isLeft())
-            QQEnvironment.send(contact.left(), action.message);
-        else
-            QQEnvironment.send(contact.right(), action.message);
+        if (contact.isRight())
+            KOOKMessage.send((KOOKMessage) action.message, contact.right());
     }
 
     private void doStop() {

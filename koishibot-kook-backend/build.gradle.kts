@@ -2,11 +2,15 @@ import java.security.MessageDigest
 
 plugins {
     `java-library`
+    kotlin("jvm")
+    kotlin("plugin.serialization")
 }
 
 repositories {
     mavenCentral()
     mavenLocal()
+    maven("https://jitpack.io")
+    maven("https://libraries.minecraft.net")
 }
 
 dependencies {
