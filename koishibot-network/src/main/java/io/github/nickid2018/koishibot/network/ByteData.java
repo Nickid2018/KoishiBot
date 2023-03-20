@@ -5,7 +5,10 @@ import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
 import io.netty.util.ByteProcessor;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -16,12 +19,22 @@ import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ScatteringByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.BitSet;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntFunction;
 
 @SuppressWarnings("unused")
-public record ByteData(ByteBuf buf) {
+public class ByteData extends ByteBuf {
+
+    public static final short MAX_STRING_LENGTH = 32767;
+    public static final int MAX_COMPONENT_STRING_LENGTH = 262144;
+    private final ByteBuf source;
+
+    public ByteData(ByteBuf paramByteBuf) {
+        this.source = paramByteBuf;
+    }
 
     public static int getVarIntSize(int paramInt) {
         for (byte b = 1; b < 5; b++) {
@@ -31,96 +44,12 @@ public record ByteData(ByteBuf buf) {
         return 5;
     }
 
-    public int readVarInt() {
-        int i = 0;
-        byte b = 0;
-        while (true) {
-            byte b1 = readByte();
-            i |= (b1 & Byte.MAX_VALUE) << b++ * 7;
-            if (b > 5)
-                throw new RuntimeException("VarInt too big");
-            if ((b1 & 0x80) != 128)
-                return i;
+    public static int getVarLongSize(long paramLong) {
+        for (byte b = 1; b < 10; b++) {
+            if ((paramLong & -1L << b * 7) == 0L)
+                return b;
         }
-    }
-
-    public ByteData writeVarInt(int paramInt) {
-        while (true) {
-            if ((paramInt & 0xFFFFFF80) == 0) {
-                writeByte(paramInt);
-                return this;
-            }
-            writeByte(paramInt & 0x7F | 0x80);
-            paramInt >>>= 7;
-        }
-    }
-
-    public String readString() {
-        return readString(32767);
-    }
-
-    public String readString(int paramInt) {
-        int i = readVarInt();
-        if (i > paramInt * 4)
-            throw new DecoderException("The received encoded string buffer length is longer than maximum allowed (" + i
-                    + " > " + paramInt * 4 + ")");
-        if (i < 0)
-            throw new DecoderException("The received encoded string buffer length is less than zero! Weird string!");
-        String str = toString(readerIndex(), i, StandardCharsets.UTF_8);
-        readerIndex(readerIndex() + i);
-        if (str.length() > paramInt)
-            throw new DecoderException(
-                    "The received string length is longer than maximum allowed (" + i + " > " + paramInt + ")");
-        return str;
-    }
-
-    public ByteData writeString(String paramString) {
-        return writeString(paramString, 32767);
-    }
-
-    public ByteData writeString(String paramString, int paramInt) {
-        byte[] arrayOfByte = paramString.getBytes(StandardCharsets.UTF_8);
-        if (arrayOfByte.length > paramInt)
-            throw new EncoderException(
-                    "String too big (was " + arrayOfByte.length + " bytes encoded, max " + paramInt + ")");
-        writeVarInt(arrayOfByte.length);
-        writeBytes(arrayOfByte);
-        return this;
-    }
-
-    public ByteData writeLongArray(long[] array) {
-        writeVarInt(array.length);
-        for (long l : array)
-            writeLong(l);
-        return this;
-    }
-
-    public long[] readLongArray() {
-        return readLongArray(null);
-    }
-
-    public long[] readLongArray(long[] array) {
-        return readLongArray(array, readableBytes() / 8);
-    }
-
-    public long[] readLongArray(long[] array, int paramInt) {
-        int i = readVarInt();
-        if (array == null || array.length != i) {
-            if (i > paramInt)
-                throw new DecoderException("LongArray with size " + i + " is bigger than allowed " + paramInt);
-            array = new long[i];
-        }
-        for (byte b = 0; b < array.length; b++)
-            array[b] = readLong();
-        return array;
-    }
-
-    public BitSet readBitSet() {
-        return BitSet.valueOf(readLongArray());
-    }
-
-    public void writeBitSet(BitSet bitset) {
-        writeLongArray(bitset.toLongArray());
+        return 10;
     }
 
     public SerializableData readSerializableData(Connection connection) {
@@ -164,14 +93,81 @@ public record ByteData(ByteBuf buf) {
         writeSerializableDataMultiChoice(registry, Objects.requireNonNullElse(data, NullData.INSTANCE));
     }
 
-    public ByteData writeUUID(UUID paramUUID) {
-        writeLong(paramUUID.getMostSignificantBits());
-        writeLong(paramUUID.getLeastSignificantBits());
-        return this;
+    public <T, C extends Collection<T>> C readCollection(IntFunction<C> paramIntFunction,
+                                                         Function<ByteData, T> paramFunction) {
+        int i = readVarInt();
+        C collection = paramIntFunction.apply(i);
+        for (byte b = 0; b < i; b++)
+            collection.add(paramFunction.apply(this));
+        return collection;
     }
 
-    public UUID readUUID() {
-        return new UUID(readLong(), readLong());
+    public <T> void writeCollection(Collection<T> paramCollection, BiConsumer<ByteData, T> paramBiConsumer) {
+        writeVarInt(paramCollection.size());
+        for (T obj : paramCollection)
+            paramBiConsumer.accept(this, obj);
+    }
+
+    public <T> List<T> readList(Function<ByteData, T> paramFunction) {
+        return readCollection(ArrayList::new, paramFunction);
+    }
+
+    public IntList readIntIdList() {
+        int i = readVarInt();
+        IntArrayList intArrayList = new IntArrayList();
+        for (byte b = 0; b < i; b++)
+            intArrayList.add(readVarInt());
+        return intArrayList;
+    }
+
+    public void writeIntIdList(IntList paramIntList) {
+        writeVarInt(paramIntList.size());
+        paramIntList.forEach(this::writeVarInt);
+    }
+
+    public <K, V, M extends Map<K, V>> M readMap(IntFunction<M> paramIntFunction,
+                                                 Function<ByteData, K> paramFunction, Function<ByteData, V> paramFunction1) {
+        int i = readVarInt();
+        M map = paramIntFunction.apply(i);
+        for (byte b = 0; b < i; b++) {
+            K k = paramFunction.apply(this);
+            V v = paramFunction1.apply(this);
+            map.put(k, v);
+        }
+        return map;
+    }
+
+    public <K, V> Map<K, V> readMap(Function<ByteData, K> paramFunction,
+                                    Function<ByteData, V> paramFunction1) {
+        return readMap(HashMap::new, paramFunction, paramFunction1);
+    }
+
+    public <K, V> void writeMap(Map<K, V> paramMap, BiConsumer<ByteData, K> paramBiConsumer,
+                                BiConsumer<ByteData, V> paramBiConsumer1) {
+        writeVarInt(paramMap.size());
+        paramMap.forEach((paramObject1, paramObject2) -> {
+            paramBiConsumer.accept(this, paramObject1);
+            paramBiConsumer1.accept(this, paramObject2);
+        });
+    }
+
+    public void readWithCount(Consumer<ByteData> paramConsumer) {
+        int i = readVarInt();
+        for (byte b = 0; b < i; b++)
+            paramConsumer.accept(this);
+    }
+
+    public <T> void writeOptional(Optional<T> paramOptional, BiConsumer<ByteData, T> paramBiConsumer) {
+        if (paramOptional.isPresent()) {
+            writeBoolean(true);
+            paramBiConsumer.accept(this, paramOptional.get());
+        } else {
+            writeBoolean(false);
+        }
+    }
+
+    public <T> Optional<T> readOptional(Function<ByteData, T> paramFunction) {
+        return readBoolean() ? Optional.of(paramFunction.apply(this)) : Optional.empty();
     }
 
     public byte[] readByteArray() {
@@ -193,737 +189,903 @@ public record ByteData(ByteBuf buf) {
         return arrayOfByte;
     }
 
+    public ByteData writeVarIntArray(int[] paramArrayOfint) {
+        writeVarInt(paramArrayOfint.length);
+        for (int i : paramArrayOfint)
+            writeVarInt(i);
+        return this;
+    }
+
+    public int[] readVarIntArray() {
+        return readVarIntArray(readableBytes());
+    }
+
+    public int[] readVarIntArray(int paramInt) {
+        int i = readVarInt();
+        if (i > paramInt)
+            throw new DecoderException("VarIntArray with size " + i + " is bigger than allowed " + paramInt);
+        int[] arrayOfInt = new int[i];
+        for (byte b = 0; b < arrayOfInt.length; b++)
+            arrayOfInt[b] = readVarInt();
+        return arrayOfInt;
+    }
+
+    public ByteData writeLongArray(long[] paramArrayOflong) {
+        writeVarInt(paramArrayOflong.length);
+        for (long l : paramArrayOflong)
+            writeLong(l);
+        return this;
+    }
+
+    public long[] readLongArray() {
+        return readLongArray(null);
+    }
+
+    public long[] readLongArray(@Nullable long[] paramArrayOflong) {
+        return readLongArray(paramArrayOflong, readableBytes() / 8);
+    }
+
+    public long[] readLongArray(@Nullable long[] paramArrayOflong, int paramInt) {
+        int i = readVarInt();
+        if (paramArrayOflong == null || paramArrayOflong.length != i) {
+            if (i > paramInt)
+                throw new DecoderException("LongArray with size " + i + " is bigger than allowed " + paramInt);
+            paramArrayOflong = new long[i];
+        }
+        for (byte b = 0; b < paramArrayOflong.length; b++)
+            paramArrayOflong[b] = readLong();
+        return paramArrayOflong;
+    }
+
+    public <T extends Enum<T>> T readEnum(Class<T> paramClass) {
+        return paramClass.getEnumConstants()[readVarInt()];
+    }
+
+    public ByteData writeEnum(Enum<?> paramEnum) {
+        return writeVarInt(paramEnum.ordinal());
+    }
+
+    public int readVarInt() {
+        int i = 0;
+        byte b = 0;
+        while (true) {
+            byte b1 = readByte();
+            i |= (b1 & Byte.MAX_VALUE) << b++ * 7;
+            if (b > 5)
+                throw new RuntimeException("VarInt too big");
+            if ((b1 & 0x80) != 128)
+                return i;
+        }
+    }
+
+    public long readVarLong() {
+        long l = 0L;
+        byte b = 0;
+        while (true) {
+            byte b1 = readByte();
+            l |= (long) (b1 & Byte.MAX_VALUE) << b++ * 7;
+            if (b > 10)
+                throw new RuntimeException("VarLong too big");
+            if ((b1 & 0x80) != 128)
+                return l;
+        }
+    }
+
+    public ByteData writeUUID(UUID paramUUID) {
+        writeLong(paramUUID.getMostSignificantBits());
+        writeLong(paramUUID.getLeastSignificantBits());
+        return this;
+    }
+
+    public UUID readUUID() {
+        return new UUID(readLong(), readLong());
+    }
+
+    public ByteData writeVarInt(int paramInt) {
+        while (true) {
+            if ((paramInt & 0xFFFFFF80) == 0) {
+                writeByte(paramInt);
+                return this;
+            }
+            writeByte(paramInt & 0x7F | 0x80);
+            paramInt >>>= 7;
+        }
+    }
+
+    public ByteData writeVarLong(long paramLong) {
+        while (true) {
+            if ((paramLong & 0xFFFFFFFFFFFFFF80L) == 0L) {
+                writeByte((int) paramLong);
+                return this;
+            }
+            writeByte((int) (paramLong & 0x7FL) | 0x80);
+            paramLong >>>= 7L;
+        }
+    }
+
+    public String readString() {
+        return readString(32767);
+    }
+
+    public String readString(int paramInt) {
+        int i = readVarInt();
+        if (i > paramInt * 4)
+            throw new DecoderException("The received encoded string buffer length is longer than maximum allowed (" + i
+                    + " > " + paramInt * 4 + ")");
+        if (i < 0)
+            throw new DecoderException("The received encoded string buffer length is less than zero! Weird string!");
+        String str = toString(readerIndex(), i, StandardCharsets.UTF_8);
+        readerIndex(readerIndex() + i);
+        if (str.length() > paramInt)
+            throw new DecoderException(
+                    "The received string length is longer than maximum allowed (" + i + " > " + paramInt + ")");
+        return str;
+    }
+
+    public ByteData writeString(String paramString) {
+        return writeString(paramString, 32767);
+    }
+
+    public ByteData writeString(String paramString, int paramInt) {
+        byte[] arrayOfByte = paramString.getBytes(StandardCharsets.UTF_8);
+        if (arrayOfByte.length > paramInt)
+            throw new EncoderException(
+                    "String too big (was " + arrayOfByte.length + " bytes encoded, max " + paramInt + ")");
+        writeVarInt(arrayOfByte.length);
+        writeBytes(arrayOfByte);
+        return this;
+    }
+
+    public Date readDate() {
+        return new Date(readLong());
+    }
+
+    public ByteData writeDate(Date paramDate) {
+        writeLong(paramDate.getTime());
+        return this;
+    }
+
+    public BitSet readBitSet() {
+        return BitSet.valueOf(readLongArray());
+    }
+
+    public void writeBitSet(BitSet paramBitSet) {
+        writeLongArray(paramBitSet.toLongArray());
+    }
+
     public int capacity() {
-        return buf.capacity();
+        return this.source.capacity();
     }
 
     public ByteBuf capacity(int paramInt) {
-        return buf.capacity(paramInt);
+        return this.source.capacity(paramInt);
     }
 
     public int maxCapacity() {
-        return buf.maxCapacity();
+        return this.source.maxCapacity();
     }
 
     public ByteBufAllocator alloc() {
-        return buf.alloc();
+        return this.source.alloc();
     }
 
+    @SuppressWarnings("deprecation")
     public ByteOrder order() {
-        return buf.order();
+        return this.source.order();
     }
 
+    @SuppressWarnings("deprecation")
     public ByteBuf order(ByteOrder paramByteOrder) {
-        return buf.order(paramByteOrder);
+        return this.source.order(paramByteOrder);
     }
 
     public ByteBuf unwrap() {
-        return buf.unwrap();
+        return this.source.unwrap();
     }
 
     public boolean isDirect() {
-        return buf.isDirect();
+        return this.source.isDirect();
     }
 
     public boolean isReadOnly() {
-        return buf.isReadOnly();
+        return this.source.isReadOnly();
     }
 
     public ByteBuf asReadOnly() {
-        return buf.asReadOnly();
+        return this.source.asReadOnly();
     }
 
     public int readerIndex() {
-        return buf.readerIndex();
+        return this.source.readerIndex();
     }
 
     public ByteBuf readerIndex(int paramInt) {
-        return buf.readerIndex(paramInt);
+        return this.source.readerIndex(paramInt);
     }
 
     public int writerIndex() {
-        return buf.writerIndex();
+        return this.source.writerIndex();
     }
 
     public ByteBuf writerIndex(int paramInt) {
-        return buf.writerIndex(paramInt);
+        return this.source.writerIndex(paramInt);
     }
 
     public ByteBuf setIndex(int paramInt1, int paramInt2) {
-        return buf.setIndex(paramInt1, paramInt2);
+        return this.source.setIndex(paramInt1, paramInt2);
     }
 
     public int readableBytes() {
-        return buf.readableBytes();
+        return this.source.readableBytes();
     }
 
     public int writableBytes() {
-        return buf.writableBytes();
+        return this.source.writableBytes();
     }
 
     public int maxWritableBytes() {
-        return buf.maxWritableBytes();
+        return this.source.maxWritableBytes();
     }
 
     public boolean isReadable() {
-        return buf.isReadable();
+        return this.source.isReadable();
     }
 
     public boolean isReadable(int paramInt) {
-        return buf.isReadable(paramInt);
+        return this.source.isReadable(paramInt);
     }
 
     public boolean isWritable() {
-        return buf.isWritable();
+        return this.source.isWritable();
     }
 
     public boolean isWritable(int paramInt) {
-        return buf.isWritable(paramInt);
+        return this.source.isWritable(paramInt);
     }
 
     public ByteBuf clear() {
-        return buf.clear();
+        return this.source.clear();
     }
 
     public ByteBuf markReaderIndex() {
-        return buf.markReaderIndex();
+        return this.source.markReaderIndex();
     }
 
     public ByteBuf resetReaderIndex() {
-        return buf.resetReaderIndex();
+        return this.source.resetReaderIndex();
     }
 
     public ByteBuf markWriterIndex() {
-        return buf.markWriterIndex();
+        return this.source.markWriterIndex();
     }
 
     public ByteBuf resetWriterIndex() {
-        return buf.resetWriterIndex();
+        return this.source.resetWriterIndex();
     }
 
     public ByteBuf discardReadBytes() {
-        return buf.discardReadBytes();
+        return this.source.discardReadBytes();
     }
 
     public ByteBuf discardSomeReadBytes() {
-        return buf.discardSomeReadBytes();
+        return this.source.discardSomeReadBytes();
     }
 
     public ByteBuf ensureWritable(int paramInt) {
-        return buf.ensureWritable(paramInt);
+        return this.source.ensureWritable(paramInt);
     }
 
     public int ensureWritable(int paramInt, boolean paramBoolean) {
-        return buf.ensureWritable(paramInt, paramBoolean);
+        return this.source.ensureWritable(paramInt, paramBoolean);
     }
 
     public boolean getBoolean(int paramInt) {
-        return buf.getBoolean(paramInt);
+        return this.source.getBoolean(paramInt);
     }
 
     public byte getByte(int paramInt) {
-        return buf.getByte(paramInt);
+        return this.source.getByte(paramInt);
     }
 
     public short getUnsignedByte(int paramInt) {
-        return buf.getUnsignedByte(paramInt);
+        return this.source.getUnsignedByte(paramInt);
     }
 
     public short getShort(int paramInt) {
-        return buf.getShort(paramInt);
+        return this.source.getShort(paramInt);
     }
 
     public short getShortLE(int paramInt) {
-        return buf.getShortLE(paramInt);
+        return this.source.getShortLE(paramInt);
     }
 
     public int getUnsignedShort(int paramInt) {
-        return buf.getUnsignedShort(paramInt);
+        return this.source.getUnsignedShort(paramInt);
     }
 
     public int getUnsignedShortLE(int paramInt) {
-        return buf.getUnsignedShortLE(paramInt);
+        return this.source.getUnsignedShortLE(paramInt);
     }
 
     public int getMedium(int paramInt) {
-        return buf.getMedium(paramInt);
+        return this.source.getMedium(paramInt);
     }
 
     public int getMediumLE(int paramInt) {
-        return buf.getMediumLE(paramInt);
+        return this.source.getMediumLE(paramInt);
     }
 
     public int getUnsignedMedium(int paramInt) {
-        return buf.getUnsignedMedium(paramInt);
+        return this.source.getUnsignedMedium(paramInt);
     }
 
     public int getUnsignedMediumLE(int paramInt) {
-        return buf.getUnsignedMediumLE(paramInt);
+        return this.source.getUnsignedMediumLE(paramInt);
     }
 
     public int getInt(int paramInt) {
-        return buf.getInt(paramInt);
+        return this.source.getInt(paramInt);
     }
 
     public int getIntLE(int paramInt) {
-        return buf.getIntLE(paramInt);
+        return this.source.getIntLE(paramInt);
     }
 
     public long getUnsignedInt(int paramInt) {
-        return buf.getUnsignedInt(paramInt);
+        return this.source.getUnsignedInt(paramInt);
     }
 
     public long getUnsignedIntLE(int paramInt) {
-        return buf.getUnsignedIntLE(paramInt);
+        return this.source.getUnsignedIntLE(paramInt);
     }
 
     public long getLong(int paramInt) {
-        return buf.getLong(paramInt);
+        return this.source.getLong(paramInt);
     }
 
     public long getLongLE(int paramInt) {
-        return buf.getLongLE(paramInt);
+        return this.source.getLongLE(paramInt);
     }
 
     public char getChar(int paramInt) {
-        return buf.getChar(paramInt);
+        return this.source.getChar(paramInt);
     }
 
     public float getFloat(int paramInt) {
-        return buf.getFloat(paramInt);
+        return this.source.getFloat(paramInt);
     }
 
     public double getDouble(int paramInt) {
-        return buf.getDouble(paramInt);
+        return this.source.getDouble(paramInt);
     }
 
     public ByteBuf getBytes(int paramInt, ByteBuf paramByteBuf) {
-        return buf.getBytes(paramInt, paramByteBuf);
+        return this.source.getBytes(paramInt, paramByteBuf);
     }
 
     public ByteBuf getBytes(int paramInt1, ByteBuf paramByteBuf, int paramInt2) {
-        return buf.getBytes(paramInt1, paramByteBuf, paramInt2);
+        return this.source.getBytes(paramInt1, paramByteBuf, paramInt2);
     }
 
     public ByteBuf getBytes(int paramInt1, ByteBuf paramByteBuf, int paramInt2, int paramInt3) {
-        return buf.getBytes(paramInt1, paramByteBuf, paramInt2, paramInt3);
+        return this.source.getBytes(paramInt1, paramByteBuf, paramInt2, paramInt3);
     }
 
     public ByteBuf getBytes(int paramInt, byte[] paramArrayOfbyte) {
-        return buf.getBytes(paramInt, paramArrayOfbyte);
+        return this.source.getBytes(paramInt, paramArrayOfbyte);
     }
 
     public ByteBuf getBytes(int paramInt1, byte[] paramArrayOfbyte, int paramInt2, int paramInt3) {
-        return buf.getBytes(paramInt1, paramArrayOfbyte, paramInt2, paramInt3);
+        return this.source.getBytes(paramInt1, paramArrayOfbyte, paramInt2, paramInt3);
     }
 
     public ByteBuf getBytes(int paramInt, ByteBuffer paramByteBuffer) {
-        return buf.getBytes(paramInt, paramByteBuffer);
+        return this.source.getBytes(paramInt, paramByteBuffer);
     }
 
     public ByteBuf getBytes(int paramInt1, OutputStream paramOutputStream, int paramInt2) throws IOException {
-        return buf.getBytes(paramInt1, paramOutputStream, paramInt2);
+        return this.source.getBytes(paramInt1, paramOutputStream, paramInt2);
     }
 
     public int getBytes(int paramInt1, GatheringByteChannel paramGatheringByteChannel, int paramInt2)
             throws IOException {
-        return buf.getBytes(paramInt1, paramGatheringByteChannel, paramInt2);
+        return this.source.getBytes(paramInt1, paramGatheringByteChannel, paramInt2);
     }
 
     public int getBytes(int paramInt1, FileChannel paramFileChannel, long paramLong, int paramInt2) throws IOException {
-        return buf.getBytes(paramInt1, paramFileChannel, paramLong, paramInt2);
+        return this.source.getBytes(paramInt1, paramFileChannel, paramLong, paramInt2);
     }
 
     public CharSequence getCharSequence(int paramInt1, int paramInt2, Charset paramCharset) {
-        return buf.getCharSequence(paramInt1, paramInt2, paramCharset);
+        return this.source.getCharSequence(paramInt1, paramInt2, paramCharset);
     }
 
     public ByteBuf setBoolean(int paramInt, boolean paramBoolean) {
-        return buf.setBoolean(paramInt, paramBoolean);
+        return this.source.setBoolean(paramInt, paramBoolean);
     }
 
     public ByteBuf setByte(int paramInt1, int paramInt2) {
-        return buf.setByte(paramInt1, paramInt2);
+        return this.source.setByte(paramInt1, paramInt2);
     }
 
     public ByteBuf setShort(int paramInt1, int paramInt2) {
-        return buf.setShort(paramInt1, paramInt2);
+        return this.source.setShort(paramInt1, paramInt2);
     }
 
     public ByteBuf setShortLE(int paramInt1, int paramInt2) {
-        return buf.setShortLE(paramInt1, paramInt2);
+        return this.source.setShortLE(paramInt1, paramInt2);
     }
 
     public ByteBuf setMedium(int paramInt1, int paramInt2) {
-        return buf.setMedium(paramInt1, paramInt2);
+        return this.source.setMedium(paramInt1, paramInt2);
     }
 
     public ByteBuf setMediumLE(int paramInt1, int paramInt2) {
-        return buf.setMediumLE(paramInt1, paramInt2);
+        return this.source.setMediumLE(paramInt1, paramInt2);
     }
 
     public ByteBuf setInt(int paramInt1, int paramInt2) {
-        return buf.setInt(paramInt1, paramInt2);
+        return this.source.setInt(paramInt1, paramInt2);
     }
 
     public ByteBuf setIntLE(int paramInt1, int paramInt2) {
-        return buf.setIntLE(paramInt1, paramInt2);
+        return this.source.setIntLE(paramInt1, paramInt2);
     }
 
     public ByteBuf setLong(int paramInt, long paramLong) {
-        return buf.setLong(paramInt, paramLong);
+        return this.source.setLong(paramInt, paramLong);
     }
 
     public ByteBuf setLongLE(int paramInt, long paramLong) {
-        return buf.setLongLE(paramInt, paramLong);
+        return this.source.setLongLE(paramInt, paramLong);
     }
 
     public ByteBuf setChar(int paramInt1, int paramInt2) {
-        return buf.setChar(paramInt1, paramInt2);
+        return this.source.setChar(paramInt1, paramInt2);
     }
 
     public ByteBuf setFloat(int paramInt, float paramFloat) {
-        return buf.setFloat(paramInt, paramFloat);
+        return this.source.setFloat(paramInt, paramFloat);
     }
 
     public ByteBuf setDouble(int paramInt, double paramDouble) {
-        return buf.setDouble(paramInt, paramDouble);
+        return this.source.setDouble(paramInt, paramDouble);
     }
 
     public ByteBuf setBytes(int paramInt, ByteBuf paramByteBuf) {
-        return buf.setBytes(paramInt, paramByteBuf);
+        return this.source.setBytes(paramInt, paramByteBuf);
     }
 
     public ByteBuf setBytes(int paramInt1, ByteBuf paramByteBuf, int paramInt2) {
-        return buf.setBytes(paramInt1, paramByteBuf, paramInt2);
+        return this.source.setBytes(paramInt1, paramByteBuf, paramInt2);
     }
 
     public ByteBuf setBytes(int paramInt1, ByteBuf paramByteBuf, int paramInt2, int paramInt3) {
-        return buf.setBytes(paramInt1, paramByteBuf, paramInt2, paramInt3);
+        return this.source.setBytes(paramInt1, paramByteBuf, paramInt2, paramInt3);
     }
 
     public ByteBuf setBytes(int paramInt, byte[] paramArrayOfbyte) {
-        return buf.setBytes(paramInt, paramArrayOfbyte);
+        return this.source.setBytes(paramInt, paramArrayOfbyte);
     }
 
     public ByteBuf setBytes(int paramInt1, byte[] paramArrayOfbyte, int paramInt2, int paramInt3) {
-        return buf.setBytes(paramInt1, paramArrayOfbyte, paramInt2, paramInt3);
+        return this.source.setBytes(paramInt1, paramArrayOfbyte, paramInt2, paramInt3);
     }
 
     public ByteBuf setBytes(int paramInt, ByteBuffer paramByteBuffer) {
-        return buf.setBytes(paramInt, paramByteBuffer);
+        return this.source.setBytes(paramInt, paramByteBuffer);
     }
 
     public int setBytes(int paramInt1, InputStream paramInputStream, int paramInt2) throws IOException {
-        return buf.setBytes(paramInt1, paramInputStream, paramInt2);
+        return this.source.setBytes(paramInt1, paramInputStream, paramInt2);
     }
 
     public int setBytes(int paramInt1, ScatteringByteChannel paramScatteringByteChannel, int paramInt2)
             throws IOException {
-        return buf.setBytes(paramInt1, paramScatteringByteChannel, paramInt2);
+        return this.source.setBytes(paramInt1, paramScatteringByteChannel, paramInt2);
     }
 
     public int setBytes(int paramInt1, FileChannel paramFileChannel, long paramLong, int paramInt2) throws IOException {
-        return buf.setBytes(paramInt1, paramFileChannel, paramLong, paramInt2);
+        return this.source.setBytes(paramInt1, paramFileChannel, paramLong, paramInt2);
     }
 
     public ByteBuf setZero(int paramInt1, int paramInt2) {
-        return buf.setZero(paramInt1, paramInt2);
+        return this.source.setZero(paramInt1, paramInt2);
     }
 
     public int setCharSequence(int paramInt, CharSequence paramCharSequence, Charset paramCharset) {
-        return buf.setCharSequence(paramInt, paramCharSequence, paramCharset);
+        return this.source.setCharSequence(paramInt, paramCharSequence, paramCharset);
     }
 
     public boolean readBoolean() {
-        return buf.readBoolean();
+        return this.source.readBoolean();
     }
 
     public byte readByte() {
-        return buf.readByte();
+        return this.source.readByte();
     }
 
     public short readUnsignedByte() {
-        return buf.readUnsignedByte();
+        return this.source.readUnsignedByte();
     }
 
     public short readShort() {
-        return buf.readShort();
+        return this.source.readShort();
     }
 
     public short readShortLE() {
-        return buf.readShortLE();
+        return this.source.readShortLE();
     }
 
     public int readUnsignedShort() {
-        return buf.readUnsignedShort();
+        return this.source.readUnsignedShort();
     }
 
     public int readUnsignedShortLE() {
-        return buf.readUnsignedShortLE();
+        return this.source.readUnsignedShortLE();
     }
 
     public int readMedium() {
-        return buf.readMedium();
+        return this.source.readMedium();
     }
 
     public int readMediumLE() {
-        return buf.readMediumLE();
+        return this.source.readMediumLE();
     }
 
     public int readUnsignedMedium() {
-        return buf.readUnsignedMedium();
+        return this.source.readUnsignedMedium();
     }
 
     public int readUnsignedMediumLE() {
-        return buf.readUnsignedMediumLE();
+        return this.source.readUnsignedMediumLE();
     }
 
     public int readInt() {
-        return buf.readInt();
+        return this.source.readInt();
     }
 
     public int readIntLE() {
-        return buf.readIntLE();
+        return this.source.readIntLE();
     }
 
     public long readUnsignedInt() {
-        return buf.readUnsignedInt();
+        return this.source.readUnsignedInt();
     }
 
     public long readUnsignedIntLE() {
-        return buf.readUnsignedIntLE();
+        return this.source.readUnsignedIntLE();
     }
 
     public long readLong() {
-        return buf.readLong();
+        return this.source.readLong();
     }
 
     public long readLongLE() {
-        return buf.readLongLE();
+        return this.source.readLongLE();
     }
 
     public char readChar() {
-        return buf.readChar();
+        return this.source.readChar();
     }
 
     public float readFloat() {
-        return buf.readFloat();
+        return this.source.readFloat();
     }
 
     public double readDouble() {
-        return buf.readDouble();
+        return this.source.readDouble();
     }
 
     public ByteBuf readBytes(int paramInt) {
-        return buf.readBytes(paramInt);
+        return this.source.readBytes(paramInt);
     }
 
     public ByteBuf readSlice(int paramInt) {
-        return buf.readSlice(paramInt);
+        return this.source.readSlice(paramInt);
     }
 
     public ByteBuf readRetainedSlice(int paramInt) {
-        return buf.readRetainedSlice(paramInt);
+        return this.source.readRetainedSlice(paramInt);
     }
 
     public ByteBuf readBytes(ByteBuf paramByteBuf) {
-        return buf.readBytes(paramByteBuf);
+        return this.source.readBytes(paramByteBuf);
     }
 
     public ByteBuf readBytes(ByteBuf paramByteBuf, int paramInt) {
-        return buf.readBytes(paramByteBuf, paramInt);
+        return this.source.readBytes(paramByteBuf, paramInt);
     }
 
     public ByteBuf readBytes(ByteBuf paramByteBuf, int paramInt1, int paramInt2) {
-        return buf.readBytes(paramByteBuf, paramInt1, paramInt2);
+        return this.source.readBytes(paramByteBuf, paramInt1, paramInt2);
     }
 
     public ByteBuf readBytes(byte[] paramArrayOfbyte) {
-        return buf.readBytes(paramArrayOfbyte);
+        return this.source.readBytes(paramArrayOfbyte);
     }
 
     public ByteBuf readBytes(byte[] paramArrayOfbyte, int paramInt1, int paramInt2) {
-        return buf.readBytes(paramArrayOfbyte, paramInt1, paramInt2);
+        return this.source.readBytes(paramArrayOfbyte, paramInt1, paramInt2);
     }
 
     public ByteBuf readBytes(ByteBuffer paramByteBuffer) {
-        return buf.readBytes(paramByteBuffer);
+        return this.source.readBytes(paramByteBuffer);
     }
 
     public ByteBuf readBytes(OutputStream paramOutputStream, int paramInt) throws IOException {
-        return buf.readBytes(paramOutputStream, paramInt);
+        return this.source.readBytes(paramOutputStream, paramInt);
     }
 
     public int readBytes(GatheringByteChannel paramGatheringByteChannel, int paramInt) throws IOException {
-        return buf.readBytes(paramGatheringByteChannel, paramInt);
+        return this.source.readBytes(paramGatheringByteChannel, paramInt);
     }
 
     public CharSequence readCharSequence(int paramInt, Charset paramCharset) {
-        return buf.readCharSequence(paramInt, paramCharset);
+        return this.source.readCharSequence(paramInt, paramCharset);
     }
 
     public int readBytes(FileChannel paramFileChannel, long paramLong, int paramInt) throws IOException {
-        return buf.readBytes(paramFileChannel, paramLong, paramInt);
+        return this.source.readBytes(paramFileChannel, paramLong, paramInt);
     }
 
     public ByteBuf skipBytes(int paramInt) {
-        return buf.skipBytes(paramInt);
+        return this.source.skipBytes(paramInt);
     }
 
     public ByteBuf writeBoolean(boolean paramBoolean) {
-        return buf.writeBoolean(paramBoolean);
+        return this.source.writeBoolean(paramBoolean);
     }
 
     public ByteBuf writeByte(int paramInt) {
-        return buf.writeByte(paramInt);
+        return this.source.writeByte(paramInt);
     }
 
     public ByteBuf writeShort(int paramInt) {
-        return buf.writeShort(paramInt);
+        return this.source.writeShort(paramInt);
     }
 
     public ByteBuf writeShortLE(int paramInt) {
-        return buf.writeShortLE(paramInt);
+        return this.source.writeShortLE(paramInt);
     }
 
     public ByteBuf writeMedium(int paramInt) {
-        return buf.writeMedium(paramInt);
+        return this.source.writeMedium(paramInt);
     }
 
     public ByteBuf writeMediumLE(int paramInt) {
-        return buf.writeMediumLE(paramInt);
+        return this.source.writeMediumLE(paramInt);
     }
 
     public ByteBuf writeInt(int paramInt) {
-        return buf.writeInt(paramInt);
+        return this.source.writeInt(paramInt);
     }
 
     public ByteBuf writeIntLE(int paramInt) {
-        return buf.writeIntLE(paramInt);
+        return this.source.writeIntLE(paramInt);
     }
 
     public ByteBuf writeLong(long paramLong) {
-        return buf.writeLong(paramLong);
+        return this.source.writeLong(paramLong);
     }
 
     public ByteBuf writeLongLE(long paramLong) {
-        return buf.writeLongLE(paramLong);
+        return this.source.writeLongLE(paramLong);
     }
 
     public ByteBuf writeChar(int paramInt) {
-        return buf.writeChar(paramInt);
+        return this.source.writeChar(paramInt);
     }
 
     public ByteBuf writeFloat(float paramFloat) {
-        return buf.writeFloat(paramFloat);
+        return this.source.writeFloat(paramFloat);
     }
 
     public ByteBuf writeDouble(double paramDouble) {
-        return buf.writeDouble(paramDouble);
+        return this.source.writeDouble(paramDouble);
     }
 
     public ByteBuf writeBytes(ByteBuf paramByteBuf) {
-        return buf.writeBytes(paramByteBuf);
+        return this.source.writeBytes(paramByteBuf);
     }
 
     public ByteBuf writeBytes(ByteBuf paramByteBuf, int paramInt) {
-        return buf.writeBytes(paramByteBuf, paramInt);
+        return this.source.writeBytes(paramByteBuf, paramInt);
     }
 
     public ByteBuf writeBytes(ByteBuf paramByteBuf, int paramInt1, int paramInt2) {
-        return buf.writeBytes(paramByteBuf, paramInt1, paramInt2);
+        return this.source.writeBytes(paramByteBuf, paramInt1, paramInt2);
     }
 
     public ByteBuf writeBytes(byte[] paramArrayOfbyte) {
-        return buf.writeBytes(paramArrayOfbyte);
+        return this.source.writeBytes(paramArrayOfbyte);
     }
 
     public ByteBuf writeBytes(byte[] paramArrayOfbyte, int paramInt1, int paramInt2) {
-        return buf.writeBytes(paramArrayOfbyte, paramInt1, paramInt2);
+        return this.source.writeBytes(paramArrayOfbyte, paramInt1, paramInt2);
     }
 
     public ByteBuf writeBytes(ByteBuffer paramByteBuffer) {
-        return buf.writeBytes(paramByteBuffer);
+        return this.source.writeBytes(paramByteBuffer);
     }
 
     public int writeBytes(InputStream paramInputStream, int paramInt) throws IOException {
-        return buf.writeBytes(paramInputStream, paramInt);
+        return this.source.writeBytes(paramInputStream, paramInt);
     }
 
     public int writeBytes(ScatteringByteChannel paramScatteringByteChannel, int paramInt) throws IOException {
-        return buf.writeBytes(paramScatteringByteChannel, paramInt);
+        return this.source.writeBytes(paramScatteringByteChannel, paramInt);
     }
 
     public int writeBytes(FileChannel paramFileChannel, long paramLong, int paramInt) throws IOException {
-        return buf.writeBytes(paramFileChannel, paramLong, paramInt);
+        return this.source.writeBytes(paramFileChannel, paramLong, paramInt);
     }
 
     public ByteBuf writeZero(int paramInt) {
-        return buf.writeZero(paramInt);
+        return this.source.writeZero(paramInt);
     }
 
     public int writeCharSequence(CharSequence paramCharSequence, Charset paramCharset) {
-        return buf.writeCharSequence(paramCharSequence, paramCharset);
+        return this.source.writeCharSequence(paramCharSequence, paramCharset);
     }
 
     public int indexOf(int paramInt1, int paramInt2, byte paramByte) {
-        return buf.indexOf(paramInt1, paramInt2, paramByte);
+        return this.source.indexOf(paramInt1, paramInt2, paramByte);
     }
 
     public int bytesBefore(byte paramByte) {
-        return buf.bytesBefore(paramByte);
+        return this.source.bytesBefore(paramByte);
     }
 
     public int bytesBefore(int paramInt, byte paramByte) {
-        return buf.bytesBefore(paramInt, paramByte);
+        return this.source.bytesBefore(paramInt, paramByte);
     }
 
     public int bytesBefore(int paramInt1, int paramInt2, byte paramByte) {
-        return buf.bytesBefore(paramInt1, paramInt2, paramByte);
+        return this.source.bytesBefore(paramInt1, paramInt2, paramByte);
     }
 
     public int forEachByte(ByteProcessor paramByteProcessor) {
-        return buf.forEachByte(paramByteProcessor);
+        return this.source.forEachByte(paramByteProcessor);
     }
 
     public int forEachByte(int paramInt1, int paramInt2, ByteProcessor paramByteProcessor) {
-        return buf.forEachByte(paramInt1, paramInt2, paramByteProcessor);
+        return this.source.forEachByte(paramInt1, paramInt2, paramByteProcessor);
     }
 
     public int forEachByteDesc(ByteProcessor paramByteProcessor) {
-        return buf.forEachByteDesc(paramByteProcessor);
+        return this.source.forEachByteDesc(paramByteProcessor);
     }
 
     public int forEachByteDesc(int paramInt1, int paramInt2, ByteProcessor paramByteProcessor) {
-        return buf.forEachByteDesc(paramInt1, paramInt2, paramByteProcessor);
+        return this.source.forEachByteDesc(paramInt1, paramInt2, paramByteProcessor);
     }
 
     public ByteBuf copy() {
-        return buf.copy();
+        return this.source.copy();
     }
 
     public ByteBuf copy(int paramInt1, int paramInt2) {
-        return buf.copy(paramInt1, paramInt2);
+        return this.source.copy(paramInt1, paramInt2);
     }
 
     public ByteBuf slice() {
-        return buf.slice();
+        return this.source.slice();
     }
 
     public ByteBuf retainedSlice() {
-        return buf.retainedSlice();
+        return this.source.retainedSlice();
     }
 
     public ByteBuf slice(int paramInt1, int paramInt2) {
-        return buf.slice(paramInt1, paramInt2);
+        return this.source.slice(paramInt1, paramInt2);
     }
 
     public ByteBuf retainedSlice(int paramInt1, int paramInt2) {
-        return buf.retainedSlice(paramInt1, paramInt2);
+        return this.source.retainedSlice(paramInt1, paramInt2);
     }
 
     public ByteBuf duplicate() {
-        return buf.duplicate();
+        return this.source.duplicate();
     }
 
     public ByteBuf retainedDuplicate() {
-        return buf.retainedDuplicate();
+        return this.source.retainedDuplicate();
     }
 
     public int nioBufferCount() {
-        return buf.nioBufferCount();
+        return this.source.nioBufferCount();
     }
 
     public ByteBuffer nioBuffer() {
-        return buf.nioBuffer();
+        return this.source.nioBuffer();
     }
 
     public ByteBuffer nioBuffer(int paramInt1, int paramInt2) {
-        return buf.nioBuffer(paramInt1, paramInt2);
+        return this.source.nioBuffer(paramInt1, paramInt2);
     }
 
     public ByteBuffer internalNioBuffer(int paramInt1, int paramInt2) {
-        return buf.internalNioBuffer(paramInt1, paramInt2);
+        return this.source.internalNioBuffer(paramInt1, paramInt2);
     }
 
     public ByteBuffer[] nioBuffers() {
-        return buf.nioBuffers();
+        return this.source.nioBuffers();
     }
 
     public ByteBuffer[] nioBuffers(int paramInt1, int paramInt2) {
-        return buf.nioBuffers(paramInt1, paramInt2);
+        return this.source.nioBuffers(paramInt1, paramInt2);
     }
 
     public boolean hasArray() {
-        return buf.hasArray();
+        return this.source.hasArray();
     }
 
     public byte[] array() {
-        return buf.array();
+        return this.source.array();
     }
 
     public int arrayOffset() {
-        return buf.arrayOffset();
+        return this.source.arrayOffset();
     }
 
     public boolean hasMemoryAddress() {
-        return buf.hasMemoryAddress();
+        return this.source.hasMemoryAddress();
     }
 
     public long memoryAddress() {
-        return buf.memoryAddress();
+        return this.source.memoryAddress();
     }
 
     public String toString(Charset paramCharset) {
-        return buf.toString(paramCharset);
+        return this.source.toString(paramCharset);
     }
 
     public String toString(int paramInt1, int paramInt2, Charset paramCharset) {
-        return buf.toString(paramInt1, paramInt2, paramCharset);
+        return this.source.toString(paramInt1, paramInt2, paramCharset);
     }
 
     public int hashCode() {
-        return buf.hashCode();
+        return this.source.hashCode();
     }
 
     public boolean equals(Object paramObject) {
-        return buf.equals(paramObject);
+        return this.source.equals(paramObject);
     }
 
     public int compareTo(ByteBuf paramByteBuf) {
-        return buf.compareTo(paramByteBuf);
+        return this.source.compareTo(paramByteBuf);
     }
 
     public String toString() {
-        return buf.toString();
+        return this.source.toString();
     }
 
     public ByteBuf retain(int paramInt) {
-        return buf.retain(paramInt);
+        return this.source.retain(paramInt);
     }
 
     public ByteBuf retain() {
-        return buf.retain();
+        return this.source.retain();
     }
 
     public ByteBuf touch() {
-        return buf.touch();
+        return this.source.touch();
     }
 
     public ByteBuf touch(Object paramObject) {
-        return buf.touch(paramObject);
+        return this.source.touch(paramObject);
     }
 
     public int refCnt() {
-        return buf.refCnt();
+        return this.source.refCnt();
     }
 
     public boolean release() {
-        return buf.release();
+        return this.source.release();
     }
 
     public boolean release(int paramInt) {
-        return buf.release(paramInt);
+        return this.source.release(paramInt);
     }
 }
