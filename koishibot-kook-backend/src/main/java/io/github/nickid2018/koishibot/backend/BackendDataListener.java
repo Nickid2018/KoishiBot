@@ -17,6 +17,8 @@ import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -27,14 +29,30 @@ public class BackendDataListener extends DataPacketListener {
     private final Supplier<KOOKEnvironment> environment;
     private final CompletableFuture<Void> disconnectFuture;
 
+    public static final Map<Class<? extends SerializableData>, Class<? extends SerializableData>> MAPPING = new HashMap<>();
+
+    static {
+        MAPPING.put(Environment.class, KOOKEnvironment.class);
+        MAPPING.put(AtMessage.class, KOOKAt.class);
+        MAPPING.put(ChainMessage.class, KOOKChain.class);
+        MAPPING.put(GroupInfo.class, KOOKTextChannel.class);
+        MAPPING.put(ImageMessage.class, KOOKImage.class);
+        MAPPING.put(MessageSource.class, KOOKMessageSource.class);
+        MAPPING.put(QuoteMessage.class, KOOKQuote.class);
+        MAPPING.put(TextMessage.class, KOOKText.class);
+        MAPPING.put(UserInfo.class, KOOKUser.class);
+    }
+
     public BackendDataListener(Supplier<KOOKEnvironment> environment, CompletableFuture<Void> disconnectFuture) {
         this.environment = environment;
         this.disconnectFuture = disconnectFuture;
+
         BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory = (c, cn) -> {
             try {
-                return (c.getTypeName().contains("kook") ?
-                        c.getConstructor(KOOKEnvironment.class) :
-                        c.getConstructor(Environment.class)).newInstance(environment.get());
+                if (MAPPING.containsKey(c))
+                    return MAPPING.get(c).getConstructor(KOOKEnvironment.class).newInstance(environment.get());
+                else
+                    return c.getConstructor(Environment.class).newInstance(environment.get());
             } catch (Exception e) {
                 return null;
             }
@@ -42,18 +60,18 @@ public class BackendDataListener extends DataPacketListener {
 
         registry.registerData(KOOKEnvironment.class, (c, cn) -> null);
 
-        registry.registerData(KOOKAt.class, dataFactory);
+        registry.registerData(AtMessage.class, dataFactory);
         registry.registerData(AudioMessage.class, dataFactory);
-        registry.registerData(KOOKChain.class, dataFactory);
+        registry.registerData(ChainMessage.class, dataFactory);
         registry.registerData(ForwardMessage.class, dataFactory);
-        registry.registerData(KOOKTextChannel.class, dataFactory);
-        registry.registerData(KOOKImage.class, dataFactory);
+        registry.registerData(GroupInfo.class, dataFactory);
+        registry.registerData(ImageMessage.class, dataFactory);
         registry.registerData(MessageEntry.class, dataFactory);
-        registry.registerData(KOOKMessageSource.class, dataFactory);
-        registry.registerData(KOOKQuote.class, dataFactory);
+        registry.registerData(MessageSource.class, dataFactory);
+        registry.registerData(QuoteMessage.class, dataFactory);
         registry.registerData(ServiceMessage.class, dataFactory);
-        registry.registerData(KOOKText.class, dataFactory);
-        registry.registerData(KOOKUser.class, dataFactory);
+        registry.registerData(TextMessage.class, dataFactory);
+        registry.registerData(UserInfo.class, dataFactory);
 
         registry.registerData(QueryResultEvent.class, dataFactory);
         registry.registerData(OnFriendMessageEvent.class, dataFactory);

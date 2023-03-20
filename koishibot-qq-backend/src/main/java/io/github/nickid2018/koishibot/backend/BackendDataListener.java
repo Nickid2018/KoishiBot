@@ -4,9 +4,7 @@ import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
 import io.github.nickid2018.koishibot.message.action.SendMessageAction;
 import io.github.nickid2018.koishibot.message.action.StopAction;
-import io.github.nickid2018.koishibot.message.api.Environment;
-import io.github.nickid2018.koishibot.message.api.GroupInfo;
-import io.github.nickid2018.koishibot.message.api.UserInfo;
+import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.event.*;
 import io.github.nickid2018.koishibot.message.network.DataPacketListener;
 import io.github.nickid2018.koishibot.message.qq.*;
@@ -19,6 +17,8 @@ import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -29,33 +29,52 @@ public class BackendDataListener extends DataPacketListener {
     private final Supplier<QQEnvironment> environment;
     private final CompletableFuture<Void> disconnectFuture;
 
+    public static final Map<Class<? extends SerializableData>, Class<? extends SerializableData>> MAPPING = new HashMap<>();
+
+    static {
+        MAPPING.put(Environment.class, QQEnvironment.class);
+        MAPPING.put(AtMessage.class, QQAt.class);
+        MAPPING.put(AudioMessage.class, QQAudio.class);
+        MAPPING.put(ChainMessage.class, QQChain.class);
+        MAPPING.put(ForwardMessage.class, QQForward.class);
+        MAPPING.put(GroupInfo.class, QQGroup.class);
+        MAPPING.put(ImageMessage.class, QQImage.class);
+        MAPPING.put(MessageEntry.class, QQMessageEntry.class);
+        MAPPING.put(MessageSource.class, QQMessageSource.class);
+        MAPPING.put(QuoteMessage.class, QQQuote.class);
+        MAPPING.put(ServiceMessage.class, QQService.class);
+        MAPPING.put(TextMessage.class, QQText.class);
+        MAPPING.put(UserInfo.class, QQUser.class);
+    }
+
     public BackendDataListener(Supplier<QQEnvironment> environment, CompletableFuture<Void> disconnectFuture) {
         this.environment = environment;
         this.disconnectFuture = disconnectFuture;
         BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory = (c, cn) -> {
             try {
-                return (c.getTypeName().contains("qq") ?
-                        c.getConstructor(QQEnvironment.class) :
-                        c.getConstructor(Environment.class)).newInstance(environment.get());
+                if (MAPPING.containsKey(c))
+                    return MAPPING.get(c).getConstructor(QQEnvironment.class).newInstance(environment.get());
+                else
+                    return c.getConstructor(Environment.class).newInstance(environment.get());
             } catch (Exception e) {
                 return null;
             }
         };
 
-        registry.registerData(QQEnvironment.class, (c, cn) -> null);
+        registry.registerData(Environment.class, (c, cn) -> null);
 
-        registry.registerData(QQAt.class, dataFactory);
-        registry.registerData(QQAudio.class, dataFactory);
-        registry.registerData(QQChain.class, dataFactory);
-        registry.registerData(QQForward.class, dataFactory);
-        registry.registerData(QQGroup.class, dataFactory);
-        registry.registerData(QQImage.class, dataFactory);
-        registry.registerData(QQMessageEntry.class, dataFactory);
-        registry.registerData(QQMessageSource.class, dataFactory);
-        registry.registerData(QQQuote.class, dataFactory);
-        registry.registerData(QQService.class, dataFactory);
-        registry.registerData(QQText.class, dataFactory);
-        registry.registerData(QQUser.class, dataFactory);
+        registry.registerData(AtMessage.class, dataFactory);
+        registry.registerData(AudioMessage.class, dataFactory);
+        registry.registerData(ChainMessage.class, dataFactory);
+        registry.registerData(ForwardMessage.class, dataFactory);
+        registry.registerData(GroupInfo.class, dataFactory);
+        registry.registerData(ImageMessage.class, dataFactory);
+        registry.registerData(MessageEntry.class, dataFactory);
+        registry.registerData(MessageSource.class, dataFactory);
+        registry.registerData(QuoteMessage.class, dataFactory);
+        registry.registerData(ServiceMessage.class, dataFactory);
+        registry.registerData(TextMessage.class, dataFactory);
+        registry.registerData(UserInfo.class, dataFactory);
 
         registry.registerData(QueryResultEvent.class, dataFactory);
         registry.registerData(OnFriendMessageEvent.class, dataFactory);

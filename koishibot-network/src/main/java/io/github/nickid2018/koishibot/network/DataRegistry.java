@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -32,7 +33,8 @@ public class DataRegistry {
     }
 
     public int getPacketId(Class<? extends SerializableData> dataClass) {
-        return dataMap.getInt(dataClass);
+        List<Class<? extends SerializableData>> list = dataMap.keySet().stream().filter(c -> c.isAssignableFrom(dataClass)).toList();
+        return list.isEmpty() ? -1 : dataMap.getInt(list.get(0));
     }
 
     public Class<? extends SerializableData> getDataClass(int id) {
