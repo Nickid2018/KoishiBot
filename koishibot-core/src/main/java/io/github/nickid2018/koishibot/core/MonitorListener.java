@@ -2,6 +2,9 @@ package io.github.nickid2018.koishibot.core;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.nickid2018.koishibot.message.Environments;
+import io.github.nickid2018.koishibot.message.action.StopAction;
+import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.network.*;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.LogUtils;
@@ -51,6 +54,9 @@ public class MonitorListener implements NetworkListener {
     }
 
     private void doExit() {
-
+        Environments.getEnvironments().stream()
+                .map(Environment::getConnection)
+                .forEach(con -> con.sendPacket(StopAction.INSTANCE));
+        BotStart.terminate();
     }
 }

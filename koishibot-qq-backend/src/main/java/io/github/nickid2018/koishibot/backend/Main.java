@@ -18,6 +18,7 @@ public class Main {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot QQ Backend");
 
+    public static AtomicBoolean stopped = new AtomicBoolean();
     private static QQEnvironment environment;
 
     public static void main(String[] args) {
@@ -45,7 +46,7 @@ public class Main {
         bot.login();
 
         int retry = 0;
-        while (bot.isOnline() && retry < 20) {
+        while (!stopped.get() && bot.isOnline() && retry < 20) {
             CompletableFuture<Void> disconnected = new CompletableFuture<>();
             BackendDataListener listener = new BackendDataListener(() -> environment, disconnected);
             try {

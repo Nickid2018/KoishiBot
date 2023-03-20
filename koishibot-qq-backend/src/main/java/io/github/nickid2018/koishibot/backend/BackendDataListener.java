@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.backend;
 import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
 import io.github.nickid2018.koishibot.message.action.SendMessageAction;
+import io.github.nickid2018.koishibot.message.action.StopAction;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.message.event.*;
@@ -68,6 +69,7 @@ public class BackendDataListener extends DataPacketListener {
         registry.registerData(NudgeAction.class, dataFactory);
         registry.registerData(RecallAction.class, dataFactory);
         registry.registerData(SendMessageAction.class, dataFactory);
+        registry.registerData(StopAction.class, (c, cn) -> StopAction.INSTANCE);
     }
 
     @Override
@@ -91,6 +93,8 @@ public class BackendDataListener extends DataPacketListener {
             recallAction(connection, action);
         else if (packet instanceof SendMessageAction action)
             sendMessageAction(connection, action);
+        else if (packet instanceof StopAction)
+            doStop();
     }
 
     @Override
@@ -152,5 +156,10 @@ public class BackendDataListener extends DataPacketListener {
             QQEnvironment.send(contact.left(), action.message);
         else
             QQEnvironment.send(contact.right(), action.message);
+    }
+
+    private void doStop() {
+        Main.stopped.set(true);
+        environment.get().close();
     }
 }

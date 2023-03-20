@@ -56,6 +56,7 @@ public class QQEnvironment extends Environment {
     }
 
     public void close() {
+        bot.close();
     }
 
     public boolean isNudgeEnabled() {

@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.message;
 import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
 import io.github.nickid2018.koishibot.message.action.SendMessageAction;
+import io.github.nickid2018.koishibot.message.action.StopAction;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.event.*;
 import io.github.nickid2018.koishibot.message.network.DataPacketListener;
@@ -62,6 +63,7 @@ public class MessageDataListener extends DataPacketListener {
         REGISTRY.registerData(NudgeAction.class, dataFactory);
         REGISTRY.registerData(RecallAction.class, dataFactory);
         REGISTRY.registerData(SendMessageAction.class, dataFactory);
+        REGISTRY.registerData(StopAction.class, (c, cn) -> StopAction.INSTANCE);
     }
 
     @Override
