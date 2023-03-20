@@ -57,6 +57,11 @@ public class MonitorListener implements NetworkListener {
         Environments.getEnvironments().stream()
                 .map(Environment::getConnection)
                 .forEach(con -> con.sendPacket(StopAction.INSTANCE));
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            LogUtils.error(LOGGER, "Can't wait for bot to stop!", e);
+        }
         BotStart.terminate();
     }
 }

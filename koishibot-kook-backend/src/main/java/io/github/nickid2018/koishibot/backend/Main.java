@@ -34,11 +34,13 @@ public class Main {
         int retry = 0;
         while (!stopped.get() && retry < 20) {
             CompletableFuture<Void> disconnected = new CompletableFuture<>();
-            BackendDataListener listener = new BackendDataListener(() -> environment, disconnected);
+            CompletableFuture<KOOKEnvironment> env = new CompletableFuture<>();
+            BackendDataListener listener = new BackendDataListener(env::join, disconnected);
             try {
                 Connection connection = Connection.connectToTcpServer(
                         listener.registry, listener, InetAddress.getLocalHost(), Settings.delegatePort);
                 environment = new KOOKEnvironment(kookClient, self, connection);
+                env.complete(environment);
                 retry = 0;
                 disconnected.get();
             } catch (Exception e) {

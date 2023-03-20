@@ -48,11 +48,13 @@ public class Main {
         int retry = 0;
         while (!stopped.get() && bot.isOnline() && retry < 20) {
             CompletableFuture<Void> disconnected = new CompletableFuture<>();
-            BackendDataListener listener = new BackendDataListener(() -> environment, disconnected);
+            CompletableFuture<QQEnvironment> env = new CompletableFuture<>();
+            BackendDataListener listener = new BackendDataListener(env::join, disconnected);
             try {
                 Connection connection = Connection.connectToTcpServer(
                         listener.registry, listener, InetAddress.getLocalHost(), Settings.delegatePort);
                 environment = new QQEnvironment(bot, nudgeEnabled.get(), connection);
+                env.complete(environment);
                 retry = 0;
                 disconnected.get();
             } catch (Exception e) {
