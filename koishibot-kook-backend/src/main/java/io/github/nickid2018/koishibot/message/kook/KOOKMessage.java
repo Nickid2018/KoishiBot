@@ -17,23 +17,8 @@ public interface KOOKMessage {
         kookMessage.setSentMessage(((KOOKTextChannel) group).getChannel().sendMessage(message));
         if (kookMessage instanceof KOOKChain kookChain) {
             if (!kookChain.getImages().isEmpty())
-                kookChain.getImages().forEach(image -> send(image, group));
+                kookChain.getImages().forEach(image -> image.send(group));
         }
-    }
-
-    static void recall(KOOKMessage message) {
-        if (message.getSentMessage() != null)
-            message.getSentMessage().delete();
-    }
-
-    static long getSentTime(KOOKMessage message) {
-        return message.getSentMessage().getTimestamp();
-    }
-
-    static MessageSource getSource(KOOKMessage message) {
-        if (message.getSentMessage() != null)
-            return new KOOKMessageSource(message.getEnvironment(), message.getSentMessage().getId(), message.getSentMessage());
-        return null;
     }
 
     Environment getEnvironment();
