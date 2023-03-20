@@ -164,5 +164,6 @@ public class BackendDataListener extends DataPacketListener {
     private void doStop() {
         Main.stopped.set(true);
         environment.get().close();
+        disconnectFuture.complete(null);
     }
 }

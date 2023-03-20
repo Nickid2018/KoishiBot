@@ -3,6 +3,7 @@ package io.github.nickid2018.koishibot.network;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.EncoderException;
 import io.netty.util.ByteProcessor;
 
 import java.io.IOException;
@@ -43,24 +44,47 @@ public record ByteData(ByteBuf buf) {
         }
     }
 
-    public ByteData writeVarInt(int i) {
+    public ByteData writeVarInt(int paramInt) {
         while (true) {
-            if ((i & 0xFFFFFF80) == 0) {
-                writeByte(i);
+            if ((paramInt & 0xFFFFFF80) == 0) {
+                writeByte(paramInt);
                 return this;
             }
-            writeByte(i & 0x7F | 0x80);
-            i >>>= 7;
+            writeByte(paramInt & 0x7F | 0x80);
+            paramInt >>>= 7;
         }
     }
 
     public String readString() {
-        return buf.readCharSequence(readVarInt(), StandardCharsets.UTF_8).toString();
+        return readString(32767);
     }
 
-    public ByteData writeString(String s) {
-        writeVarInt(s.length());
-        buf.writeCharSequence(s, StandardCharsets.UTF_8);
+    public String readString(int paramInt) {
+        int i = readVarInt();
+        if (i > paramInt * 4)
+            throw new DecoderException("The received encoded string buffer length is longer than maximum allowed (" + i
+                    + " > " + paramInt * 4 + ")");
+        if (i < 0)
+            throw new DecoderException("The received encoded string buffer length is less than zero! Weird string!");
+        String str = toString(readerIndex(), i, StandardCharsets.UTF_8);
+        readerIndex(readerIndex() + i);
+        if (str.length() > paramInt)
+            throw new DecoderException(
+                    "The received string length is longer than maximum allowed (" + i + " > " + paramInt + ")");
+        return str;
+    }
+
+    public ByteData writeString(String paramString) {
+        return writeString(paramString, 32767);
+    }
+
+    public ByteData writeString(String paramString, int paramInt) {
+        byte[] arrayOfByte = paramString.getBytes(StandardCharsets.UTF_8);
+        if (arrayOfByte.length > paramInt)
+            throw new EncoderException(
+                    "String too big (was " + arrayOfByte.length + " bytes encoded, max " + paramInt + ")");
+        writeVarInt(arrayOfByte.length);
+        writeBytes(arrayOfByte);
         return this;
     }
 
