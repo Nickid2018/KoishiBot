@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 @Syntax(syntax = "~page [pageID]", help = "查询指定ID的wiki页面")
 public class WikiResolver extends MessageResolver {
 
-    public static final Pattern WIKI_PATTERN = Pattern.compile("\\[\\[.+?]{2,3}+");
+    public static final Pattern WIKI_PATTERN = Pattern.compile("\\[{2,3}.+?]{2,3}+");
 
     public WikiResolver() {
         super(WIKI_PATTERN);

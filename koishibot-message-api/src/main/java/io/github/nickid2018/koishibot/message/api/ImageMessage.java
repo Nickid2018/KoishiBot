@@ -7,32 +7,32 @@ import java.net.URL;
 
 public class ImageMessage extends AbstractMessage {
 
-    protected URL source;
+    protected URL imageSource;
 
     public ImageMessage(Environment env) {
         super(env);
     }
 
     public ImageMessage fillImage(URL source) {
-        this.source = source;
+        this.imageSource = source;
         return this;
     }
 
     public URL getImage() {
-        return source;
+        return imageSource;
     }
 
     @Override
     protected void readAdditional(ByteData buf) {
         try {
-            source = new URL(buf.readString());
+            imageSource = new URL(buf.readString());
         } catch (MalformedURLException e) {
-            source = null;
+            imageSource = null;
         }
     }
 
     @Override
     protected void writeAdditional(ByteData buf) {
-        buf.writeString(source.toString());
+        buf.writeString(imageSource.toString());
     }
 }

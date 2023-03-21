@@ -22,7 +22,7 @@ public class QQImage extends ImageMessage implements QQMessage {
         super(environment);
         this.image = image;
         try {
-            source = new URL(Image.queryUrl(image));
+            imageSource = new URL(Image.queryUrl(image));
         } catch (MalformedURLException ignored) {
         }
     }
@@ -36,7 +36,7 @@ public class QQImage extends ImageMessage implements QQMessage {
     public void read(ByteData buf) {
         super.read(buf);
         try {
-            image = Contact.uploadImage(((QQEnvironment) env).getBot().getAsFriend(), source.openStream());
+            image = Contact.uploadImage(((QQEnvironment) env).getBot().getAsFriend(), imageSource.openStream());
         } catch (IOException e) {
             image = null;
         }

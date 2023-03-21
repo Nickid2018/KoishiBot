@@ -22,9 +22,9 @@ public class KOOKImage extends ImageMessage implements KOOKMessage {
         super(environment);
         this.imageMessage = image;
         try {
-            this.source = new URL(image.content());
+            this.imageSource = new URL(image.content());
         } catch (MalformedURLException e) {
-            this.source = null;
+            this.imageSource = null;
         }
     }
 
@@ -37,7 +37,7 @@ public class KOOKImage extends ImageMessage implements KOOKMessage {
     @Override
     public void read(ByteData buf) {
         super.read(buf);
-        File file = new File(source.getFile());
+        File file = new File(imageSource.getFile());
         imageMessage = new io.github.kookybot.message.ImageMessage(
                 ((KOOKEnvironment) env).getKookClient(), null, null, file);
     }
@@ -49,6 +49,7 @@ public class KOOKImage extends ImageMessage implements KOOKMessage {
     @Override
     public void setSentMessage(SelfMessage message) {
         sentMessage = message;
+        source = new KOOKMessageSource(env, message.getId(), message);
     }
 
     @Override

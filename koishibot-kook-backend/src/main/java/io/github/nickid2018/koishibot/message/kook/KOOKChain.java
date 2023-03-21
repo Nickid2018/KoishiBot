@@ -22,6 +22,7 @@ public class KOOKChain extends ChainMessage implements KOOKMessage {
         super(environment);
         this.data = data;
         messages = getMessages();
+        source = new KOOKMessageSource(environment, data.getMsgID(), null);
     }
 
     @Override
@@ -62,6 +63,7 @@ public class KOOKChain extends ChainMessage implements KOOKMessage {
     @Override
     public void setSentMessage(SelfMessage message) {
         sentMessage = message;
+        source = new KOOKMessageSource(env, message.getId(), message);
     }
 
     @Override

@@ -14,10 +14,7 @@ import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class MessageManager {
@@ -102,6 +99,7 @@ public class MessageManager {
         if (service == null) {
             if (strings.isEmpty() || strings.get(0).startsWith("!"))
                 return;
+            LOGGER.debug("Message: {}.", strings);
 
             MutableBoolean bool = new MutableBoolean(false);
             boolean finalAtt = att;

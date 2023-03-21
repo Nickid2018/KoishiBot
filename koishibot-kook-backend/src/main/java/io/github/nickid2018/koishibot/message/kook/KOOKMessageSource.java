@@ -20,7 +20,8 @@ public class KOOKMessageSource extends MessageSource {
         messageUniqueID = msgID;
         sentTime = -1;
         sentMessage = message;
-        messageCache.put(messageUniqueID, this, 1000 * 60 * 5);
+        if (sentMessage != null)
+            messageCache.put(messageUniqueID, this, 1000 * 60 * 5);
     }
 
     public static void recall(KOOKMessageSource source) {
