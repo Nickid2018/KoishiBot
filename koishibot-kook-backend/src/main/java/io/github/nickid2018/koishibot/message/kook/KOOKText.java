@@ -12,12 +12,12 @@ public class KOOKText extends TextMessage implements KOOKMessage {
 
     public KOOKText(KOOKEnvironment environment, String message) {
         super(environment);
-        text = message.replace("[", "\\[").replace("]", "\\]");
+        text = message;
     }
 
     @Override
     public void formatMessage(KOOKMessageData data) {
-        data.getTexts().add(text);
+        data.getTexts().add(text.replace("[", "\\[").replace("]", "\\]"));
     }
 
     @Override
