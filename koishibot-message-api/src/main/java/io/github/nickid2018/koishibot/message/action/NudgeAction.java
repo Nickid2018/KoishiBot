@@ -19,12 +19,12 @@ public class NudgeAction implements SerializableData {
     @Override
     public void read(ByteData buf) {
         user = buf.readSerializableData(env.getConnection(), UserInfo.class);
-        contact = buf.readSerializableData(env.getConnection(), ContactInfo.class);
+        contact = (ContactInfo) buf.readSerializableData(env.getConnection());
     }
 
     @Override
     public void write(ByteData buf) {
         buf.writeSerializableData(user);
-        buf.writeSerializableData(contact);
+        buf.writeSerializableDataMultiChoice(env.getConnection().getRegistry(), contact);
     }
 }

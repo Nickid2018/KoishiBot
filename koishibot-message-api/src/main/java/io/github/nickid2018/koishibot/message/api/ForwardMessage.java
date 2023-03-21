@@ -19,7 +19,7 @@ public class ForwardMessage extends AbstractMessage {
 
     @Override
     protected void readAdditional(ByteData buf) {
-        group = buf.readSerializableData(env.getConnection(), ContactInfo.class);
+        group = (ContactInfo) buf.readSerializableData(env.getConnection());
         int len = buf.readVarInt();
         entries = new MessageEntry[len];
         for (int i = 0; i < len; i++)
@@ -28,7 +28,7 @@ public class ForwardMessage extends AbstractMessage {
 
     @Override
     protected void writeAdditional(ByteData buf) {
-        buf.writeSerializableData(group);
+        buf.writeSerializableDataMultiChoice(env.getConnection().getRegistry(), group);
         buf.writeVarInt(entries.length);
         for (MessageEntry entry : entries)
             buf.writeSerializableData(entry);

@@ -15,7 +15,6 @@ public class KOOKQuote extends QuoteMessage {
         message = new KOOKChain((KOOKEnvironment) env, chain.getData().getQuoteData());
         replyTo = new KOOKUser(env, chain.getData().getQuoteUser());
         quoteFrom = new KOOKMessageSource(env, chain.getData().getQuoteID(), null);
-        replyToID = "kook.user" + chain.getData().getQuoteUser().getId();
         chainMessage = chain;
     }
 

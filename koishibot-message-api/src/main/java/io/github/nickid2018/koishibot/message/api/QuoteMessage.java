@@ -1,5 +1,7 @@
 package io.github.nickid2018.koishibot.message.api;
 
+import io.github.nickid2018.koishibot.network.ByteData;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -8,7 +10,6 @@ public class QuoteMessage extends AbstractMessage {
     protected ChainMessage message;
     protected MessageSource quoteFrom;
     protected UserInfo replyTo;
-    protected String replyToID;
 
     public QuoteMessage(Environment env) {
         super(env);
@@ -17,6 +18,7 @@ public class QuoteMessage extends AbstractMessage {
     public QuoteMessage fill(ChainMessage message) {
         this.message = message;
         this.quoteFrom = message.source;
+        this.replyTo = null;
         return this;
     }
 
@@ -48,5 +50,19 @@ public class QuoteMessage extends AbstractMessage {
 
     public ChainMessage format() {
         return env.newChain(this, env.newText(" "));
+    }
+
+    @Override
+    protected void readAdditional(ByteData buf) {
+        message = (ChainMessage) buf.readSerializableData(env.getConnection());
+        quoteFrom = buf.readSerializableData(env.getConnection(), MessageSource.class);
+        replyTo = buf.readSerializableDataOrNull(env.getConnection(), UserInfo.class);
+    }
+
+    @Override
+    protected void writeAdditional(ByteData buf) {
+        buf.writeSerializableDataMultiChoice(env.getConnection().getRegistry(), message);
+        buf.writeSerializableData(quoteFrom);
+        buf.writeSerializableDataOrNull(env.getConnection().getRegistry(), replyTo);
     }
 }

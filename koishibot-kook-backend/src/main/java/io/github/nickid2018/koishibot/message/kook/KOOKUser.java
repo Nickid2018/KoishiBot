@@ -9,7 +9,7 @@ import io.github.nickid2018.koishibot.network.ByteData;
 public class KOOKUser extends UserInfo {
     private GuildUser user;
 
-    public KOOKUser(Environment environment) {
+    public KOOKUser(KOOKEnvironment environment) {
         super(environment);
     }
 

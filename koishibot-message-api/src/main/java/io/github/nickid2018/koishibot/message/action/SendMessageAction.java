@@ -21,7 +21,7 @@ public class SendMessageAction implements SerializableData {
 
     @Override
     public void read(ByteData buf) {
-        message = buf.readSerializableData(env.getConnection(), AbstractMessage.class);
+        message = (AbstractMessage) buf.readSerializableData(env.getConnection());
         if (buf.readBoolean())
             target = Either.left(buf.readSerializableData(env.getConnection(), UserInfo.class));
         else
@@ -30,7 +30,7 @@ public class SendMessageAction implements SerializableData {
 
     @Override
     public void write(ByteData buf) {
-        buf.writeSerializableData(message);
+        buf.writeSerializableDataMultiChoice(env.getConnection().getRegistry(), message);
         if (target.isLeft()) {
             buf.writeBoolean(true);
             buf.writeSerializableData(target.left());

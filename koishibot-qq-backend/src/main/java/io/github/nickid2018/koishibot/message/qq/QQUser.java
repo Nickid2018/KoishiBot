@@ -12,6 +12,10 @@ public class QQUser extends UserInfo {
 
     private User user;
 
+    public QQUser(QQEnvironment environment) {
+        super(environment);
+    }
+
     public QQUser(QQEnvironment environment, User user, boolean stranger) {
         super(environment);
         isStranger = stranger || user instanceof Stranger;

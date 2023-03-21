@@ -31,7 +31,7 @@ public class ServiceMessage extends AbstractMessage implements SerializableData 
 
 
     @Override
-    public void read(ByteData buf) {
+    public void readAdditional(ByteData buf) {
         name = buf.readString();
         data = buf.readBoolean() ?
                 Either.left(JsonParser.parseString(buf.readString()).getAsJsonObject()) :
@@ -39,7 +39,7 @@ public class ServiceMessage extends AbstractMessage implements SerializableData 
     }
 
     @Override
-    public void write(ByteData buf) {
+    public void writeAdditional(ByteData buf) {
         buf.writeString(name);
         if (data.isLeft()) {
             buf.writeBoolean(true);

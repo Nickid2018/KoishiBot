@@ -11,7 +11,7 @@ public class KOOKMessageSource extends MessageSource {
 
     private SelfMessage sentMessage;
 
-    public KOOKMessageSource(Environment environment) {
+    public KOOKMessageSource(KOOKEnvironment environment) {
         super(environment);
     }
 

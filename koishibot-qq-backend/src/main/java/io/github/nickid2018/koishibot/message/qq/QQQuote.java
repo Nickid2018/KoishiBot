@@ -17,7 +17,6 @@ public class QQQuote extends QuoteMessage implements QQMessage {
         super(environment);
         this.quoteReply = quoteReply;
         this.replyTo = environment.getUser("qq.user" + quoteReply.getSource().getFromId(), true);
-        this.replyToID = "qq.user" + quoteReply.getSource().getFromId();
         this.message = new QQChain(environment, quoteReply.getSource().getOriginalMessage());
         this.quoteFrom = new QQMessageSource(environment, quoteReply.getSource());
     }

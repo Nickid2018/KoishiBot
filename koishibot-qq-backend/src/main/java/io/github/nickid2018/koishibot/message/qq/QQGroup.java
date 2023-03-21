@@ -8,6 +8,10 @@ public class QQGroup extends GroupInfo {
 
     private Group group;
 
+    public QQGroup(QQEnvironment environment) {
+        super(environment);
+    }
+
     public QQGroup(QQEnvironment environment, Group group) {
         super(environment);
 
