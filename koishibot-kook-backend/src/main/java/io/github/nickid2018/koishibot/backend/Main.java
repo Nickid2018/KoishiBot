@@ -19,6 +19,7 @@ public class Main {
     public static final Logger LOGGER = LoggerFactory.getLogger("KoishiBot KOOK Backend");
 
     public static AtomicBoolean stopped = new AtomicBoolean();
+    public static KOOKEnvironment environment;
 
     public static void main(String[] args) {
         try {
@@ -40,7 +41,7 @@ public class Main {
             try {
                 Connection connection = Connection.connectToTcpServer(
                         listener.registry, listener, InetAddress.getLocalHost(), Settings.delegatePort);
-                KOOKEnvironment environment = new KOOKEnvironment(kookClient, self, connection);
+                environment = new KOOKEnvironment(kookClient, self, connection);
                 env.complete(environment);
                 retry = 0;
                 disconnected.get();

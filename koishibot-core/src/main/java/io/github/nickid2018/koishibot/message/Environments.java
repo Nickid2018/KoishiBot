@@ -45,10 +45,6 @@ public class Environments {
         return ENVIRONMENT_MAP.values();
     }
 
-    public static void addEnvironment(DelegateEnvironment environment) {
-        ENVIRONMENT_MAP.put(environment.getEnvironmentName(), environment);
-    }
-
     public static void removeEnvironment(String id) {
         DelegateEnvironment environment = ENVIRONMENT_MAP.remove(id);
         ENVIRONMENT_CONNECTION_MAP.remove(environment.getConnection());

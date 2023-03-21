@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.message;
 
+import io.github.nickid2018.koishibot.core.BotStart;
 import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
 import io.github.nickid2018.koishibot.message.action.SendMessageAction;
@@ -13,6 +14,7 @@ import io.github.nickid2018.koishibot.message.query.UserInfoQuery;
 import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.SerializableData;
+import io.github.nickid2018.koishibot.util.LogUtils;
 
 import java.util.function.BiFunction;
 
@@ -23,7 +25,11 @@ public class MessageDataListener extends DataPacketListener {
     static {
         BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory = (c, cn) -> {
             try {
-                return c.getConstructor(Environment.class).newInstance(Environments.getEnvironment(cn));
+                Environment environment = Environments.getEnvironment(cn);
+                if (environment == null)
+                    return null;
+                BotStart.LOGGER.debug("Creating data in environment {}: {}", environment.getEnvironmentName(), c.getName());
+                return c.getConstructor(Environment.class).newInstance(environment);
             } catch (Exception e) {
                 return null;
             }
@@ -32,6 +38,7 @@ public class MessageDataListener extends DataPacketListener {
         REGISTRY.registerData(DelegateEnvironment.class, (c, cn) -> {
             DelegateEnvironment env = new DelegateEnvironment(cn);
             Environments.putEnvironment(env.getEnvironmentName(), env);
+            LogUtils.info(LogUtils.FontColor.GREEN, BotStart.LOGGER, "Delegate environment created: {}", env.getEnvironmentName());
             return env;
         });
 

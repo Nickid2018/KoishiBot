@@ -15,6 +15,7 @@ import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
+import io.github.nickid2018.koishibot.util.LogUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -95,6 +96,7 @@ public class BackendDataListener extends DataPacketListener {
     public void connectionOpened(Connection connection) {
         super.connectionOpened(connection);
         connection.sendPacket(environment.get());
+        LogUtils.info(LogUtils.FontColor.GREEN, Main.LOGGER, "Connected to core");
     }
 
     @Override
