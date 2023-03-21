@@ -26,8 +26,11 @@ public class KOOKUser extends UserInfo {
     }
 
     public static String getNameInGroup(GuildUser user, GroupInfo group) {
-        GuildUser u = ((KOOKTextChannel) group).getChannel().getGuild().getGuildUser(user.getId());
-        return u == null ? user.getName() : u.getName();
+        try {
+            return user.getName();
+        } catch (Exception e) {
+            return "<error>";
+        }
     }
 
     @Override

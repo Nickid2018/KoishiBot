@@ -37,8 +37,11 @@ public class KOOKEnvironment extends Environment {
     }
 
     public GuildUser getUser(String id) {
+        if (!id.startsWith("kook.user"))
+            return null;
+        String user = id.substring(9);
         return self.getGuilds().values().stream()
-                .map(guild -> guild.getGuildUser(id))
+                .map(guild -> guild.getGuildUser(user))
                 .filter(Objects::nonNull)
                 .findFirst()
                 .orElse(null);

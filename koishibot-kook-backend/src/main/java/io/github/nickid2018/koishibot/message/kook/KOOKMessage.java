@@ -14,7 +14,8 @@ public interface KOOKMessage {
                 ((KOOKEnvironment) kookMessage.getEnvironment()).getKookClient(), String.join("", data.getTexts()));
         message.setQuote(data.getQuoteID());
         data.getMentionUsers().forEach(user -> message.append(AtKt.At(user)));
-        kookMessage.setSentMessage(((KOOKTextChannel) group).getChannel().sendMessage(message));
+        if (!message.content().isEmpty())
+            kookMessage.setSentMessage(((KOOKTextChannel) group).getChannel().sendMessage(message));
         if (kookMessage instanceof KOOKChain kookChain) {
             if (!kookChain.getImages().isEmpty())
                 kookChain.getImages().forEach(image -> image.send(group));

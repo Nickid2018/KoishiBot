@@ -34,7 +34,7 @@ public class ModuleManager {
 
     public static final Logger LOGGER = LoggerFactory.getLogger("KoishiBotModule Manager");
 
-    private static final Map<String, KoishiBotModule> MODULE_MAP = new HashMap<>();
+    private static final Map<String, KoishiBotModule> MODULE_MAP = new LinkedHashMap<>();
 
     @SuppressWarnings("unchecked")
     private static final GroupDataReader<Set<String>> DATA_READER = new GroupDataReader<>(
