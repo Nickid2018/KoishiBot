@@ -54,7 +54,7 @@ public class Main {
             BackendDataListener listener = new BackendDataListener(lazyLoadedValue::get, disconnected);
             try {
                 Connection connection = Connection.connectToTcpServer(
-                        listener.registry, listener, InetAddress.getLocalHost(), Settings.delegatePort);
+                        listener.getRegistry(), listener, InetAddress.getLocalHost(), Settings.delegatePort);
                 environment = new QQEnvironment(bot, nudgeEnabled.get(), connection);
                 env.complete(environment);
                 retry = 0;

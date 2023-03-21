@@ -1,30 +1,24 @@
 package io.github.nickid2018.koishibot.message;
 
 import io.github.nickid2018.koishibot.core.BotStart;
-import io.github.nickid2018.koishibot.message.action.NudgeAction;
-import io.github.nickid2018.koishibot.message.action.RecallAction;
-import io.github.nickid2018.koishibot.message.action.SendMessageAction;
-import io.github.nickid2018.koishibot.message.action.StopAction;
-import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.event.*;
 import io.github.nickid2018.koishibot.message.network.DataPacketListener;
-import io.github.nickid2018.koishibot.message.query.GroupInfoQuery;
-import io.github.nickid2018.koishibot.message.query.NameInGroupQuery;
-import io.github.nickid2018.koishibot.message.query.UserInfoQuery;
 import io.github.nickid2018.koishibot.network.Connection;
-import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.LogUtils;
 
-import java.util.function.BiFunction;
-
 public class MessageDataListener extends DataPacketListener {
 
-    public static final DataRegistry REGISTRY = new DataRegistry();
-
-    static {
-        BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory = (c, cn) -> {
+    public MessageDataListener() {
+        super((c, cn) -> {
             try {
+                if (c.equals(Environment.class)) {
+                    DelegateEnvironment env = new DelegateEnvironment(cn);
+                    Environments.putEnvironment(env.getEnvironmentName(), env);
+                    LogUtils.info(LogUtils.FontColor.GREEN, BotStart.LOGGER, "Delegate environment created: {}", env.getEnvironmentName());
+                    return env;
+                }
                 Environment environment = Environments.getEnvironment(cn);
                 if (environment == null)
                     return null;
@@ -33,44 +27,7 @@ public class MessageDataListener extends DataPacketListener {
             } catch (Exception e) {
                 return null;
             }
-        };
-
-        REGISTRY.registerData(DelegateEnvironment.class, (c, cn) -> {
-            DelegateEnvironment env = new DelegateEnvironment(cn);
-            Environments.putEnvironment(env.getEnvironmentName(), env);
-            LogUtils.info(LogUtils.FontColor.GREEN, BotStart.LOGGER, "Delegate environment created: {}", env.getEnvironmentName());
-            return env;
         });
-
-        REGISTRY.registerData(AtMessage.class, dataFactory);
-        REGISTRY.registerData(AudioMessage.class, dataFactory);
-        REGISTRY.registerData(ChainMessage.class, dataFactory);
-        REGISTRY.registerData(ForwardMessage.class, dataFactory);
-        REGISTRY.registerData(GroupInfo.class, dataFactory);
-        REGISTRY.registerData(ImageMessage.class, dataFactory);
-        REGISTRY.registerData(MessageEntry.class, dataFactory);
-        REGISTRY.registerData(MessageSource.class, dataFactory);
-        REGISTRY.registerData(QuoteMessage.class, dataFactory);
-        REGISTRY.registerData(ServiceMessage.class, dataFactory);
-        REGISTRY.registerData(TextMessage.class, dataFactory);
-        REGISTRY.registerData(UserInfo.class, dataFactory);
-
-        REGISTRY.registerData(QueryResultEvent.class, dataFactory);
-        REGISTRY.registerData(OnFriendMessageEvent.class, dataFactory);
-        REGISTRY.registerData(OnFriendMessageEvent.class, dataFactory);
-        REGISTRY.registerData(OnGroupMessageEvent.class, dataFactory);
-        REGISTRY.registerData(OnGroupRecallEvent.class, dataFactory);
-        REGISTRY.registerData(OnMemberAddEvent.class, dataFactory);
-        REGISTRY.registerData(OnStrangerMessageEvent.class, dataFactory);
-
-        REGISTRY.registerData(GroupInfoQuery.class, dataFactory);
-        REGISTRY.registerData(NameInGroupQuery.class, dataFactory);
-        REGISTRY.registerData(UserInfoQuery.class, dataFactory);
-
-        REGISTRY.registerData(NudgeAction.class, dataFactory);
-        REGISTRY.registerData(RecallAction.class, dataFactory);
-        REGISTRY.registerData(SendMessageAction.class, dataFactory);
-        REGISTRY.registerData(StopAction.class, (c, cn) -> StopAction.INSTANCE);
     }
 
     @Override

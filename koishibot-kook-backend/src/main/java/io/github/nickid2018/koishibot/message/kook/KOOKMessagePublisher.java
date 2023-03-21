@@ -5,6 +5,7 @@ import io.github.kookybot.events.Listener;
 import io.github.kookybot.events.MessageEvent;
 import io.github.kookybot.events.channel.ChannelMessageEvent;
 import io.github.kookybot.events.guild.GuildUserJoinEvent;
+import io.github.nickid2018.koishibot.backend.Main;
 import io.github.nickid2018.koishibot.message.event.OnGroupMessageEvent;
 import io.github.nickid2018.koishibot.message.event.OnMemberAddEvent;
 
@@ -38,6 +39,7 @@ public class KOOKMessagePublisher {
                 groupMessageEvent.message = chain;
                 groupMessageEvent.time = Long.parseLong(event.getTimestamp());
                 environment.getConnection().sendPacket(groupMessageEvent);
+                Main.LOGGER.debug("Sent group message event: " + event);
             }
         }
     }
@@ -58,6 +60,7 @@ public class KOOKMessagePublisher {
             memberAddEvent.group = groupInfo;
             memberAddEvent.user = userInfo;
             environment.getConnection().sendPacket(memberAddEvent);
+            Main.LOGGER.debug("Sent member join event: " + event);
         }
     }
 }

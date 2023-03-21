@@ -5,14 +5,13 @@ import io.github.nickid2018.koishibot.message.action.RecallAction;
 import io.github.nickid2018.koishibot.message.action.SendMessageAction;
 import io.github.nickid2018.koishibot.message.action.StopAction;
 import io.github.nickid2018.koishibot.message.api.*;
-import io.github.nickid2018.koishibot.message.event.*;
+import io.github.nickid2018.koishibot.message.event.QueryResultEvent;
 import io.github.nickid2018.koishibot.message.network.DataPacketListener;
 import io.github.nickid2018.koishibot.message.qq.*;
 import io.github.nickid2018.koishibot.message.query.GroupInfoQuery;
 import io.github.nickid2018.koishibot.message.query.NameInGroupQuery;
 import io.github.nickid2018.koishibot.message.query.UserInfoQuery;
 import io.github.nickid2018.koishibot.network.Connection;
-import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
 import io.github.nickid2018.koishibot.util.LogUtils;
@@ -21,19 +20,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public class BackendDataListener extends DataPacketListener {
-
-    public final DataRegistry registry = new DataRegistry();
     private final Supplier<QQEnvironment> environment;
     private final CompletableFuture<Void> disconnectFuture;
 
     public static final Map<Class<? extends SerializableData>, Class<? extends SerializableData>> MAPPING = new HashMap<>();
 
     static {
-        MAPPING.put(Environment.class, QQEnvironment.class);
         MAPPING.put(AtMessage.class, QQAt.class);
         MAPPING.put(AudioMessage.class, QQAudio.class);
         MAPPING.put(ChainMessage.class, QQChain.class);
@@ -49,50 +44,19 @@ public class BackendDataListener extends DataPacketListener {
     }
 
     public BackendDataListener(Supplier<QQEnvironment> environment, CompletableFuture<Void> disconnectFuture) {
-        this.environment = environment;
-        this.disconnectFuture = disconnectFuture;
-        BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory = (c, cn) -> {
+        super((c, cn) -> {
             try {
+                if (c.equals(Environment.class))
+                    return null;
                 if (MAPPING.containsKey(c))
                     return MAPPING.get(c).getConstructor(QQEnvironment.class).newInstance(environment.get());
-                else
-                    return c.getConstructor(Environment.class).newInstance(environment.get());
+                return c.getConstructor(Environment.class).newInstance(environment.get());
             } catch (Exception e) {
                 return null;
             }
-        };
-
-        registry.registerData(Environment.class, (c, cn) -> null);
-
-        registry.registerData(AtMessage.class, dataFactory);
-        registry.registerData(AudioMessage.class, dataFactory);
-        registry.registerData(ChainMessage.class, dataFactory);
-        registry.registerData(ForwardMessage.class, dataFactory);
-        registry.registerData(GroupInfo.class, dataFactory);
-        registry.registerData(ImageMessage.class, dataFactory);
-        registry.registerData(MessageEntry.class, dataFactory);
-        registry.registerData(MessageSource.class, dataFactory);
-        registry.registerData(QuoteMessage.class, dataFactory);
-        registry.registerData(ServiceMessage.class, dataFactory);
-        registry.registerData(TextMessage.class, dataFactory);
-        registry.registerData(UserInfo.class, dataFactory);
-
-        registry.registerData(QueryResultEvent.class, dataFactory);
-        registry.registerData(OnFriendMessageEvent.class, dataFactory);
-        registry.registerData(OnFriendMessageEvent.class, dataFactory);
-        registry.registerData(OnGroupMessageEvent.class, dataFactory);
-        registry.registerData(OnGroupRecallEvent.class, dataFactory);
-        registry.registerData(OnMemberAddEvent.class, dataFactory);
-        registry.registerData(OnStrangerMessageEvent.class, dataFactory);
-
-        registry.registerData(GroupInfoQuery.class, dataFactory);
-        registry.registerData(NameInGroupQuery.class, dataFactory);
-        registry.registerData(UserInfoQuery.class, dataFactory);
-
-        registry.registerData(NudgeAction.class, dataFactory);
-        registry.registerData(RecallAction.class, dataFactory);
-        registry.registerData(SendMessageAction.class, dataFactory);
-        registry.registerData(StopAction.class, (c, cn) -> StopAction.INSTANCE);
+        });
+        this.environment = environment;
+        this.disconnectFuture = disconnectFuture;
     }
 
     @Override

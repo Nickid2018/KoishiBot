@@ -18,7 +18,8 @@ public class Environments {
     private static KoishiBotServer server;
 
     public static void startServer() {
-        server = new KoishiBotServer(Settings.DELEGATE_PORT, MessageDataListener.REGISTRY, new MessageDataListener());
+        MessageDataListener listener = new MessageDataListener();
+        server = new KoishiBotServer(Settings.DELEGATE_PORT, listener.getRegistry(), listener);
         server.start();
         LogUtils.info(LogUtils.FontColor.CYAN, BotStart.LOGGER, "Delegate server started");
     }
