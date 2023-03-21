@@ -16,6 +16,8 @@ public interface KOOKMessage {
         data.getMentionUsers().forEach(user -> message.append(AtKt.At(user)));
         if (!message.content().isEmpty())
             kookMessage.setSentMessage(((KOOKTextChannel) group).getChannel().sendMessage(message));
+        if (kookMessage instanceof KOOKImage kookImage)
+            kookImage.send(group);
         if (kookMessage instanceof KOOKChain kookChain) {
             if (!kookChain.getImages().isEmpty())
                 kookChain.getImages().forEach(image -> image.send(group));
