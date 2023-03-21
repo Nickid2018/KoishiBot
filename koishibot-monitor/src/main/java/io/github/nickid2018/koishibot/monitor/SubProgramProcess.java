@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Queue;
+import java.util.regex.Pattern;
 
 public class SubProgramProcess implements Runnable {
 
@@ -69,12 +70,16 @@ public class SubProgramProcess implements Runnable {
         programInput.flush();
     }
 
+    public static final Pattern OUTPUT_PATTERN = Pattern.compile("\\[\\d{2}:\\d{2}:\\d{2}] .+");
+
     @Override
     public void run() {
         while (process.isAlive()) {
             try {
                 String line = programOutput.readLine();
                 if (line == null)
+                    continue;
+                if (!OUTPUT_PATTERN.matcher(line).matches())
                     continue;
                 if (outputQueue != null) {
                     outputQueue.offer(line);
