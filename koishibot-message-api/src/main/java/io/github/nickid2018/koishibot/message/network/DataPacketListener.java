@@ -2,7 +2,7 @@ package io.github.nickid2018.koishibot.message.network;
 
 import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
-import io.github.nickid2018.koishibot.message.action.SendMessageAction;
+import io.github.nickid2018.koishibot.message.query.SendMessageQuery;
 import io.github.nickid2018.koishibot.message.action.StopAction;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.event.*;
@@ -58,10 +58,10 @@ public class DataPacketListener implements NetworkListener {
         registry.registerData(GroupInfoQuery.class, dataFactory);
         registry.registerData(NameInGroupQuery.class, dataFactory);
         registry.registerData(UserInfoQuery.class, dataFactory);
+        registry.registerData(SendMessageQuery.class, dataFactory);
 
         registry.registerData(NudgeAction.class, dataFactory);
         registry.registerData(RecallAction.class, dataFactory);
-        registry.registerData(SendMessageAction.class, dataFactory);
         registry.registerData(StopAction.class, (c, cn) -> StopAction.INSTANCE);
     }
 

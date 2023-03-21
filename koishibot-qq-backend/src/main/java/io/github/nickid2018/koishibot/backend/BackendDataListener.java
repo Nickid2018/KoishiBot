@@ -2,7 +2,7 @@ package io.github.nickid2018.koishibot.backend;
 
 import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
-import io.github.nickid2018.koishibot.message.action.SendMessageAction;
+import io.github.nickid2018.koishibot.message.query.SendMessageQuery;
 import io.github.nickid2018.koishibot.message.action.StopAction;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.event.QueryResultEvent;
@@ -75,12 +75,12 @@ public class BackendDataListener extends DataPacketListener {
             nameInGroupQuery(connection, nameInGroupQuery);
         else if (packet instanceof UserInfoQuery userInfoQuery)
             userInfoQuery(connection, userInfoQuery);
+        else if (packet instanceof SendMessageQuery action)
+            sendMessageQuery(connection, action);
         else if (packet instanceof NudgeAction action)
             nudgeAction(connection, action);
         else if (packet instanceof RecallAction action)
             recallAction(connection, action);
-        else if (packet instanceof SendMessageAction action)
-            sendMessageAction(connection, action);
         else if (packet instanceof StopAction)
             doStop();
     }
@@ -127,6 +127,19 @@ public class BackendDataListener extends DataPacketListener {
         connection.sendPacket(event);
     }
 
+    private void sendMessageQuery(Connection connection, SendMessageQuery action) {
+        Either<UserInfo, GroupInfo> contact = action.target;
+        if (contact.isLeft())
+            environment.get().send(contact.left(), action.message);
+        else
+            environment.get().send(contact.right(), action.message);
+        MessageSource source = action.message.getSource();
+        QueryResultEvent event = new QueryResultEvent(environment.get());
+        event.queryId = action.queryId;
+        event.payload = SendMessageQuery.toBytes(connection, source);
+        connection.sendPacket(event);
+    }
+
     private void recallAction(Connection connection, RecallAction action) {
         if (QQMessageSource.messageCache.containsKey(action.messageUniqueID)) {
             QQMessageSource.messageCache.get(action.messageUniqueID).recall();
@@ -136,14 +149,6 @@ public class BackendDataListener extends DataPacketListener {
 
     private void nudgeAction(Connection connection, NudgeAction action) {
         QQUser.nudge((QQUser) action.user, action.contact);
-    }
-
-    private void sendMessageAction(Connection connection, SendMessageAction action) {
-        Either<UserInfo, GroupInfo> contact = action.target;
-        if (contact.isLeft())
-            QQEnvironment.send(contact.left(), action.message);
-        else
-            QQEnvironment.send(contact.right(), action.message);
     }
 
     private void doStop() {

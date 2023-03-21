@@ -45,6 +45,8 @@ public class KOOKMessageData {
                     JsonUtil.getStringInPathOrNull(quote, "author.id"));
         });
 
+        data.msgID = channelMessage.getMessageId();
+
         return data;
     }
 

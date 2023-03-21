@@ -1,7 +1,7 @@
 package io.github.nickid2018.koishibot.backend;
 
 import io.github.nickid2018.koishibot.message.action.RecallAction;
-import io.github.nickid2018.koishibot.message.action.SendMessageAction;
+import io.github.nickid2018.koishibot.message.query.SendMessageQuery;
 import io.github.nickid2018.koishibot.message.action.StopAction;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.event.QueryResultEvent;
@@ -70,10 +70,10 @@ public class BackendDataListener extends DataPacketListener {
             nameInGroupQuery(connection, nameInGroupQuery);
         else if (packet instanceof UserInfoQuery userInfoQuery)
             userInfoQuery(connection, userInfoQuery);
+        else if (packet instanceof SendMessageQuery action)
+            sendMessageQuery(connection, action);
         else if (packet instanceof RecallAction action)
             recallAction(connection, action);
-        else if (packet instanceof SendMessageAction action)
-            sendMessageAction(connection, action);
         else if (packet instanceof StopAction)
             doStop();
     }
@@ -119,17 +119,21 @@ public class BackendDataListener extends DataPacketListener {
         connection.sendPacket(event);
     }
 
+    private void sendMessageQuery(Connection connection, SendMessageQuery action) {
+        Either<UserInfo, GroupInfo> contact = action.target;
+        if (contact.isRight())
+            KOOKMessage.send((KOOKMessage) action.message, contact.right());
+        QueryResultEvent event = new QueryResultEvent(environment.get());
+        event.queryId = action.queryId;
+        event.payload = SendMessageQuery.toBytes(connection, action.message.getSource());
+        connection.sendPacket(event);
+    }
+
     private void recallAction(Connection connection, RecallAction action) {
         if (KOOKMessageSource.messageCache.containsKey(action.messageUniqueID)) {
             KOOKMessageSource.messageCache.get(action.messageUniqueID).recall();
             KOOKMessageSource.messageCache.remove(action.messageUniqueID);
         }
-    }
-
-    private void sendMessageAction(Connection connection, SendMessageAction action) {
-        Either<UserInfo, GroupInfo> contact = action.target;
-        if (contact.isRight())
-            KOOKMessage.send((KOOKMessage) action.message, contact.right());
     }
 
     private void doStop() {

@@ -6,6 +6,7 @@ import io.github.nickid2018.koishibot.network.Connection;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.User;
+import net.mamoe.mirai.message.MessageReceipt;
 import net.mamoe.mirai.message.data.*;
 
 public class QQEnvironment extends Environment {
@@ -88,13 +89,17 @@ public class QQEnvironment extends Environment {
             return new UnsupportedMessage(this);
     }
 
-    public static void send(UserInfo user, AbstractMessage message) {
+    public void send(UserInfo user, AbstractMessage message) {
         User qq = ((QQUser) user).getUser();
-        qq.sendMessage(((QQMessage) message).getMessage());
+        MessageReceipt<?> receipt = qq.sendMessage(((QQMessage) message).getMessage());
+        QQMessageSource source = new QQMessageSource(this, receipt.getSource());
+        ((QQMessage) message).setMessageSource(source);
     }
 
-    public static void send(GroupInfo group, AbstractMessage message) {
+    public void send(GroupInfo group, AbstractMessage message) {
         Group qq = ((QQGroup) group).getGroup();
-        qq.sendMessage(((QQMessage) message).getMessage());
+        MessageReceipt<?> receipt = qq.sendMessage(((QQMessage) message).getMessage());
+        QQMessageSource source = new QQMessageSource(this, receipt.getSource());
+        ((QQMessage) message).setMessageSource(source);
     }
 }

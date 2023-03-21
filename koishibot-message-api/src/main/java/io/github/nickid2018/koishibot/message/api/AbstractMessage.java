@@ -1,6 +1,6 @@
 package io.github.nickid2018.koishibot.message.api;
 
-import io.github.nickid2018.koishibot.message.action.SendMessageAction;
+import io.github.nickid2018.koishibot.message.query.SendMessageQuery;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
@@ -19,17 +19,26 @@ public abstract class AbstractMessage implements SerializableData {
     }
 
     public void send(UserInfo contact) {
-        SendMessageAction event = new SendMessageAction(env);
-        event.target = Either.left(contact);
-        event.message = this;
-        env.getConnection().sendPacket(event);
+        SendMessageQuery sendQuery = new SendMessageQuery(env);
+        sendQuery.target = Either.left(contact);
+        sendQuery.message = this;
+        env.getListener().queryData(env.getConnection(), sendQuery);
+        try {
+            source = SendMessageQuery.fromBytes(env.getConnection(),
+                    env.getListener().queryData(env.getConnection(), sendQuery).get());
+        } catch (Exception ignored) {
+        }
     }
 
     public void send(GroupInfo group) {
-        SendMessageAction event = new SendMessageAction(env);
-        event.target = Either.right(group);
-        event.message = this;
-        env.getConnection().sendPacket(event);
+        SendMessageQuery sendQuery = new SendMessageQuery(env);
+        sendQuery.target = Either.right(group);
+        sendQuery.message = this;
+        try {
+            source = SendMessageQuery.fromBytes(env.getConnection(),
+                    env.getListener().queryData(env.getConnection(), sendQuery).get());
+        } catch (Exception ignored) {
+        }
     }
 
     public void recall() {
@@ -45,6 +54,10 @@ public abstract class AbstractMessage implements SerializableData {
 
     public MessageSource getSource() {
         return source;
+    }
+
+    public void setMessageSource(MessageSource source) {
+        this.source = source;
     }
 
     @Override

@@ -140,7 +140,7 @@ public class MessageSender {
                 en.second().recall();
             });
         } catch (Exception e) {
-            e.printStackTrace();
+            MessageManager.LOGGER.error("Error when recalling message", e);
         } finally {
             sendLock.unlock();
         }
