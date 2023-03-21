@@ -2,6 +2,7 @@ package io.github.nickid2018.koishibot.backend;
 
 import io.github.nickid2018.koishibot.message.qq.QQEnvironment;
 import io.github.nickid2018.koishibot.network.Connection;
+import io.github.nickid2018.koishibot.util.LazyLoadedValue;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.BotFactory;
 import net.mamoe.mirai.utils.BotConfiguration;
@@ -48,7 +49,8 @@ public class Main {
         while (!stopped.get() && bot.isOnline() && retry < 20) {
             CompletableFuture<Void> disconnected = new CompletableFuture<>();
             CompletableFuture<QQEnvironment> env = new CompletableFuture<>();
-            BackendDataListener listener = new BackendDataListener(env::join, disconnected);
+            LazyLoadedValue<QQEnvironment> lazyLoadedValue = new LazyLoadedValue<>(env::join);
+            BackendDataListener listener = new BackendDataListener(lazyLoadedValue::get, disconnected);
             try {
                 Connection connection = Connection.connectToTcpServer(
                         listener.registry, listener, InetAddress.getLocalHost(), Settings.delegatePort);

@@ -5,6 +5,7 @@ import io.github.kookybot.client.Client;
 import io.github.kookybot.contract.Self;
 import io.github.nickid2018.koishibot.message.kook.KOOKEnvironment;
 import io.github.nickid2018.koishibot.network.Connection;
+import io.github.nickid2018.koishibot.util.LazyLoadedValue;
 import kotlin.Unit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +35,8 @@ public class Main {
         while (!stopped.get() && retry < 20) {
             CompletableFuture<Void> disconnected = new CompletableFuture<>();
             CompletableFuture<KOOKEnvironment> env = new CompletableFuture<>();
-            BackendDataListener listener = new BackendDataListener(env::join, disconnected);
+            LazyLoadedValue<KOOKEnvironment> lazyLoadedValue = new LazyLoadedValue<>(env::join);
+            BackendDataListener listener = new BackendDataListener(lazyLoadedValue::get, disconnected);
             try {
                 Connection connection = Connection.connectToTcpServer(
                         listener.registry, listener, InetAddress.getLocalHost(), Settings.delegatePort);
