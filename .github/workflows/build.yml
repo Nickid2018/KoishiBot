@@ -70,6 +70,18 @@ jobs:
           name: kook-backend-libraries
           path: koishibot-kook-backend/build/apis/*.jar
 
+      - name: Upload telegram backend artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: telegram-backend
+          path: koishibot-telegram-backend/build/libs/*.jar
+
+      - name: Upload telegram backend libraries artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: telegram-backend-libraries
+          path: koishibot-telegram-backend/build/apis/*.jar
+
       - name: Upload monitor artifact
         uses: actions/upload-artifact@v2
         with:
