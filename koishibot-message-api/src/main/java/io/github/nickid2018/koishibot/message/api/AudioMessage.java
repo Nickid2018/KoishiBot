@@ -8,7 +8,7 @@ import java.net.URL;
 public class AudioMessage extends AbstractMessage {
 
     protected GroupInfo group;
-    protected URL source;
+    protected URL audioSource;
 
     public AudioMessage(Environment env) {
         super(env);
@@ -16,7 +16,7 @@ public class AudioMessage extends AbstractMessage {
 
     public AudioMessage fillAudio(GroupInfo group, URL source) {
         this.group = group;
-        this.source = source;
+        this.audioSource = source;
         return this;
     }
 
@@ -24,16 +24,16 @@ public class AudioMessage extends AbstractMessage {
     protected void readAdditional(ByteData buf) {
         group = buf.readSerializableDataOrNull(env.getConnection(), GroupInfo.class);
         try {
-            source = new URL(buf.readString());
+            audioSource = new URL(buf.readString());
         } catch (MalformedURLException e) {
-            source = null;
+            audioSource = null;
         }
     }
 
     @Override
     protected void writeAdditional(ByteData buf) {
         buf.writeSerializableDataOrNull(env.getConnection().getRegistry(), group);
-        buf.writeString(source.toString());
+        buf.writeString(audioSource.toString());
     }
 
     public GroupInfo getGroup() {
@@ -41,6 +41,6 @@ public class AudioMessage extends AbstractMessage {
     }
 
     public URL getSourceURL() {
-        return source;
+        return audioSource;
     }
 }

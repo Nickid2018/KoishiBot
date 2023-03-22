@@ -20,7 +20,7 @@ public class QQAudio extends AudioMessage implements QQMessage {
         super(environment);
         this.audio = audio;
         try {
-            this.source = new URL("https://github.com"); // Not supported now
+            this.audioSource = new URL("https://github.com"); // Not supported now
             this.group = null;
         } catch (Exception ignored) {
         }
@@ -33,7 +33,7 @@ public class QQAudio extends AudioMessage implements QQMessage {
     @Override
     public void read(ByteData buf) {
         super.read(buf);
-        try (ExternalResource resource = ExternalResource.create(source.openStream())) {
+        try (ExternalResource resource = ExternalResource.create(audioSource.openStream())) {
             audio = ((QQGroup) group).getGroup().uploadAudio(resource);
         } catch (IOException e) {
             throw new RuntimeException(e);

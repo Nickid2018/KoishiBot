@@ -142,7 +142,7 @@ public class BackendDataListener extends DataPacketListener {
 
     private void recallAction(Connection connection, RecallAction action) {
         if (QQMessageSource.messageCache.containsKey(action.messageUniqueID)) {
-            QQMessageSource.messageCache.get(action.messageUniqueID).recall();
+            QQMessageSource.recall(QQMessageSource.messageCache.get(action.messageUniqueID));
             QQMessageSource.messageCache.remove(action.messageUniqueID);
         }
     }

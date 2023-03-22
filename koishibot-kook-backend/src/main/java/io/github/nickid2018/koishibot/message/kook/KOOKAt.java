@@ -30,6 +30,7 @@ public class KOOKAt extends AtMessage implements KOOKMessage {
     @Override
     public void setSentMessage(SelfMessage message) {
         sentMessage = message;
+        source = new KOOKMessageSource(env, message.getId(), message);
     }
 
     @Override
