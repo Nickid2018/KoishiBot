@@ -117,6 +117,10 @@ public class TelegramMessageData {
         return chatID;
     }
 
+    public void setMsgID(int msgID) {
+        this.msgID = msgID;
+    }
+
     public int getMsgID() {
         return msgID;
     }

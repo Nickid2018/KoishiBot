@@ -32,6 +32,8 @@ public class TelegramChain extends ChainMessage implements TelegramMessage {
         for (AbstractMessage message : messages)
             if (message instanceof TelegramMessage telegramMessage)
                 telegramMessage.formatMessage(data);
+        if (source instanceof TelegramMessageSource telegramMessageSource)
+            data.setMsgID(telegramMessageSource.getMsgID());
     }
 
     @Override

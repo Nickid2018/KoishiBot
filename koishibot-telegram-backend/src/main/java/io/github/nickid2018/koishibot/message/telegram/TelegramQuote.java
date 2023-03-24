@@ -1,6 +1,5 @@
 package io.github.nickid2018.koishibot.message.telegram;
 
-import io.github.nickid2018.koishibot.message.api.ChainMessage;
 import io.github.nickid2018.koishibot.message.api.QuoteMessage;
 import io.github.nickid2018.koishibot.network.ByteData;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -31,11 +30,6 @@ public class TelegramQuote extends QuoteMessage implements TelegramMessage {
             quoteData = chain.getData();
             user = chain.getData().getSender();
         }
-    }
-
-    @Override
-    public ChainMessage getQuoteMessage() {
-        return new TelegramChain((TelegramEnvironment) env, quoteData);
     }
 
     @Override

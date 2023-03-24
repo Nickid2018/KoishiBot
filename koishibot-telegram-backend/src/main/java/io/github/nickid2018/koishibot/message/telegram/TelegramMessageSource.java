@@ -34,4 +34,8 @@ public class TelegramMessageSource extends MessageSource {
             TelegramEnvironment.LOGGER.error("Failed to delete message", e);
         }
     }
+
+    public int getMsgID() {
+        return msgID;
+    }
 }
