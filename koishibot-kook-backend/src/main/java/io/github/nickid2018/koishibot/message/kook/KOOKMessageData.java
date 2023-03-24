@@ -75,6 +75,10 @@ public class KOOKMessageData {
         return texts;
     }
 
+    public void setMsgID(String msgID) {
+        this.msgID = msgID;
+    }
+
     public String getMsgID() {
         return msgID;
     }

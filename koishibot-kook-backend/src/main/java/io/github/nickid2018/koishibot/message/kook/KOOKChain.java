@@ -37,6 +37,8 @@ public class KOOKChain extends ChainMessage implements KOOKMessage {
             else if (message instanceof KOOKMessage kook)
                 kook.formatMessage(data);
         }
+        if (source instanceof KOOKMessageSource kookMessageSource)
+            data.setMsgID(kookMessageSource.getMessageUniqueID());
     }
 
     @Override
