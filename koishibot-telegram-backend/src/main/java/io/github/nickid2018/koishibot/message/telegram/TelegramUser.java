@@ -1,8 +1,10 @@
 package io.github.nickid2018.koishibot.message.telegram;
 
+import io.github.nickid2018.koishibot.backend.Main;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.network.ByteData;
+import io.github.nickid2018.koishibot.util.LogUtils;
 import io.github.nickid2018.koishibot.util.TimeoutCache;
 import org.telegram.telegrambots.meta.api.objects.User;
 
@@ -22,7 +24,7 @@ public class TelegramUser extends UserInfo {
         name = user.getUserName();
         userId = "tg.user" + user.getId();
         isStranger = false;
-        USER_CACHE.put(userId, this, Long.MAX_VALUE);
+        USER_CACHE.put(userId, this, 10000000_000L);
     }
 
     public static String getNameInGroup(UserInfo userInfo, GroupInfo group) {
@@ -36,12 +38,11 @@ public class TelegramUser extends UserInfo {
     @Override
     public void read(ByteData buf) {
         super.read(buf);
+        LogUtils.info(LogUtils.FontColor.CYAN, Main.LOGGER, "User: {}", userId);
         if (USER_CACHE.containsKey(userId)) {
+            LogUtils.info(LogUtils.FontColor.CYAN, Main.LOGGER, "Hit cache user {}", userId);
             TelegramUser telegramUser = USER_CACHE.get(userId);
             user = telegramUser.user;
-            userId = telegramUser.userId;
-            name = telegramUser.name;
-            isStranger = telegramUser.isStranger;
         }
     }
 }
