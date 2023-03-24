@@ -122,6 +122,7 @@ public class BackendDataListener extends DataPacketListener {
     }
 
     private void sendMessageQuery(Connection connection, SendMessageQuery action) {
+        LogUtils.info(LogUtils.FontColor.GREEN, Main.LOGGER, "Sending message to " + action.target);
         Either<UserInfo, GroupInfo> contact = action.target;
         if (contact.isRight())
             TelegramMessage.send((TelegramMessage) action.message, contact.right());
