@@ -32,6 +32,7 @@ public class DataPacketListener implements NetworkListener {
 
     public DataPacketListener(BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory) {
         registry.registerData(Environment.class, dataFactory);
+        registry.registerData(MessageContext.class, dataFactory);
 
         registry.registerData(AtMessage.class, dataFactory);
         registry.registerData(AudioMessage.class, dataFactory);
