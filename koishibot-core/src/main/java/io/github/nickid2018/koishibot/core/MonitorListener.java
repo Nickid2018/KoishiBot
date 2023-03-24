@@ -39,7 +39,9 @@ public class MonitorListener implements NetworkListener {
         data.writeSerializableData(context);
         byte[] bytes = data.readByteArray();
         data.release();
-        return Base64.getEncoder().encodeToString(bytes);
+        String str = Base64.getEncoder().encodeToString(bytes);
+        LOGGER.info("Context: " + str);
+        return str;
     }
 
     public static Pair<DelegateEnvironment, MessageContext> parseContext(String context) {
