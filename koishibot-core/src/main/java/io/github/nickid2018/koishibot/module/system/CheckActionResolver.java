@@ -12,7 +12,7 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 public class CheckActionResolver extends MessageResolver {
 
     public CheckActionResolver() {
-        super("~check_action");
+        super("~check_update");
     }
 
     @Override
