@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Set;
 
 public class MonitorStart {
 
@@ -47,6 +48,15 @@ public class MonitorStart {
                 LogUtils.error(LOGGER, "Failed to send command", e);
             }
         }
+    }
+
+    public static void checkAndRun() throws IOException {
+        Set<String> running = ProcessManager.nowRunning();
+        if (!running.contains("core"))
+            ProcessManager.startCore();
+        for (String backend : Settings.ENABLE_BACKENDS)
+            if (!running.contains(backend))
+                ProcessManager.startBackend(backend);
     }
 
     private static boolean commandExitProcess(String line) {

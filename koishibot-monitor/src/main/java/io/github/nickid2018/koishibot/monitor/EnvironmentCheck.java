@@ -18,6 +18,8 @@ public class EnvironmentCheck {
     public static final Logger LOGGER = LoggerFactory.getLogger("Creating Process");
     public static final File MONITOR_DATA_FILE = new File("monitor-data.json");
 
+    public static long NOW_ACTION_ID = -1;
+
     public static boolean checkAndCreate() {
         if (!MONITOR_DATA_FILE.isFile()) {
             try {
@@ -29,9 +31,9 @@ public class EnvironmentCheck {
             return false;
         } else {
             try {
-                long actionID = GitHubWebRequests.getNowActionID();
-                LogUtils.info(LogUtils.FontColor.CYAN, LOGGER, "Now action ID: {}", actionID);
-                Object2LongMap<String> artifacts = GitHubWebRequests.getArtifacts(actionID);
+                NOW_ACTION_ID = GitHubWebRequests.getNowActionID();
+                LogUtils.info(LogUtils.FontColor.CYAN, LOGGER, "Now action ID: {}", NOW_ACTION_ID);
+                Object2LongMap<String> artifacts = GitHubWebRequests.getArtifacts(NOW_ACTION_ID);
                 File checksums = GitHubWebRequests.getArtifact(artifacts.getLong("checksums"));
                 Pair<Set<String>, Set<String>> needUpdates = StatusCheck.needUpdates(checksums);
                 Set<String> updateModules = new HashSet<>(needUpdates.first());
