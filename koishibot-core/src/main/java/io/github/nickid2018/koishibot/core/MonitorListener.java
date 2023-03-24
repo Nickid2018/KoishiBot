@@ -43,7 +43,6 @@ public class MonitorListener implements NetworkListener {
     }
 
     public static Pair<DelegateEnvironment, MessageContext> parseContext(String context) {
-        LOGGER.info("Context: " + context);
         byte[] bytes = Base64.getDecoder().decode(context);
         ByteData data = new ByteData(Unpooled.wrappedBuffer(bytes));
         String envName = data.readString();
