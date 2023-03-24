@@ -12,11 +12,11 @@ import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.LogUtils;
 import io.github.nickid2018.koishibot.util.Pair;
 import io.netty.buffer.Unpooled;
-import org.apache.hc.client5.http.utils.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
+import java.util.Base64;
 
 public class MonitorListener implements NetworkListener {
 
@@ -39,12 +39,12 @@ public class MonitorListener implements NetworkListener {
         data.writeSerializableData(context);
         byte[] bytes = data.readByteArray();
         data.release();
-        return Base64.encodeBase64String(bytes);
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
     public static Pair<DelegateEnvironment, MessageContext> parseContext(String context) {
         LOGGER.info("Context: " + context);
-        byte[] bytes = Base64.decodeBase64(context);
+        byte[] bytes = Base64.getDecoder().decode(context);
         ByteData data = new ByteData(Unpooled.wrappedBuffer(bytes));
         String envName = data.readString();
         DelegateEnvironment environment = Environments.getEnvironment(envName);
