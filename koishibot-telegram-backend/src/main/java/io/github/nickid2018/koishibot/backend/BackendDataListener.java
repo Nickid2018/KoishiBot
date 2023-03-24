@@ -125,6 +125,8 @@ public class BackendDataListener extends DataPacketListener {
         Either<UserInfo, GroupInfo> contact = action.target;
         if (contact.isRight())
             TelegramMessage.send((TelegramMessage) action.message, contact.right());
+        else
+            TelegramMessage.send((TelegramMessage) action.message, contact.left());
         QueryResultEvent event = new QueryResultEvent(environment.get());
         event.queryId = action.queryId;
         event.payload = SendMessageQuery.toBytes(connection, action.message.getSource());
