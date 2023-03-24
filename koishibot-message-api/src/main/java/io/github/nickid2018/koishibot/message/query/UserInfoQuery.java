@@ -34,7 +34,7 @@ public class UserInfoQuery extends Query {
     public static byte[] toBytes(UserInfo user) {
         ByteData buf = new ByteData(Unpooled.buffer());
         buf.writeSerializableData(user);
-        byte[] data = buf.readByteArray();
+        byte[] data = buf.toByteArray();
         buf.release();
         return data;
     }

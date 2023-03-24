@@ -30,7 +30,7 @@ public class GroupInfoQuery extends Query {
     public static byte[] toBytes(GroupInfo groupInfo) {
         ByteData buf = new ByteData(Unpooled.buffer());
         buf.writeSerializableData(groupInfo);
-        byte[] data = buf.readByteArray();
+        byte[] data = buf.toByteArray();
         buf.release();
         return data;
     }

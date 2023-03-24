@@ -43,7 +43,7 @@ public class SendMessageQuery extends Query {
     public static byte[] toBytes(Connection connection, MessageSource source) {
         ByteData buf = new ByteData(Unpooled.buffer());
         buf.writeSerializableDataOrNull(connection.getRegistry(), source);
-        byte[] data = buf.readByteArray();
+        byte[] data = buf.toByteArray();
         buf.release();
         return data;
     }

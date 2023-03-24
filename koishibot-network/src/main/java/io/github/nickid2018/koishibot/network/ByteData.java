@@ -36,6 +36,12 @@ public class ByteData extends ByteBuf {
         this.source = paramByteBuf;
     }
 
+    public byte[] toByteArray() {
+        byte[] arrayOfByte = new byte[readableBytes()];
+        readBytes(arrayOfByte);
+        return arrayOfByte;
+    }
+
     public static int getVarIntSize(int paramInt) {
         for (byte b = 1; b < 5; b++) {
             if ((paramInt & -1 << b * 7) == 0)
