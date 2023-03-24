@@ -1,10 +1,12 @@
 package io.github.nickid2018.koishibot.message;
 
+import io.github.nickid2018.koishibot.core.BotStart;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.FormatTransformer;
+import io.github.nickid2018.koishibot.util.LogUtils;
 
 import java.io.File;
 import java.net.URL;
@@ -39,5 +41,8 @@ public class DelegateEnvironment extends Environment {
         super.read(buf);
         sender = new MessageSender(this, needAntiFilter);
         manager = new MessageManager(this);
+
+        Environments.putEnvironment(getEnvironmentName(), this);
+        LogUtils.info(LogUtils.FontColor.GREEN, BotStart.LOGGER, "Delegate environment {} created.", getEnvironmentName());
     }
 }
