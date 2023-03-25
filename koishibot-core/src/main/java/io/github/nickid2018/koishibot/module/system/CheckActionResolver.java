@@ -16,6 +16,11 @@ public class CheckActionResolver extends MessageResolver {
     }
 
     @Override
+    public boolean needAt() {
+        return true;
+    }
+
+    @Override
     public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, DelegateEnvironment environment) {
         MonitorListener.checkActionID(environment, context);
         return true;

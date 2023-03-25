@@ -91,8 +91,15 @@ public class CoreListener implements NetworkListener {
     private void updateAndRestart(String context) {
         try {
             long nowActionID = GitHubWebRequests.getNowActionID();
-            if (nowActionID == EnvironmentCheck.NOW_ACTION_ID)
+            if (nowActionID == EnvironmentCheck.NOW_ACTION_ID) {
+                JsonObject object = new JsonObject();
+                object.addProperty("action", "update");
+                object.addProperty("result", "no_update");
+                object.addProperty("action_id", nowActionID);
+                object.addProperty("context", context);
+                send(object.toString());
                 return;
+            }
             LogUtils.info(LogUtils.FontColor.CYAN, MonitorStart.LOGGER,
                     "Action ID {} -> {}", EnvironmentCheck.NOW_ACTION_ID, nowActionID);
 
