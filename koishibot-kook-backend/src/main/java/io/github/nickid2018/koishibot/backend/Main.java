@@ -33,7 +33,7 @@ public class Main {
         Self self = JavaBaseClass.utils.connectWebsocket(kookClient);
 
         int retry = 0;
-        while (!stopped.get() && retry < 20) {
+        while (!stopped.get() && retry < 100) {
             CompletableFuture<Void> disconnected = new CompletableFuture<>();
             CompletableFuture<KOOKEnvironment> env = new CompletableFuture<>();
             LazyLoadedValue<KOOKEnvironment> lazyLoadedValue = new LazyLoadedValue<>(env::join);
@@ -53,12 +53,12 @@ public class Main {
             LOGGER.info("Disconnected. Waiting 1min to reconnect.");
             retry++;
             try {
-                Thread.sleep(60000);
+                Thread.sleep(10000);
             } catch (InterruptedException ignored) {
             }
         }
 
-        LOGGER.error(retry == 20 ? "Retries > 20, can't link to delegate. Shutting down." : "Bot offline. Shutting down.");
+        LOGGER.error(retry == 100 ? "Retries > 100, can't link to delegate. Shutting down." : "Bot offline. Shutting down.");
         kookClient.close();
     }
 }
