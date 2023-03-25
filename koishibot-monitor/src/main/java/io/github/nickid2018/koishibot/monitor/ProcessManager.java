@@ -58,6 +58,7 @@ public class ProcessManager {
     }
 
     public static Set<String> nowRunning() {
+        checkProcessesAlive();
         return PROCESSES.keySet();
     }
 
