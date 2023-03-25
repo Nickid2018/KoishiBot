@@ -170,6 +170,7 @@ public class CoreListener implements NetworkListener {
 
             EnvironmentCheck.NOW_ACTION_ID = nowActionID;
         } catch (Exception e) {
+            LogUtils.error(MonitorStart.LOGGER, "Update error!", e);
             try {
                 MonitorStart.checkAndRun();
                 JsonObject object = new JsonObject();

@@ -127,6 +127,7 @@ public class MonitorListener implements NetworkListener {
             String name = stops.get(i).getAsString();
             stopSet.add(BACKEND_TO_NAME_MAP.getOrDefault(name, name));
         }
+        LogUtils.info(LogUtils.FontColor.RED, LOGGER, "Stopping modules: {}", stopSet);
         Environments.getEnvironments().stream()
                 .filter(env -> stopSet.contains(env.getEnvironmentName()))
                 .map(Environment::getConnection)
@@ -159,6 +160,7 @@ public class MonitorListener implements NetworkListener {
     }
 
     private void doUpdateCallback(JsonObject data) {
+        LogUtils.info(LogUtils.FontColor.CYAN, LOGGER, "Updated bot...");
         Pair<DelegateEnvironment, MessageContext> pair = parseContext(JsonUtil.getStringOrNull(data, "context"));
         DelegateEnvironment environment = pair.first();
         MessageContext context = pair.second();
