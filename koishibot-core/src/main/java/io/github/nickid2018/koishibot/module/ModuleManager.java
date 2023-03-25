@@ -51,7 +51,7 @@ public class ModuleManager {
         addModule(new PlainModule("system", false, NOP, NOP, "系统模块",
                 new SayResolver(), new ReloadResolver(), new CleanCacheResolver(),
                 new RuntimeArgResolver(), new StopResolver(), new RecallResolver(),
-                new StopMusicQueueResolver(), new CheckActionResolver()));
+                new StopMusicQueueResolver(), new CheckActionResolver(), new UpdateResolver()));
         addModule(new PlainModule("module", false, NOP, NOP, "模块管理模块", new ModuleManageResolver()));
         addModule(new PlainModule("perm", false, NOP, NOP, "权限模块", new PermissionResolver()));
         addModule(new WikiModule());
