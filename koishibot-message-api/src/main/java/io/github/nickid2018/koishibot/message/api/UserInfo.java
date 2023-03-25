@@ -49,7 +49,7 @@ public class UserInfo extends ContactInfo {
 
     @Override
     public boolean equals(ContactInfo info) {
-        return info.getEnvironment() == env && info instanceof UserInfo user && user.getUserId().equals(userId);
+        return info.getEnvironment().equals(env) && info instanceof UserInfo user && user.getUserId().equals(userId);
     }
 
     @Override
