@@ -8,6 +8,7 @@ import io.github.nickid2018.koishibot.network.*;
 import io.github.nickid2018.koishibot.util.JsonUtil;
 import io.github.nickid2018.koishibot.util.LogUtils;
 import io.github.nickid2018.koishibot.util.Pair;
+import io.github.nickid2018.koishibot.util.SimpleThreadFactory;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 
 import java.io.File;
@@ -20,7 +21,7 @@ import java.util.concurrent.Executors;
 
 public class CoreListener implements NetworkListener {
 
-    private static ExecutorService EXECUTOR;
+    private static ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(new SimpleThreadFactory("CoreListener"));
 
     public static final DataRegistry REGISTRY = new DataRegistry();
     public static final CoreListener INSTANCE = new CoreListener();
@@ -35,7 +36,6 @@ public class CoreListener implements NetworkListener {
     @Override
     public void connectionOpened(Connection connection) {
         this.connection = connection;
-        EXECUTOR = Executors.newSingleThreadExecutor();
         LogUtils.info(LogUtils.FontColor.CYAN, MonitorStart.LOGGER, "Core connection opened!");
         JsonObject object = new JsonObject();
         object.addProperty("action", "start");
@@ -59,7 +59,6 @@ public class CoreListener implements NetworkListener {
 
     @Override
     public void connectionClosed(Connection connection) {
-        EXECUTOR.shutdownNow();
         LogUtils.error(MonitorStart.LOGGER, "Core connection closed!", null);
     }
 

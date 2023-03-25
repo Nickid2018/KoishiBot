@@ -213,5 +213,6 @@ public class MonitorListener implements NetworkListener {
         environment.getMessageSender().sendMessage(context, environment.newText(
                 "更新完成。目前bot版本为: %d".formatted(JsonUtil.getLongOrZero(data, "action_id"))
         ));
+        ACTION_ID = JsonUtil.getLongOrZero(data, "action_id");
     }
 }
