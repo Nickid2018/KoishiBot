@@ -7,7 +7,7 @@ import net.mamoe.mirai.message.data.PlainText;
 
 public class QQText extends TextMessage implements QQMessage {
 
-    private PlainText textMessage;
+    public PlainText textMessage;
 
     protected QQText(QQEnvironment environment) {
         super(environment);

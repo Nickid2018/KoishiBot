@@ -9,7 +9,7 @@ public class QQQuote extends QuoteMessage implements QQMessage {
 
     private QuoteReply quoteReply;
 
-    protected QQQuote(QQEnvironment environment) {
+    public QQQuote(QQEnvironment environment) {
         super(environment);
     }
 

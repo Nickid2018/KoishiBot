@@ -9,7 +9,7 @@ public class QQForward extends ForwardMessage implements QQMessage {
 
     private net.mamoe.mirai.message.data.ForwardMessage forward;
 
-    protected QQForward(QQEnvironment environment) {
+    public QQForward(QQEnvironment environment) {
         super(environment);
     }
 

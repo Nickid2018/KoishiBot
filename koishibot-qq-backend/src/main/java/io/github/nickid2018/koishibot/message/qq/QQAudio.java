@@ -12,7 +12,7 @@ public class QQAudio extends AudioMessage implements QQMessage {
 
     private Audio audio;
 
-    protected QQAudio(QQEnvironment environment) {
+    public QQAudio(QQEnvironment environment) {
         super(environment);
     }
 

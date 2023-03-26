@@ -14,7 +14,7 @@ public class QQChain extends ChainMessage implements QQMessage {
 
     private MessageChain chain;
 
-    protected QQChain(QQEnvironment environment) {
+    public QQChain(QQEnvironment environment) {
         super(environment);
     }
 

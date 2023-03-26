@@ -14,7 +14,7 @@ public class QQImage extends ImageMessage implements QQMessage {
 
     protected Image image;
 
-    protected QQImage(QQEnvironment environment) {
+    public QQImage(QQEnvironment environment) {
         super(environment);
     }
 

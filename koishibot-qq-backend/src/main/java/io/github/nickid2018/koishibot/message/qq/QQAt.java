@@ -8,7 +8,7 @@ public class QQAt extends AtMessage {
 
     private At at;
 
-    protected QQAt(QQEnvironment environment) {
+    public QQAt(QQEnvironment environment) {
         super(environment);
     }
 

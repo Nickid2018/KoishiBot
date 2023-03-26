@@ -15,7 +15,7 @@ public class QQService extends ServiceMessage implements QQMessage {
 
     private RichMessage richMessage;
 
-    protected QQService(QQEnvironment environment) {
+    public QQService(QQEnvironment environment) {
         super(environment);
     }
 
