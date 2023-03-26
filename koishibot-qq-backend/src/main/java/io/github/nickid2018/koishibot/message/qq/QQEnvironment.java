@@ -1,10 +1,8 @@
 package io.github.nickid2018.koishibot.message.qq;
 
-import io.github.nickid2018.koishibot.backend.Main;
 import io.github.nickid2018.koishibot.message.api.UnsupportedMessage;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.network.Connection;
-import io.github.nickid2018.koishibot.util.LogUtils;
 import net.mamoe.mirai.Bot;
 import net.mamoe.mirai.contact.Group;
 import net.mamoe.mirai.contact.User;
@@ -39,7 +37,6 @@ public class QQEnvironment extends Environment {
         if (!id.startsWith("qq.user"))
             return null;
         long idLong = Long.parseLong(id.substring(7));
-        LogUtils.info(LogUtils.FontColor.GREEN, Main.LOGGER, "Looking up user {}", idLong);
         if (findInGroup)
             for (Group group : bot.getGroups()) {
                 User user = group.get(idLong);

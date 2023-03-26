@@ -6,7 +6,7 @@ import io.github.nickid2018.koishibot.network.ByteData;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class UserInfo extends ContactInfo {
     public boolean isStranger;
@@ -38,11 +38,11 @@ public class UserInfo extends ContactInfo {
         query.user = this;
         CompletableFuture<byte[]> future = env.getListener().queryData(env.getConnection(), query);
         try {
-            byte[] data = future.get();
+            byte[] data = future.get(20, TimeUnit.SECONDS);
             if (data == null)
                 return "<error>";
             return new String(data, StandardCharsets.UTF_8);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             return "<error>";
         }
     }

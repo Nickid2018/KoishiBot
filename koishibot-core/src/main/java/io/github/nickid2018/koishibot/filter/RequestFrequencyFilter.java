@@ -1,9 +1,11 @@
 package io.github.nickid2018.koishibot.filter;
 
 import io.github.nickid2018.koishibot.message.DelegateEnvironment;
+import io.github.nickid2018.koishibot.message.MessageManager;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.permission.PermissionLevel;
 import io.github.nickid2018.koishibot.permission.PermissionManager;
+import io.github.nickid2018.koishibot.util.LogUtils;
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
 
 import javax.annotation.Nonnull;
@@ -26,6 +28,8 @@ public class RequestFrequencyFilter implements PreFilter, PostFilter {
             int times = USER_REQUEST_FAIL.getOrDefault(member, 0);
             times++;
             if (times >= REQUEST_MAX_FAIL) {
+                LogUtils.info(LogUtils.FontColor.RED, MessageManager.LOGGER,
+                        "User {} has been banned for {} seconds", member, AUTO_BAN_TIME / 1000);
                 PermissionManager.setLevel(member.getUserId(), PermissionLevel.BANNED, nowTime + AUTO_BAN_TIME, false);
                 USER_REQUEST_FAIL.remove(member);
                 nowBan.setValue(true);

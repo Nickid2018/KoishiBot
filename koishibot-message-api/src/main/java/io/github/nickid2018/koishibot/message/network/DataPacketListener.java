@@ -2,18 +2,16 @@ package io.github.nickid2018.koishibot.message.network;
 
 import io.github.nickid2018.koishibot.message.action.NudgeAction;
 import io.github.nickid2018.koishibot.message.action.RecallAction;
-import io.github.nickid2018.koishibot.message.query.SendMessageQuery;
 import io.github.nickid2018.koishibot.message.action.StopAction;
 import io.github.nickid2018.koishibot.message.api.*;
 import io.github.nickid2018.koishibot.message.event.*;
-import io.github.nickid2018.koishibot.message.query.GroupInfoQuery;
-import io.github.nickid2018.koishibot.message.query.NameInGroupQuery;
-import io.github.nickid2018.koishibot.message.query.Query;
-import io.github.nickid2018.koishibot.message.query.UserInfoQuery;
+import io.github.nickid2018.koishibot.message.query.*;
 import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.network.DataRegistry;
 import io.github.nickid2018.koishibot.network.NetworkListener;
 import io.github.nickid2018.koishibot.network.SerializableData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.UUID;
@@ -29,6 +27,8 @@ public class DataPacketListener implements NetworkListener {
     private final Map<UUID, CompletableFuture<byte[]>> queryResults = new ConcurrentHashMap<>();
 
     protected final DataRegistry registry = new DataRegistry();
+
+    public static final Logger LOGGER = LoggerFactory.getLogger("DataPacketListener");
 
     public DataPacketListener(BiFunction<Class<? extends SerializableData>, Connection, ? extends SerializableData> dataFactory) {
         registry.registerData(Environment.class, dataFactory);

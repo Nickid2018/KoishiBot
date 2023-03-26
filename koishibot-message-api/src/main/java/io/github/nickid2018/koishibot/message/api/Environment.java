@@ -8,10 +8,11 @@ import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
+import io.github.nickid2018.koishibot.util.LogUtils;
 
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class Environment implements SerializableData {
 
@@ -36,8 +37,9 @@ public class Environment implements SerializableData {
         query.isStranger = isStranger;
         CompletableFuture<byte[]> future = getListener().queryData(connection, query);
         try {
-            return UserInfoQuery.fromBytes(connection, future.get());
-        } catch (InterruptedException | ExecutionException e) {
+            return UserInfoQuery.fromBytes(connection, future.get(20, TimeUnit.SECONDS));
+        } catch (Exception e) {
+            LogUtils.error(DataPacketListener.LOGGER, "Failed to get user info", e);
             return null;
         }
     }
@@ -47,8 +49,9 @@ public class Environment implements SerializableData {
         query.id = id;
         CompletableFuture<byte[]> future = getListener().queryData(connection, query);
         try {
-            return GroupInfoQuery.fromBytes(connection, future.get());
-        } catch (InterruptedException | ExecutionException e) {
+            return GroupInfoQuery.fromBytes(connection, future.get(20, TimeUnit.SECONDS));
+        } catch (Exception e) {
+            LogUtils.error(DataPacketListener.LOGGER, "Failed to get group info", e);
             return null;
         }
     }

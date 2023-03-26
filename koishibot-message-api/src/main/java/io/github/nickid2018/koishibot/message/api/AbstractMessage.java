@@ -1,9 +1,13 @@
 package io.github.nickid2018.koishibot.message.api;
 
+import io.github.nickid2018.koishibot.message.network.DataPacketListener;
 import io.github.nickid2018.koishibot.message.query.SendMessageQuery;
 import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.network.SerializableData;
 import io.github.nickid2018.koishibot.util.Either;
+import io.github.nickid2018.koishibot.util.LogUtils;
+
+import java.util.concurrent.TimeUnit;
 
 public abstract class AbstractMessage implements SerializableData {
 
@@ -24,9 +28,10 @@ public abstract class AbstractMessage implements SerializableData {
         sendQuery.message = this;
         env.getListener().queryData(env.getConnection(), sendQuery);
         try {
-            source = SendMessageQuery.fromBytes(env.getConnection(),
-                    env.getListener().queryData(env.getConnection(), sendQuery).get());
-        } catch (Exception ignored) {
+            byte[] data = env.getListener().queryData(env.getConnection(), sendQuery).get(20, TimeUnit.SECONDS);
+            source = SendMessageQuery.fromBytes(env.getConnection(), data);
+        } catch (Exception e) {
+            LogUtils.error(DataPacketListener.LOGGER, "Failed to send message", e);
         }
     }
 
@@ -35,9 +40,10 @@ public abstract class AbstractMessage implements SerializableData {
         sendQuery.target = Either.right(group);
         sendQuery.message = this;
         try {
-            source = SendMessageQuery.fromBytes(env.getConnection(),
-                    env.getListener().queryData(env.getConnection(), sendQuery).get());
-        } catch (Exception ignored) {
+            byte[] data = env.getListener().queryData(env.getConnection(), sendQuery).get(20, TimeUnit.SECONDS);
+            source = SendMessageQuery.fromBytes(env.getConnection(), data);
+        } catch (Exception e) {
+            LogUtils.error(DataPacketListener.LOGGER, "Failed to send message", e);
         }
     }
 
