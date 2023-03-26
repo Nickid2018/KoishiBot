@@ -35,7 +35,10 @@ public class QQChain extends ChainMessage implements QQMessage {
     public void read(ByteData buf) {
         super.read(buf);
         chain = MessageUtils.newChain(
-                Stream.of(messages).map(m -> ((QQMessage) m).getMessage()).toArray(Message[]::new)
+                Stream.of(messages)
+                        .filter(m -> m instanceof QQMessage)
+                        .map(m -> ((QQMessage) m).getMessage())
+                        .toArray(Message[]::new)
         );
     }
 }
