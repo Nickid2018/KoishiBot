@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.message.qq;
 
+import io.github.nickid2018.koishibot.network.ByteData;
 import io.github.nickid2018.koishibot.util.TimeoutCache;
 import net.mamoe.mirai.message.data.MessageSource;
 
@@ -27,6 +28,12 @@ public class QQMessageSource extends io.github.nickid2018.koishibot.message.api.
 
     public MessageSource getSource() {
         return source;
+    }
+
+    @Override
+    public void read(ByteData buf) {
+        super.read(buf);
+        source = messageCache.get(messageUniqueID).getSource();
     }
 
     public static void recall(QQMessageSource source) {
