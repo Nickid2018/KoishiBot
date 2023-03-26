@@ -50,7 +50,6 @@ public class BotStart {
 
     public static void terminate() {
         PluginProcessor.exit();
-        Environments.closeEnvironments();
         System.exit(0);
     }
 }

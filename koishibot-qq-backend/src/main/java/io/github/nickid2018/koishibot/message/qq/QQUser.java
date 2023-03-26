@@ -44,7 +44,7 @@ public class QQUser extends UserInfo {
             String name = member == null ? null : member.getNameCard();
             return name == null || name.isEmpty() ? user.name : name;
         } else
-            return null;
+            return user.user.getNick();
     }
 
     @Override
