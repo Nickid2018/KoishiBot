@@ -17,8 +17,9 @@ public class MCChatBridgeFilter implements PreFilter {
     @Override
     public ChainMessage filterMessagePre(ChainMessage input, MessageContext context, DelegateEnvironment environment) {
         if (ModuleManager.isOpened(Objects.requireNonNull(context.group()).getGroupId(), "mcchat"))
-            AsyncUtil.execute(() -> MCChatBridgeModule.INSTANCE.onReceiveGroupText(
-                    context.group(), context.user(), messageToString(input, context)));
+            if (MCChatBridgeModule.INSTANCE != null)
+                AsyncUtil.execute(() -> MCChatBridgeModule.INSTANCE.onReceiveGroupText(
+                        context.group(), context.user(), messageToString(input, context)));
         return input;
     }
 

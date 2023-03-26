@@ -21,7 +21,7 @@ public class GitHubWebHookResolver extends MessageResolver {
 
     @Override
     public boolean groupEnabled() {
-        return GitHubModule.INSTANCE.getAuthenticator().enableOAuth2();
+        return GitHubModule.INSTANCE != null && GitHubModule.INSTANCE.getAuthenticator().enableOAuth2();
     }
 
     @Override
