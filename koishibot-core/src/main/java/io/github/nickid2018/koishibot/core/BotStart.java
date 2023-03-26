@@ -21,6 +21,7 @@ public class BotStart {
             LogUtils.error(LOGGER, "Failed to start bot", e);
             return;
         }
+        LogUtils.info(LogUtils.FontColor.GREEN, LOGGER, "Bot started");
         Scanner scanner = new Scanner(System.in);
         MAIN: while (scanner.hasNext()) {
             String command = scanner.nextLine();
