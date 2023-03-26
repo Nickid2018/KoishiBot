@@ -1,6 +1,5 @@
 package io.github.nickid2018.koishibot.message;
 
-import io.github.nickid2018.koishibot.core.BotStart;
 import io.github.nickid2018.koishibot.message.api.Environment;
 import io.github.nickid2018.koishibot.message.event.*;
 import io.github.nickid2018.koishibot.message.network.DataPacketListener;
@@ -17,7 +16,6 @@ public class MessageDataListener extends DataPacketListener {
                 Environment environment = Environments.getEnvironment(cn);
                 if (environment == null)
                     return null;
-                BotStart.LOGGER.debug("Creating data in environment {}: {}", environment.getEnvironmentName(), c.getName());
                 return c.getConstructor(Environment.class).newInstance(environment);
             } catch (Exception e) {
                 return null;

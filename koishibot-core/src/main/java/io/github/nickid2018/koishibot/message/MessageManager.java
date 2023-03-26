@@ -99,7 +99,6 @@ public class MessageManager {
         if (service == null) {
             if (strings.isEmpty() || strings.get(0).startsWith("!"))
                 return;
-            LOGGER.debug("Message: {}.", strings);
 
             MutableBoolean bool = new MutableBoolean(false);
             boolean finalAtt = att;

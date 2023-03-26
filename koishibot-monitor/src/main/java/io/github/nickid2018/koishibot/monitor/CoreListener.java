@@ -21,7 +21,7 @@ import java.util.concurrent.Executors;
 
 public class CoreListener implements NetworkListener {
 
-    private static ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(new SimpleThreadFactory("CoreListener"));
+    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor(new SimpleThreadFactory("CoreListener"));
 
     public static final DataRegistry REGISTRY = new DataRegistry();
     public static final CoreListener INSTANCE = new CoreListener();
