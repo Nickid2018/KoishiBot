@@ -9,7 +9,7 @@ public class QQText extends TextMessage implements QQMessage {
 
     public PlainText textMessage;
 
-    protected QQText(QQEnvironment environment) {
+    public QQText(QQEnvironment environment) {
         super(environment);
     }
 
