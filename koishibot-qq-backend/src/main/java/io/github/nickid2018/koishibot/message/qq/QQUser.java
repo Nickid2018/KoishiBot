@@ -50,6 +50,6 @@ public class QQUser extends UserInfo {
     @Override
     public void read(ByteData buf) {
         super.read(buf);
-        user = ((QQEnvironment) env).getQQUser(userId, isStranger);
+        user = ((QQEnvironment) env).getQQUser(userId, isStranger, true);
     }
 }

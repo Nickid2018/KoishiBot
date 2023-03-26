@@ -79,8 +79,6 @@ public class SubProgramProcess implements Runnable {
                 String line = programOutput.readLine();
                 if (line == null)
                     continue;
-                if (!OUTPUT_PATTERN.matcher(line).matches())
-                    continue;
                 if (outputQueue != null) {
                     outputQueue.offer(line);
                     if (outputQueue.size() > 20)

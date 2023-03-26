@@ -33,11 +33,18 @@ public class QQEnvironment extends Environment {
         audioSilk = true;
     }
 
-    public User getQQUser(String id, boolean isStranger) {
-        return id.startsWith("qq.user") ? (isStranger ?
+    public User getQQUser(String id, boolean isStranger, boolean findInGroup) {
+        if (!id.startsWith("qq.user"))
+            return null;
+        if (findInGroup)
+            for (Group group : bot.getGroups()) {
+                User user = group.get(Long.parseLong(id.substring(7)));
+                if (user != null)
+                    return user;
+            }
+        return isStranger ?
                 bot.getStranger(Long.parseLong(id.substring(7))) :
-                bot.getFriend(Long.parseLong(id.substring(7)))
-        ) : null;
+                bot.getFriend(Long.parseLong(id.substring(7)));
     }
 
     public Group getQQGroup(String id) {
@@ -46,8 +53,12 @@ public class QQEnvironment extends Environment {
 
     @Override
     public UserInfo getUser(String id, boolean isStranger) {
+        return getUser(id, isStranger, true);
+    }
+
+    public UserInfo getUser(String id, boolean isStranger, boolean findInGroup) {
         return id.startsWith("qq.user") ?
-                new QQUser(this, getQQUser(id, isStranger), isStranger) :
+                new QQUser(this, getQQUser(id, isStranger, findInGroup), isStranger) :
                 null;
     }
 

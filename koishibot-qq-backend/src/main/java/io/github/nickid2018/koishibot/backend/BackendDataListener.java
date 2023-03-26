@@ -52,6 +52,7 @@ public class BackendDataListener extends DataPacketListener {
                     return MAPPING.get(c).getConstructor(QQEnvironment.class).newInstance(environment.get());
                 return c.getConstructor(Environment.class).newInstance(environment.get());
             } catch (Exception e) {
+                LogUtils.error(Main.LOGGER, "Failed to create instance of " + c.getName(), e);
                 return null;
             }
         });
@@ -120,7 +121,7 @@ public class BackendDataListener extends DataPacketListener {
     }
 
     private void nameInGroupQuery(Connection connection, NameInGroupQuery query) {
-        String info = query.user.getNameInGroup(query.group);
+        String info = QQUser.getNameInGroup((QQUser) query.user, query.group);
         QueryResultEvent event = new QueryResultEvent(environment.get());
         event.queryId = query.queryId;
         event.payload = info.getBytes(StandardCharsets.UTF_8);

@@ -34,7 +34,7 @@ public class MonitorStart {
             for (String backend : Settings.ENABLE_BACKENDS)
                 ProcessManager.startBackend(backend);
             LogUtils.info(LogUtils.FontColor.GREEN, LOGGER, "Automatically switch to core process");
-            ProcessManager.setInteract("core");
+            ProcessManager.setInteract("qq-backend");
         } catch (IOException e) {
             LogUtils.error(LOGGER, "Failed to start core or backends", e);
         }
