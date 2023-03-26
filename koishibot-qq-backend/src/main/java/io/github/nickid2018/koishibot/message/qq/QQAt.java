@@ -16,7 +16,10 @@ public class QQAt extends AtMessage {
         super(environment);
         this.at = at;
 
-        user = environment.getUser("qq.user" + at.getTarget(), true);
+        if (at.getTarget() == environment.getBot().getId())
+            user = new QQUser(environment, environment.getBot().getAsFriend(), false);
+        else
+            user = environment.getUser("qq.user" + at.getTarget(), true);
     }
 
     public At getMessage() {
