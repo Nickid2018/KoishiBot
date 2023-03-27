@@ -75,8 +75,21 @@ tasks {
             )
         }
     }
+
+    register<Jar>("jarTransfer") {
+        archiveBaseName.set("transfer")
+        from("build/classes/java/main/") {
+            include("io/github/nickid2018/koishibot/module/mc/trans/*.class")
+            include("io/github/nickid2018/koishibot/util/tcp/*.class")
+        }
+        from(configurations.runtimeClasspath.get()
+            .filter { it.name.contains("rcon", true) }
+            .map { zipTree(it) })
+        manifest.attributes["Main-Class"] = "io.github.nickid2018.koishibot.module.mc.trans.TransMain"
+    }
 }
 
 tasks["exportApi"].dependsOn("jar")
 tasks["computeChecksum"].dependsOn("exportApi")
-tasks["build"].dependsOn("computeChecksum")
+tasks["jarTransfer"].dependsOn("computeChecksum")
+tasks["build"].dependsOn("jarTransfer")

@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: core
-          path: koishibot-core/build/libs/*.jar
+          path: koishibot-core/build/libs/koishibot-core.jar
 
       - name: Upload core libraries artifact
         uses: actions/upload-artifact@v2
@@ -87,6 +87,12 @@ jobs:
         with:
           name: monitor
           path: koishibot-monitor/build/libs/koishibot-monitor-all.jar
+
+      - name: Upload transfer artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: transfer
+          path: koishibot-core/build/libs/transfer.jar
 
       - name: Upload checksum artifact
         uses: actions/upload-artifact@v2
