@@ -20,7 +20,7 @@
 ```json
 {
   "enable_backends": "qq-backend,kook-backend,telegram-backend",
-  "github_token": "替换为GitHub Token"
+  "github_token": "替换为 GitHub Token"
 }
 ```
 
@@ -89,4 +89,16 @@
 
 配置完成后，再次运行 monitor 就可以启动。
 
-## monitor 指令
+## monitor 命令
+### `enter 子进程`
+monitor 会将核心和后端进行执行，但不是在本进程内进行操作，而是开新的进程，并通过网络进行连接。这样可以让机器人可以自动更新和阻止意外掉线等问题。
+
+进入子进程的控制台需要使用此命令，此时输入流会被重定向到子进程的输入流，子进程的输出流会重定向到控制台。如果子进程结束，monitor 会自动断开连接。
+
+monitor 在启动时自动进入核心`core`进程。
+
+### `quit`
+退出子进程，但不关闭子进程。必须在进入后输入此命令。
+
+### `exit`
+关闭 monitor，同时关闭核心和所有后端。
