@@ -4,6 +4,7 @@ import io.github.nickid2018.koishibot.backend.Main;
 import io.github.nickid2018.koishibot.message.event.*;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
+import net.mamoe.mirai.contact.AnonymousMember;
 import net.mamoe.mirai.event.EventChannel;
 import net.mamoe.mirai.event.ListeningStatus;
 import net.mamoe.mirai.event.events.*;
@@ -28,7 +29,7 @@ public class QQMessagePublisher {
     public void subscribeGroupMessage() {
         eventChannel.exceptionHandler(createHandler("qq.group.message"))
                 .subscribe(GroupMessageEvent.class, messageEvent -> {
-                    if (messageEvent.getSender().getId() == 80000000)
+                    if (messageEvent.getSender() instanceof AnonymousMember)
                         return ListeningStatus.LISTENING;
                     OnGroupMessageEvent event = new OnGroupMessageEvent(environment);
                     event.group = new QQGroup(environment, messageEvent.getGroup());

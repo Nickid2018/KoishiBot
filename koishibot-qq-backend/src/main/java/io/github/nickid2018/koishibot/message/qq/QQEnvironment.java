@@ -36,6 +36,8 @@ public class QQEnvironment extends Environment {
     public User getQQUser(String id, boolean isStranger, boolean findInGroup) {
         if (!id.startsWith("qq.user"))
             return null;
+        if (id.equals("qq.user-anonymous"))
+            return null;
         long idLong = Long.parseLong(id.substring(7));
         if (findInGroup)
             for (Group group : bot.getGroups()) {
@@ -56,9 +58,13 @@ public class QQEnvironment extends Environment {
     }
 
     public UserInfo getUser(String id, boolean isStranger, boolean findInGroup) {
-        return id.startsWith("qq.user") ?
-                new QQUser(this, getQQUser(id, isStranger, findInGroup), isStranger) :
-                null;
+        User user = getQQUser(id, isStranger, findInGroup);
+        return user != null ?
+                new QQUser(this, user, isStranger) :
+                new QQUser(this) {{
+                    userId = "qq.user-anonymous";
+                    name = "Anonymous";
+                }};
     }
 
     @Override

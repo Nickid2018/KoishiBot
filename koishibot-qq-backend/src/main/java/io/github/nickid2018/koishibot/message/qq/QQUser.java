@@ -9,7 +9,6 @@ import net.mamoe.mirai.contact.Stranger;
 import net.mamoe.mirai.contact.User;
 
 public class QQUser extends UserInfo {
-
     private User user;
 
     public QQUser(QQEnvironment environment) {
@@ -19,8 +18,14 @@ public class QQUser extends UserInfo {
     public QQUser(QQEnvironment environment, User user, boolean stranger) {
         super(environment);
         isStranger = stranger || user instanceof Stranger;
-        userId = "qq.user" + user.getId();
-        name = user.getNick();
+
+        if (user != null) {
+            userId = "qq.user" + user.getId();
+            name = user.getNick();
+        } else {
+            userId = "qq.user-anonymous";
+            name = "Anonymous";
+        }
 
         this.user = user;
     }
@@ -32,6 +37,8 @@ public class QQUser extends UserInfo {
     public static void nudge(QQUser user, ContactInfo contact) {
         if (!((QQEnvironment) user.env).isNudgeEnabled())
             return;
+        if (user.user == null)
+            return;
         if (contact instanceof QQUser)
             user.user.nudge().sendTo(((QQUser) contact).getUser());
         else
@@ -39,6 +46,8 @@ public class QQUser extends UserInfo {
     }
 
     public static String getNameInGroup(QQUser user, GroupInfo group) {
+        if (user.user == null)
+            return user.name;
         if (group instanceof QQGroup qq) {
             Member member = qq.getGroup().getMembers().get(user.user.getId());
             String name = member == null ? null : member.getNameCard();
@@ -50,6 +59,8 @@ public class QQUser extends UserInfo {
     @Override
     public void read(ByteData buf) {
         super.read(buf);
+        if (userId.equals("qq.user-anonymous"))
+            return;
         user = ((QQEnvironment) env).getQQUser(userId, isStranger, true);
     }
 }

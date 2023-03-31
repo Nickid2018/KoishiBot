@@ -8,6 +8,7 @@ import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
 import net.mamoe.mirai.message.data.MessageUtils;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class QQChain extends ChainMessage implements QQMessage {
@@ -38,6 +39,7 @@ public class QQChain extends ChainMessage implements QQMessage {
                 Stream.of(messages)
                         .filter(m -> m instanceof QQMessage)
                         .map(m -> ((QQMessage) m).getMessage())
+                        .filter(Objects::nonNull)
                         .toArray(Message[]::new)
         );
     }

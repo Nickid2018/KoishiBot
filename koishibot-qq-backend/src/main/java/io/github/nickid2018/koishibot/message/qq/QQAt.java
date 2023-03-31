@@ -2,9 +2,10 @@ package io.github.nickid2018.koishibot.message.qq;
 
 import io.github.nickid2018.koishibot.message.api.AtMessage;
 import io.github.nickid2018.koishibot.network.ByteData;
+import net.mamoe.mirai.contact.User;
 import net.mamoe.mirai.message.data.At;
 
-public class QQAt extends AtMessage {
+public class QQAt extends AtMessage implements QQMessage {
 
     private At at;
 
@@ -25,6 +26,9 @@ public class QQAt extends AtMessage {
     @Override
     public void read(ByteData buf) {
         super.read(buf);
-        at = new At(((QQUser) user).getUser().getId());
+        User user = ((QQUser) this.user).getUser();
+        if (user == null)
+            return;
+        at = new At(user.getId());
     }
 }
