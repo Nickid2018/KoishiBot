@@ -55,6 +55,7 @@ public class StatusCheck {
             if (!allLibs.contains(backend))
                 needUpdateLibs.add(backend);
         }
+        needUpdateCores.addAll(needUpdateLibs);
         return new Pair<>(needUpdateCores, needUpdateLibs);
     }
 
