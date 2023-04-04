@@ -1,10 +1,12 @@
 package io.github.nickid2018.koishibot.module.mc.chat;
 
 import com.google.gson.JsonObject;
+import io.github.nickid2018.koishibot.core.ErrorRecord;
 import io.github.nickid2018.koishibot.message.Environments;
 import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.message.api.UserInfo;
 import io.github.nickid2018.koishibot.module.KoishiBotModule;
+import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.DataReader;
 import io.github.nickid2018.koishibot.util.GroupDataReader;
 import org.slf4j.Logger;
@@ -30,7 +32,7 @@ public class MCChatBridgeModule extends KoishiBotModule {
     private final Map<InetSocketAddress, ChatBridgeProvider> providerMap = new HashMap<>();
     private final Map<String, Set<ChatBridgeProvider>> groupMap = new HashMap<>();
 
-    public MCChatBridgeModule()  {
+    public MCChatBridgeModule() {
         super("mcchat", List.of(new MCChatBridgeServerResolver(), new MCChatBridgeResolver()), true);
     }
 
@@ -101,17 +103,24 @@ public class MCChatBridgeModule extends KoishiBotModule {
         groupChatBridges.loadAll();
 
         settings = new DataReader<>(new File(groupChatBridges.getFolder(), "chat.settings"), HashSet::new);
-        settings.getData().forEach(chatBridgeSetting -> {
-            ChatBridgeProvider provider = switch (chatBridgeSetting.type) {
-                case DIRECT -> new DirectChatBridgeProvider(chatBridgeSetting.remote, chatBridgeSetting.password);
-                case INDIRECT -> new IndirectChatBridgeProvider(chatBridgeSetting.remote);
-            };
-            provider.receiveMessage(this::receiveMessage);
-            providerMap.put(chatBridgeSetting.remote, provider);
-        });
 
-        groupChatBridges.getGroups().forEach(group -> groupChatBridges.getData(group).forEach(
-                addr -> groupMap.computeIfAbsent(group, s -> new HashSet<>()).add(providerMap.get(addr))));
+        AsyncUtil.execute(() -> {
+            try {
+                settings.getData().forEach(chatBridgeSetting -> {
+                    ChatBridgeProvider provider = switch (chatBridgeSetting.type) {
+                        case DIRECT -> new DirectChatBridgeProvider(chatBridgeSetting.remote, chatBridgeSetting.password);
+                        case INDIRECT -> new IndirectChatBridgeProvider(chatBridgeSetting.remote);
+                    };
+                    provider.receiveMessage(this::receiveMessage);
+                    providerMap.put(chatBridgeSetting.remote, provider);
+                });
+            } catch (IOException e) {
+                ErrorRecord.enqueueError("mcchat.load", e);
+            }
+
+            groupChatBridges.getGroups().forEach(group -> groupChatBridges.getData(group).forEach(
+                    addr -> groupMap.computeIfAbsent(group, s -> new HashSet<>()).add(providerMap.get(addr))));
+        });
 
         INSTANCE = this;
     }
