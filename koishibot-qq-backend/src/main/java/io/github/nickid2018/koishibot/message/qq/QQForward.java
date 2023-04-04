@@ -38,7 +38,7 @@ public class QQForward extends ForwardMessage implements QQMessage {
         ForwardMessageBuilder builder = new ForwardMessageBuilder(((QQEnvironment) env).getBot().getAsFriend());
         for (MessageEntry entry : entries) {
             QQMessageEntry qq = (QQMessageEntry) entry;
-            builder.add(Long.parseLong(qq.id.substring(7)), qq.name, ((QQMessage) qq).getMessage(), qq.time);
+            builder.add(Long.parseLong(qq.id.substring(7)), qq.name, ((QQMessage) qq.message).getMessage(), qq.time);
         }
         forward = builder.build();
     }
