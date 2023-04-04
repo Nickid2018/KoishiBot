@@ -29,8 +29,7 @@ public class CalcResolver extends MessageResolver {
                     CalcModule.getContext().parse(key).calculate(CalcModule.DEFAULT_VARIABLES).toStdNumber());
             try {
                 double number = Objects.requireNonNull(future).get(5, TimeUnit.SECONDS);
-                environment.getMessageSender().sendMessage(context, environment.newText(key + " = " +
-                        (number > 10000 ? "%.2f".formatted(number) : number)));
+                environment.getMessageSender().sendMessage(context, environment.newText(key + " = " + number));
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof StatementParseException)
                     environment.getMessageSender().sendMessage(context, environment.newText("表达式错误：" + e.getCause().getMessage()));
