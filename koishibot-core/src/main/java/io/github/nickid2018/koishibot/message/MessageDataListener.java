@@ -6,7 +6,6 @@ import io.github.nickid2018.koishibot.message.event.*;
 import io.github.nickid2018.koishibot.message.network.DataPacketListener;
 import io.github.nickid2018.koishibot.network.Connection;
 import io.github.nickid2018.koishibot.network.SerializableData;
-import io.github.nickid2018.koishibot.util.LogUtils;
 
 public class MessageDataListener extends DataPacketListener {
 
@@ -28,8 +27,7 @@ public class MessageDataListener extends DataPacketListener {
     @Override
     public void receivePacket(Connection connection, SerializableData packet) {
         DelegateEnvironment env = Environments.getEnvironment(connection);
-        LogUtils.info(LogUtils.FontColor.GREEN, BotStart.LOGGER, "Received packet {} from {}",
-                packet.getClass().getSimpleName(), env.getEnvironmentName());
+        BotStart.LOGGER.debug("Received packet {} from {}", packet.getClass().getSimpleName(), env.getEnvironmentName());
 
         if (packet instanceof OnGroupMessageEvent groupMessageEvent)
             env.getMessageManager().onGroupMessage(groupMessageEvent.group, groupMessageEvent.user,
