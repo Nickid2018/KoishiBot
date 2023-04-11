@@ -26,6 +26,8 @@ import java.nio.charset.StandardCharsets;
 @ResolverName("latex")
 @Syntax(syntax = "~latex [LaTeX表达式]", help = "渲染LaTeX公式")
 @Syntax(syntax = "~latex-a [LaTeX表达式]", help = "渲染LaTeX公式，使用透明背景")
+@Syntax(syntax = "~latex-i [LaTeX表达式]", help = "渲染行内LaTeX公式")
+@Syntax(syntax = "~latex-ai [LaTeX表达式]", help = "渲染行内LaTeX公式，使用透明背景")
 public class LaTeXResolver extends MessageResolver {
 
     private final Transcoder transcoder;
@@ -46,13 +48,22 @@ public class LaTeXResolver extends MessageResolver {
             String latex = key;
             String[] split = latex.split(" ", 2);
             Transcoder use = transcoder;
+            boolean inline = false;
             if (split[0].equalsIgnoreCase("-a") && split.length == 2) {
                 use = alphaTranscoder;
                 latex = split[1];
+            } else if (split[0].equalsIgnoreCase("-i") && split.length == 2) {
+                latex = split[1];
+                inline = true;
+            } else if (split[0].equalsIgnoreCase("-ai") && split.length == 2) {
+                use = alphaTranscoder;
+                latex = split[1];
+                inline = true;
             }
             latex = latex.trim();
             try {
-                String data = WebUtil.fetchDataInText(new HttpGet("https://latex2img.i207m.top/?from=" + WebUtil.encode(latex)));
+                String data = WebUtil.fetchDataInText(new HttpGet(
+                        (inline ? "https://math.vercel.app?inline=" : "https://math.vercel.app?from=") + WebUtil.encode(latex)));
                 Document document = Jsoup.parse(data);
                 Elements errors = document.getElementsByAttribute("data-mjx-error");
                 if (errors.size() > 0)

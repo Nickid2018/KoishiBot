@@ -46,13 +46,15 @@ public class QRCodeResolver extends MessageResolver {
         key = key.trim();
         String[] data = key.split(" ", 2);
         switch (data[0].toLowerCase(Locale.ROOT)) {
-            case "encode":
+            case "encode" -> {
                 if (data.length != 2)
                     return false;
                 encode(data[1], context, environment);
                 return true;
-            case "decode":
+            }
+            case "decode" -> {
                 return decode(context, environment);
+            }
         }
         return false;
     }
@@ -61,7 +63,7 @@ public class QRCodeResolver extends MessageResolver {
         AsyncUtil.execute(() -> {
             try {
                 BitMatrix matrix = WRITER.encode(message, BarcodeFormat.QR_CODE, 200, 200, HINTS);
-                BufferedImage image = new BufferedImage(matrix.getWidth(), matrix.getHeight(), BufferedImage.TYPE_INT_BGR);
+                BufferedImage image = new BufferedImage(matrix.getWidth(), matrix.getHeight(), BufferedImage.TYPE_BYTE_GRAY);
                 for (int x = 0; x < matrix.getWidth(); x++)
                     for (int y = 0; y < matrix.getHeight(); y++)
                         if (matrix.get(x, y))
