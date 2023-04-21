@@ -69,13 +69,13 @@ public class BaiduSensitiveFilter extends SensitiveFilter {
                         String keyword = wordHitObj.get("keyword").getAsString();
                         JsonArray positions = wordHitObj.getAsJsonArray("positions");
                         if (positions.size() == 0)
-                            text = "*".repeat(keyword.length()) + text.substring(keyword.length());
+                            text = "*filtered*" + text.substring(keyword.length());
                         else {
                             for (JsonElement position : positions) {
                                 JsonArray positionObj = position.getAsJsonArray();
                                 int start = positionObj.get(0).getAsInt();
                                 int end = positionObj.get(1).getAsInt();
-                                text = text.substring(0, start) + "*".repeat(end - start) + text.substring(end);
+                                text = text.substring(0, start) + "*filtered*"+ text.substring(end + 1);
                             }
                         }
                     }

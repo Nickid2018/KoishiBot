@@ -7,11 +7,14 @@ import io.github.nickid2018.koishibot.message.DelegateEnvironment;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.ResolverName;
 import io.github.nickid2018.koishibot.message.Syntax;
-import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.message.api.AbstractMessage;
+import io.github.nickid2018.koishibot.message.api.ChainMessage;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.message.api.TextMessage;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.JsonUtil;
-import io.github.nickid2018.koishibot.util.func.ConsumerNE;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
+import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.hc.client5.http.classic.methods.*;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 
@@ -175,7 +178,7 @@ public class GitHubRepoResolver extends MessageResolver {
     }
 
     private void doAuthenticatedOperation(HttpUriRequest request, DelegateEnvironment environment, MessageContext context,
-                                          ConsumerNE<HttpUriRequest> requestConsumer, AbstractMessage success, String module,
+                                          FailableConsumer<HttpUriRequest, Exception> requestConsumer, AbstractMessage success, String module,
                                           String... scopes) {
         GitHubModule.INSTANCE.getAuthenticator().authenticateOperation(token -> {
             GitHubModule.INSTANCE.getAuthenticator().acceptGitHubJSON(request, token);

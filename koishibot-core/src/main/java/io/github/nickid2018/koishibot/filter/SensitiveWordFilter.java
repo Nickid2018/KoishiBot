@@ -1,6 +1,8 @@
 package io.github.nickid2018.koishibot.filter;
 
 import io.github.nickid2018.koishibot.util.value.MutableBoolean;
+import it.unimi.dsi.fastutil.chars.CharArrayList;
+import it.unimi.dsi.fastutil.chars.CharList;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -21,6 +23,7 @@ public final class SensitiveWordFilter extends SensitiveFilter {
         if (SINGLE_CHAR_LIST.size() == 0)
             return text;
         char[] chars = text.toCharArray();
+        CharList filteredChars = new CharArrayList();
         int matchSize;
         boolean matchFlag;
         for (int offset = 0; offset < chars.length; offset++) {
@@ -47,20 +50,15 @@ public final class SensitiveWordFilter extends SensitiveFilter {
                 if (single != null && single.next == null)
                     matchFlag = true;
                 if (matchFlag) {
-                    while (offset < matchSize) {
-                        if (skip(chars[offset])) {
-                            offset++;
-                            continue;
-                        }
-                        chars[offset] = REPLACE_CHARACTER;
-                        filtered.setValue(true);
-                        offset++;
-                    }
-                    offset--;
-                }
-            }
+                    offset = matchSize - 1;
+                    filteredChars.addElements(filteredChars.size(), "*filtered*".toCharArray());
+                    filtered.setValue(true);
+                } else
+                    filteredChars.add(c);
+            } else
+                filteredChars.add(c);
         }
-        return new String(chars);
+        return new String(filteredChars.toCharArray());
     }
 
     public static void loadWordFromFile(String path) throws IOException {

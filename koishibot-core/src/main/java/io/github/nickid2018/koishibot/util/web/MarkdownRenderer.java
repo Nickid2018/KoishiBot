@@ -2,7 +2,7 @@ package io.github.nickid2018.koishibot.util.web;
 
 import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
-import io.github.nickid2018.koishibot.util.func.ConsumerNE;
+import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.openqa.selenium.By;
@@ -40,7 +40,7 @@ public class MarkdownRenderer {
             </html>
             """;
 
-    public static void render(String markdown, ConsumerNE<File> additional, Consumer<Exception> exception) throws IOException {
+    public static void render(String markdown, FailableConsumer<File, Exception> additional, Consumer<Exception> exception) throws IOException {
         File tmp = TempFileSystem.createTmpFileAndCreate("md", "png");
         render(markdown, tmp, () -> {
             additional.accept(tmp);
