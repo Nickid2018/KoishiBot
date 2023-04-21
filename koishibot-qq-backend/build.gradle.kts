@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     api(project(":koishibot-message-api"))
-    api("net.mamoe:mirai-core:2.15.0-dev-52")
+    api("net.mamoe:mirai-core:2.15.0-dev-66")
 
     // Logging
     api("org.apache.logging.log4j:log4j-api:2.19.0")
