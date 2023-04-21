@@ -14,6 +14,7 @@ import java.util.List;
 
 // CAN'T BE TESTED IN PRODUCTION ENVIRONMENT(aka IDE)!
 // PROCESS CAN'T RUN WITHOUT AN ACTUAL CONSOLE, EVEN THOUGH IDE CONSOLES!
+// Encoder use new library?
 public class FormatTransformer {
 
     public static final Logger TRANSFORMER_LOGGER = LoggerFactory.getLogger("Format Transformer");
