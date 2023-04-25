@@ -47,7 +47,7 @@ public class UnicodeResolver extends MessageResolver {
                     Document doc = Jsoup.parse(WebUtil.fetchDataInText(unicodeTable));
                     Element element = doc.getElementsByClass("symbol-tabs__tabs-content").get(0);
                     Elements elements = element.children();
-                    if (elements.size() != 3) {
+                    if (elements.size() < 3) {
                         environment.getMessageSender().sendMessage(context, environment.newText("找不到该字符的信息！"));
                     } else {
                         Element techInfo = elements.get(0);
