@@ -1,5 +1,6 @@
 package io.github.nickid2018.koishibot.resolver;
 
+import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.message.DelegateEnvironment;
 import io.github.nickid2018.koishibot.message.MessageResolver;
 import io.github.nickid2018.koishibot.message.ResolverName;
@@ -13,15 +14,16 @@ import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.ImageTranscoder;
 import org.apache.batik.transcoder.image.PNGTranscoder;
-import org.apache.commons.io.input.ReaderInputStream;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.awt.*;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
 
 @ResolverName("latex")
 @Syntax(syntax = "~latex [LaTeX表达式]", help = "渲染LaTeX公式")
@@ -68,8 +70,8 @@ public class LaTeXResolver extends MessageResolver {
                 Elements errors = document.getElementsByAttribute("data-mjx-error");
                 if (errors.size() > 0)
                     throw new IOException(errors.get(0).attr("data-mjx-error"));
-                TranscoderInput input = new TranscoderInput(new ReaderInputStream(new StringReader(data), StandardCharsets.UTF_8));
-                File temp = File.createTempFile("latex", ".png");
+                TranscoderInput input = new TranscoderInput(new StringReader(data));
+                File temp = TempFileSystem.createTmpFile("latex", ".png");
                 try (FileOutputStream os = new FileOutputStream(temp)) {
                     TranscoderOutput output = new TranscoderOutput(os);
                     use.transcode(input, output);

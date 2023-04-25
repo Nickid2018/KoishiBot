@@ -59,6 +59,7 @@ public class ModuleManager {
         addModule(new TranslateModule());
         addModule(new PlainModule("urban", true, NOP, NOP, "城市字典模块", new UrbanDictResolver()));
         addModule(new PlainModule("latex", true, NOP, NOP, "LaTeX渲染模块", new LaTeXResolver()));
+        addModule(new PlainModule("unicode", true, NOP, NOP, "Unicode模块", new UnicodeResolver()));
         addModule(new PlainModule("nbnhhsh", true, NOP, NOP, "NBNHHSH模块", new NbnhhshResolver()));
         addModule(new PlainModule("qrcode", true, NOP, NOP, "二维码模块", new QRCodeResolver()));
         addModule(new PlainModule("mojira", true, NOP, NOP, "Mojira漏洞追踪器模块", new BugTrackerResolver()));
