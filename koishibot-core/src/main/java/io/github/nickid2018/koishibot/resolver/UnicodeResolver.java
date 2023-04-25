@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.message.DelegateEnvironment;
 import io.github.nickid2018.koishibot.message.MessageResolver;
+import io.github.nickid2018.koishibot.message.ResolverName;
 import io.github.nickid2018.koishibot.message.Syntax;
 import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
@@ -25,6 +26,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.StringReader;
 
+@ResolverName("unicode")
 @Syntax(syntax = "~unicode [Unicode字符编码，16进制]", help = "获取Unicode字符的信息")
 public class UnicodeResolver extends MessageResolver {
 
