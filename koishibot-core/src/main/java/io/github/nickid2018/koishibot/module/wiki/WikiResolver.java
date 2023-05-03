@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 
 @ResolverName("wiki")
 @Syntax(syntax = "[[查询页面]]", help = "查询wiki页面", rem = "允许使用跨wiki和章节，强制禁止进行跨wiki需要再加一层中括号，特殊页面查询如下")
+@Syntax(syntax = "{{查询模板}}", help = "查询wiki模板", rem = "允许使用跨wiki")
 @Syntax(syntax = "~rd", help = "随机页面")
 @Syntax(syntax = "~iw", help = "查看跨wiki数据")
 @Syntax(syntax = "~search [查询内容]", help = "查询wiki页面")
@@ -19,24 +20,33 @@ import java.util.regex.Pattern;
 public class WikiResolver extends MessageResolver {
 
     public static final Pattern WIKI_PATTERN = Pattern.compile("\\[{2,3}.+?]{2,3}+");
+    public static final Pattern WIKI_TEMPLATE_PATTERN = Pattern.compile("\\{\\{.+?}}");
 
     public WikiResolver() {
-        super(WIKI_PATTERN);
+        super(WIKI_PATTERN, WIKI_TEMPLATE_PATTERN);
     }
 
     @Override
     public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, DelegateEnvironment environment) {
         key = key.substring(2, key.length() - 2);
-        String finalKey = key;
+        boolean isTemplate = resolvedArguments == WIKI_TEMPLATE_PATTERN;
+        String finalKey = isTemplate ? key : key.substring(0, key.indexOf('|') < 0 ? key.length() : key.indexOf('|'));
         AsyncUtil.execute(() -> {
             String[] splits = finalKey.split(":", 2);
             try {
                 if (splits.length == 1 || !WikiInfo.SUPPORT_WIKIS.containsKey(splits[0].toLowerCase(Locale.ROOT)))
                     requestWikiPage(WikiInfo.SUPPORT_WIKIS.get(WikiInfo.BASE_WIKI), null,
-                            finalKey, context, null, environment);
-                else
+                            isTemplate ? "Template:" + finalKey : finalKey, context, null, environment);
+                else {
+                    int lastNamespace = splits[1].lastIndexOf(':');
+                    String query;
+                    if (lastNamespace >= 0)
+                        query = splits[1].substring(0, lastNamespace + 1) + "Template:" + splits[1].substring(lastNamespace + 1);
+                    else
+                        query = "Template:" + splits[1];
                     requestWikiPage(WikiInfo.SUPPORT_WIKIS.get(splits[0].toLowerCase(Locale.ROOT)), splits[0].toLowerCase(Locale.ROOT),
-                            splits[1], context, null, environment);
+                            query, context, null, environment);
+                }
             } catch (Exception e) {
                 environment.getMessageSender().onError(e, "wiki", context, true);
             }
