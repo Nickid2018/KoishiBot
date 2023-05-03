@@ -2,7 +2,10 @@ package io.github.nickid2018.koishibot.module.wiki;
 
 import io.github.nickid2018.koishibot.core.TempFileSystem;
 import io.github.nickid2018.koishibot.message.*;
-import io.github.nickid2018.koishibot.message.api.*;
+import io.github.nickid2018.koishibot.message.api.AbstractMessage;
+import io.github.nickid2018.koishibot.message.api.ChainMessage;
+import io.github.nickid2018.koishibot.message.api.MessageContext;
+import io.github.nickid2018.koishibot.message.api.TextMessage;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.koishibot.util.web.WebUtil;
 
@@ -39,11 +42,12 @@ public class WikiResolver extends MessageResolver {
                             isTemplate ? "Template:" + finalKey : finalKey, isTemplate, context, null, environment);
                 else {
                     int lastNamespace = splits[1].lastIndexOf(':');
-                    String query;
-                    if (lastNamespace >= 0)
-                        query = splits[1].substring(0, lastNamespace + 1) + "Template:" + splits[1].substring(lastNamespace + 1);
-                    else
-                        query = "Template:" + splits[1];
+                    String query = splits[1];
+                    if (isTemplate)
+                        if (lastNamespace >= 0)
+                            query = splits[1].substring(0, lastNamespace + 1) + "Template:" + splits[1].substring(lastNamespace + 1);
+                        else
+                            query = "Template:" + splits[1];
                     requestWikiPage(WikiInfo.SUPPORT_WIKIS.get(splits[0].toLowerCase(Locale.ROOT)), splits[0].toLowerCase(Locale.ROOT),
                             query, isTemplate, context, null, environment);
                 }
@@ -56,7 +60,7 @@ public class WikiResolver extends MessageResolver {
 
     private static void requestWikiPage(
             WikiInfo wiki, String namespace, String title, boolean takeFullPage,
-                MessageContext context, String searchTitle, DelegateEnvironment environment)
+            MessageContext context, String searchTitle, DelegateEnvironment environment)
             throws Exception {
         PageInfo page = wiki.parsePageInfo(title, 0, namespace, environment, takeFullPage);
         StringBuilder data = new StringBuilder();
@@ -138,7 +142,7 @@ public class WikiResolver extends MessageResolver {
             boolean shouldHide = false;
             if (page.url != null)
                 for (String prefix : WebUtil.MIRROR.values())
-                   if (page.url.contains(prefix)) {
+                    if (page.url.contains(prefix)) {
                         shouldHide = true;
                         break;
                     }
@@ -151,7 +155,7 @@ public class WikiResolver extends MessageResolver {
 
             if (!st.isEmpty())
                 environment.getMessageSender().sendMessageRecallable(context, environment.newChain(
-                      environment.newQuote(context.message()), environment.newText(st)
+                        environment.newQuote(context.message()), environment.newText(st)
                 ));
             if (page.imageURL != null)
                 environment.getMessageSender().sendMessageRecallable(context, environment.newImage(page.imageURL));
