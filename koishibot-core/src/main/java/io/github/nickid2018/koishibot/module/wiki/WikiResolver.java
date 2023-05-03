@@ -30,7 +30,7 @@ public class WikiResolver extends MessageResolver {
     public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, DelegateEnvironment environment) {
         key = key.substring(2, key.length() - 2);
         boolean isTemplate = resolvedArguments == WIKI_TEMPLATE_PATTERN;
-        String finalKey = isTemplate ? key : key.substring(0, key.indexOf('|') < 0 ? key.length() : key.indexOf('|'));
+        String finalKey = key.substring(0, key.indexOf('|') < 0 ? key.length() : key.indexOf('|'));
         AsyncUtil.execute(() -> {
             String[] splits = finalKey.split(":", 2);
             try {
