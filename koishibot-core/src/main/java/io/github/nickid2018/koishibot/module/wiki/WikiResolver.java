@@ -36,7 +36,7 @@ public class WikiResolver extends MessageResolver {
             try {
                 if (splits.length == 1 || !WikiInfo.SUPPORT_WIKIS.containsKey(splits[0].toLowerCase(Locale.ROOT)))
                     requestWikiPage(WikiInfo.SUPPORT_WIKIS.get(WikiInfo.BASE_WIKI), null,
-                            isTemplate ? "Template:" + finalKey : finalKey, context, null, environment);
+                            isTemplate ? "Template:" + finalKey : finalKey, isTemplate, context, null, environment);
                 else {
                     int lastNamespace = splits[1].lastIndexOf(':');
                     String query;
@@ -45,7 +45,7 @@ public class WikiResolver extends MessageResolver {
                     else
                         query = "Template:" + splits[1];
                     requestWikiPage(WikiInfo.SUPPORT_WIKIS.get(splits[0].toLowerCase(Locale.ROOT)), splits[0].toLowerCase(Locale.ROOT),
-                            query, context, null, environment);
+                            query, isTemplate, context, null, environment);
                 }
             } catch (Exception e) {
                 environment.getMessageSender().onError(e, "wiki", context, true);
@@ -55,9 +55,10 @@ public class WikiResolver extends MessageResolver {
     }
 
     private static void requestWikiPage(
-            WikiInfo wiki, String namespace, String title, MessageContext context, String searchTitle, DelegateEnvironment environment)
+            WikiInfo wiki, String namespace, String title, boolean takeFullPage,
+                MessageContext context, String searchTitle, DelegateEnvironment environment)
             throws Exception {
-        PageInfo page = wiki.parsePageInfo(title, 0, namespace, environment);
+        PageInfo page = wiki.parsePageInfo(title, 0, namespace, environment, takeFullPage);
         StringBuilder data = new StringBuilder();
         if (page.isSearched) {
             if (page.title != null) {
@@ -82,7 +83,7 @@ public class WikiResolver extends MessageResolver {
                             }
                         }
                         if (accept)
-                            requestWikiPage(page.info, page.prefix, page.title, context,
+                            requestWikiPage(page.info, page.prefix, page.title, takeFullPage, context,
                                     (namespace == null ? "" : namespace + ":") + title, environment);
                     } catch (Exception e) {
                         environment.getMessageSender().onError(e, "wiki.re_search", context, true);
@@ -116,7 +117,7 @@ public class WikiResolver extends MessageResolver {
                     int exact = Integer.parseInt(number);
                     if (exact >= page.searchTitles.size() || exact < 0)
                         return;
-                    requestWikiPage(page.info, page.prefix, page.searchTitles.get(exact), context,
+                    requestWikiPage(page.info, page.prefix, page.searchTitles.get(exact), takeFullPage, context,
                             (namespace == null ? "" : namespace + ":") + title, environment);
                 } catch (NumberFormatException ignored) {
                 } catch (Exception e) {

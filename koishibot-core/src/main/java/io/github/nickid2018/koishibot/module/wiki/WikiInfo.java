@@ -187,7 +187,7 @@ public class WikiInfo {
         }
     }
 
-    public PageInfo parsePageInfo(String title, int pageID, String prefix, DelegateEnvironment environment) throws Exception {
+    public PageInfo parsePageInfo(String title, int pageID, String prefix, DelegateEnvironment environment, boolean takeFullPage) throws Exception {
         if (title != null && title.isEmpty())
             throw new IOException("无效的wiki查询");
 
@@ -220,7 +220,7 @@ public class WikiInfo {
             if (interWikiMap.containsKey(namespace)) {
                 WikiInfo skip = STORED_WIKI_INFO.get(interWikiMap.get(namespace));
                 return skip.parsePageInfo(title.split(":", 2)[1], 0,
-                        (prefix == null ? "" : prefix + ":") + namespace, environment);
+                        (prefix == null ? "" : prefix + ":") + namespace, environment, takeFullPage);
             }
         }
 
@@ -229,7 +229,7 @@ public class WikiInfo {
         if (title != null && title.equalsIgnoreCase("~iw"))
             return interwikiList();
         if (title != null && title.toLowerCase(Locale.ROOT).startsWith("~page"))
-            return parsePageInfo(null, Integer.parseInt(title.split(" ", 2)[1]), prefix, environment);
+            return parsePageInfo(null, Integer.parseInt(title.split(" ", 2)[1]), prefix, environment, takeFullPage);
         if (title != null && title.toLowerCase(Locale.ROOT).startsWith("~search")) {
             String[] split = title.split(" ", 2);
             if (split.length == 2)
@@ -237,8 +237,7 @@ public class WikiInfo {
         }
 
         String section = null;
-        boolean takeFullPage = false;
-        if (title != null && title.contains("#")) {
+        if (title != null && title.contains("#") && !takeFullPage) {
             String[] titleSplit = title.split("#", 2);
             title = titleSplit[0];
             if (titleSplit.length == 1 || titleSplit[1].isEmpty())
