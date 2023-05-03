@@ -342,7 +342,7 @@ public class WikiInfo {
     private PageInfo random(String prefix, DelegateEnvironment environment) throws Exception {
         JsonObject data = WebUtil.fetchDataInJson(getWithHeader(url + WIKI_RANDOM)).getAsJsonObject();
         PageInfo info = parsePageInfo(Objects.requireNonNull(
-                JsonUtil.getStringInPathOrNull(data, "query.random.0.title")), 0, prefix, environment);
+                JsonUtil.getStringInPathOrNull(data, "query.random.0.title")), 0, prefix, environment, false);
         info.isRandom = true;
         return info;
     }
