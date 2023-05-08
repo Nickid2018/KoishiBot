@@ -13,6 +13,7 @@ import io.github.nickid2018.koishibot.util.web.WebUtil;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.utils.Base64;
 
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 @ResolverName("mc-skin")
@@ -44,9 +45,11 @@ public class MCSkinResolver extends MessageResolver {
                         Base64.decodeBase64(encodedValue), StandardCharsets.UTF_8)).getAsJsonObject();
                 JsonObject skin = JsonUtil.getDataInPath(decoded, "textures.SKIN", JsonObject.class).orElseThrow();
                 String textureURL = JsonUtil.getStringOrNull(skin, "url");
-                environment.getMessageSender().sendMessage(context, environment.newText(
-                        "玩家" + user + "\n皮肤URL: " + textureURL + "\n"
-                                + (skin.has("metadata") ? "Alex" : "Steve") + "模型"));
+                environment.getMessageSender().sendMessage(context, environment.newChain(
+                        environment.newText("玩家" + user + "\n皮肤URL: " + textureURL + "\n"
+                                + (skin.has("metadata") ? "Alex" : "Steve") + "模型"),
+                        environment.newImage(new URL("https://nmsr.nickac.dev/fullbodyiso/" + uuid))
+                ));
             } catch (Exception e) {
                 environment.getMessageSender().onError(e, "mc.skin", context, false);
             }

@@ -71,8 +71,4 @@ public record MCBEServerPing(InetSocketAddress address) {
 
         return data;
     }
-
-    public static void main(String[] args) throws IOException {
-        System.out.println(new MCBEServerPing(new InetSocketAddress("127.0.0.1", 50061)).fetchData());
-    }
 }
