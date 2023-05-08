@@ -23,7 +23,7 @@ public class MCVersionChecker {
 
     public MCVersionChecker(MCModule module) {
         this.module = module;
-        versionReader = new DataReader<>(new File("mcversion.dat"), () -> "");
+        versionReader = new DataReader<>(new File("data/mcversion.dat"), () -> "");
     }
 
     public void start() {
