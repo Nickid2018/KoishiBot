@@ -45,6 +45,11 @@ public class DataReader<E> {
         }
     }
 
+    public void setData(E data) throws IOException {
+        this.data = data;
+        saveData();
+    }
+
     public void saveData() throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
             oos.writeObject(data);

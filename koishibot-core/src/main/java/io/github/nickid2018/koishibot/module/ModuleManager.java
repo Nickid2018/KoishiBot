@@ -7,8 +7,7 @@ import io.github.nickid2018.koishibot.message.api.GroupInfo;
 import io.github.nickid2018.koishibot.module.calc.CalcModule;
 import io.github.nickid2018.koishibot.module.eval.EvalModule;
 import io.github.nickid2018.koishibot.module.github.GitHubModule;
-import io.github.nickid2018.koishibot.module.mc.MCServerResolver;
-import io.github.nickid2018.koishibot.module.mc.MCSkinResolver;
+import io.github.nickid2018.koishibot.module.mc.MCModule;
 import io.github.nickid2018.koishibot.module.mc.chat.MCChatBridgeModule;
 import io.github.nickid2018.koishibot.module.music.MusicInfoResolver;
 import io.github.nickid2018.koishibot.module.music.MusicResolver;
@@ -64,7 +63,7 @@ public class ModuleManager {
         addModule(new PlainModule("qrcode", true, NOP, NOP, "二维码模块", new QRCodeResolver()));
         addModule(new PlainModule("mojira", true, NOP, NOP, "Mojira漏洞追踪器模块", new BugTrackerResolver()));
         addModule(new PlainModule("mod", true, NOP, NOP, "模组查询模块", new CurseForgeResolver(), new ModrinthResolver()));
-        addModule(new PlainModule("mc", true, NOP, NOP, "MC模块", new MCServerResolver(), new MCSkinResolver()));
+        addModule(new MCModule());
         addModule(new WakaTimeModule());
         addModule(new MCChatBridgeModule());
         addModule(new GitHubModule());
