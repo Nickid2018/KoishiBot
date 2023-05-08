@@ -19,7 +19,7 @@ public class MCModule extends KoishiBotModule {
 
     public MCModule() {
         super("mc", List.of(
-                new MCServerResolver(), new MCSkinResolver()
+                new MCServerResolver(), new MCSkinResolver(), new MCSubscribeResolver()
         ), true);
         INSTANCE = this;
     }
