@@ -23,21 +23,16 @@ public abstract class AbstractMessage implements SerializableData {
     }
 
     public void send(UserInfo contact) {
-        SendMessageQuery sendQuery = new SendMessageQuery(env);
-        sendQuery.target = Either.left(contact);
-        sendQuery.message = this;
-        env.getListener().queryData(env.getConnection(), sendQuery);
-        try {
-            byte[] data = env.getListener().queryData(env.getConnection(), sendQuery).get(20, TimeUnit.SECONDS);
-            source = SendMessageQuery.fromBytes(env.getConnection(), data);
-        } catch (Exception e) {
-            LogUtils.error(DataPacketListener.LOGGER, "Failed to send message", e);
-        }
+        sendInternal(Either.left(contact));
     }
 
     public void send(GroupInfo group) {
+        sendInternal(Either.right(group));
+    }
+
+    private void sendInternal(Either<UserInfo, GroupInfo> target) {
         SendMessageQuery sendQuery = new SendMessageQuery(env);
-        sendQuery.target = Either.right(group);
+        sendQuery.target = target;
         sendQuery.message = this;
         try {
             byte[] data = env.getListener().queryData(env.getConnection(), sendQuery).get(20, TimeUnit.SECONDS);
