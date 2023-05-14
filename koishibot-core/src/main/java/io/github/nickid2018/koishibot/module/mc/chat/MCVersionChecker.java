@@ -77,7 +77,7 @@ public class MCVersionChecker {
         }
         String send = builder.toString();
         module.subscribedGroups.getGroups().stream()
-                .filter(group -> module.subscribedGroups.getData(group).contains("mc-version"))
+                .filter(group -> module.subscribedGroups.getData(group).contains("version"))
                 .forEach(group -> Environments.getEnvironments().stream()
                         .filter(e -> e.getGroup(group) != null)
                         .findFirst()
