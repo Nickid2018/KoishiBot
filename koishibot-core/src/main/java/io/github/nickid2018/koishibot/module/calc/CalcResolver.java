@@ -8,6 +8,7 @@ import io.github.nickid2018.koishibot.message.api.MessageContext;
 import io.github.nickid2018.koishibot.util.AsyncUtil;
 import io.github.nickid2018.smcl.StatementParseException;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -25,11 +26,15 @@ public class CalcResolver extends MessageResolver {
     @Override
     public boolean resolveInternal(String key, MessageContext context, Object resolvedArguments, DelegateEnvironment environment) {
         AsyncUtil.execute(() -> {
+            Instant now = Instant.now();
             Future<Double> future = AsyncUtil.submit(() ->
                     CalcModule.getContext().parse(key).calculate(CalcModule.DEFAULT_VARIABLES).toStdNumber());
             try {
                 double number = Objects.requireNonNull(future).get(5, TimeUnit.SECONDS);
-                environment.getMessageSender().sendMessage(context, environment.newText(key + " = " + number));
+                Instant end = Instant.now();
+                environment.getMessageSender().sendMessage(context, environment.newText(
+                        key + " = " + number + "\n（耗时 " + (end.toEpochMilli() - now.toEpochMilli()) + "ms）"
+                ));
             } catch (ExecutionException e) {
                 if (e.getCause() instanceof StatementParseException)
                     environment.getMessageSender().sendMessage(context, environment.newText("表达式错误：" + e.getCause().getMessage()));
