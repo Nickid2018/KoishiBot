@@ -20,7 +20,7 @@ import java.util.*;
 
 public class NeteaseMusicProtocol {
 
-    private static final BigInteger PUBLIC_KEY = new BigInteger("010001", 16);
+    public static final BigInteger PUBLIC_KEY = new BigInteger("010001", 16);
     public static final BigInteger MODULUS = new BigInteger("00e0b509f6259df8642dbc35662901477df22677ec152b5ff68ace615bb7b725152b3ab17a876aea8a5aa76d2e417629ec4ee341f56135fccf695280104e0312ecbda92557c93870114af6c9d05c4f7f0c3685b7a46bee255932575cce10b424d813cfe4875d3e82047b97ddef52741d546b8e289dc6935b3ece0462db0a22b8e7", 16);
 
     public static JsonObject searchMusic(String keywords) throws IOException {
@@ -63,7 +63,8 @@ public class NeteaseMusicProtocol {
         post.setEntity(entity);
 
         return JsonUtil.getDataInPath(
-                WebUtil.fetchDataInJson(post, WebUtil.chooseRandomUA(), false).getAsJsonObject(), "songs.0", JsonObject.class);
+                WebUtil.fetchDataInJson(post, WebUtil.chooseRandomUA(), false).getAsJsonObject(),
+                "songs.0", JsonObject.class);
     }
 
     public static String getMusicDataURL(int id) throws Exception {
@@ -112,7 +113,7 @@ public class NeteaseMusicProtocol {
 
     private static String aesEncrypt(String text, String key) throws Exception {
         int padding = 16 - text.length() % 16;
-        text += ((char) padding + "").repeat(padding);
+        text += String.valueOf((char) padding).repeat(padding);
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
         SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "AES");
         IvParameterSpec ivParameterSpec = new IvParameterSpec("0102030405060708".getBytes(StandardCharsets.UTF_8));
