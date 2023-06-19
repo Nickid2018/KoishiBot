@@ -43,7 +43,8 @@ public class Main {
                 MiraiProtocol miraiProtocol = MiraiProtocol.valueOf(Settings.protocol.toUpperCase());
                 FixProtocolVersion.sync(miraiProtocol);
                 setProtocol(miraiProtocol);
-                nudgeEnabled.set(miraiProtocol == MiraiProtocol.ANDROID_PHONE || miraiProtocol == MiraiProtocol.IPAD);
+                nudgeEnabled.set(miraiProtocol == MiraiProtocol.ANDROID_PHONE ||
+                        miraiProtocol == MiraiProtocol.IPAD || miraiProtocol == MiraiProtocol.ANDROID_PAD);
             } else
                 nudgeEnabled.set(true);
         }});
