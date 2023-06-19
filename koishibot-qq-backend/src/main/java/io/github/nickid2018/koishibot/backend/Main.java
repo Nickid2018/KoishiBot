@@ -9,6 +9,7 @@ import net.mamoe.mirai.utils.BotConfiguration;
 import net.mamoe.mirai.utils.LoggerAdapters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import xyz.cssxsh.mirai.tool.FixProtocolVersion;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -29,6 +30,7 @@ public class Main {
             LOGGER.error("Failed to load settings.", e);
             return;
         }
+        FixProtocolVersion.update();
 
         AtomicBoolean nudgeEnabled = new AtomicBoolean();
         Bot bot = BotFactory.INSTANCE.newBot(Settings.id, Settings.password, new BotConfiguration() {{
@@ -39,6 +41,7 @@ public class Main {
             setNetworkLoggerSupplier(bot -> LoggerAdapters.asMiraiLogger(LoggerFactory.getLogger("Mirai Net")));
             if (Settings.protocol != null) {
                 MiraiProtocol miraiProtocol = MiraiProtocol.valueOf(Settings.protocol.toUpperCase());
+                FixProtocolVersion.sync(miraiProtocol);
                 setProtocol(miraiProtocol);
                 nudgeEnabled.set(miraiProtocol == MiraiProtocol.ANDROID_PHONE || miraiProtocol == MiraiProtocol.IPAD);
             } else

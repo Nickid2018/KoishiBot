@@ -16,6 +16,9 @@ dependencies {
     api(project(":koishibot-message-api"))
     api("net.mamoe:mirai-core:2.15.0-dev-100")
 
+    // Fix protocol version
+    implementation(files("libraries/fix-protocol-version-1.7.1.mirai2.jar"))
+
     // Logging
     api("org.apache.logging.log4j:log4j-api:2.19.0")
     api("org.apache.logging.log4j:log4j-core:2.19.0")
