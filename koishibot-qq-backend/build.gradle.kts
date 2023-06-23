@@ -17,7 +17,7 @@ dependencies {
     api("net.mamoe:mirai-core:2.15.0-RC")
 
     // Fix protocol version
-    implementation(files("libraries/fix-protocol-version-1.8.0.mirai2.jar"))
+    implementation(files("libraries/fix-protocol-version-1.8.1.mirai2.jar"))
 
     // Logging
     api("org.apache.logging.log4j:log4j-api:2.19.0")
