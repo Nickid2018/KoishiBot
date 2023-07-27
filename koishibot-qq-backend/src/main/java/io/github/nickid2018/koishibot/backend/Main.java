@@ -10,6 +10,7 @@ import net.mamoe.mirai.utils.LoggerAdapters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import xyz.cssxsh.mirai.device.MiraiDeviceGenerator;
+import xyz.cssxsh.mirai.tool.FixProtocolVersion;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -30,6 +31,7 @@ public class Main {
             LOGGER.error("Failed to load settings.", e);
             return;
         }
+        FixProtocolVersion.fetch(BotConfiguration.MiraiProtocol.ANDROID_PHONE, "8.9.63");
 
         AtomicBoolean nudgeEnabled = new AtomicBoolean();
         Bot bot = BotFactory.INSTANCE.newBot(Settings.id, Settings.password, new BotConfiguration() {{
