@@ -17,6 +17,7 @@ dependencies {
     api("net.mamoe:mirai-core:2.15.0")
     implementation("xyz.cssxsh.mirai:mirai-device-generator:1.2.0")
     implementation(files("libraries/fix-protocol-version-1.9.7.mirai2.jar"))
+    implementation("org.asynchttpclient:async-http-client:2.12.3")
 
     // Logging
     api("org.apache.logging.log4j:log4j-api:2.19.0")
