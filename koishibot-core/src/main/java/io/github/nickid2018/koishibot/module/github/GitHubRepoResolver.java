@@ -67,7 +67,7 @@ public class GitHubRepoResolver extends MessageResolver {
         builder.append("拥有者: ").append(JsonUtil.getStringInPathOrNull(object, "owner.login")).append("\n");
         builder.append("仓库地址: ").append(JsonUtil.getStringOrNull(object, "html_url")).append("\n");
         builder.append("SSH地址: ").append(JsonUtil.getStringOrNull(object, "ssh_url")).append("\n");
-        builder.append("Watch: ").append(JsonUtil.getIntOrZero(object, "watchers")).append(" | ");
+        builder.append("Star: ").append(JsonUtil.getIntOrZero(object, "watchers")).append(" | ");
         builder.append("Fork: ").append(JsonUtil.getIntOrZero(object, "forks")).append("\n");
 
         JsonUtil.getString(object, "language").ifPresent(
