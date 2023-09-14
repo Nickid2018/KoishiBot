@@ -19,6 +19,7 @@ import org.apache.hc.client5.http.classic.methods.*;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,8 +81,13 @@ public class GitHubRepoResolver extends MessageResolver {
 
         JsonUtil.getString(object, "description").ifPresent(builder::append);
 
-        environment.getMessageSender().sendMessageReply(context, environment.newText(builder.toString().trim()), false,
-                (source, message) -> doRepoReply(message, repo, environment, context));
+        String openGraph = "https://opengraph.githubassets.com/1/" + repo;
+
+        environment.getMessageSender().sendMessageReply(context, environment.newChain(
+                        environment.newText(builder.toString().trim()),
+                        environment.newImage(new URL(openGraph))
+                ), false, (source, message) -> doRepoReply(message, repo, environment, context)
+        );
     }
 
     private void doRepoIssueGet(String repo, String issue, MessageContext context, DelegateEnvironment environment) throws IOException {
@@ -144,12 +150,14 @@ public class GitHubRepoResolver extends MessageResolver {
                 case "~star" -> doAuthenticatedOperation(new HttpPut("https://api.github.com/user/starred/" + repo),
                         environment, context, WebUtil::sendReturnNoContent,
                         environment.newText("已star仓库"), "github.repo.star", "repo");
-                case "~unstar" -> doAuthenticatedOperation(new HttpDelete("https://api.github.com/user/starred/" + repo),
-                        environment, context, WebUtil::sendReturnNoContent,
-                        environment.newText("已取消star仓库"), "github.repo.unstar", "repo");
-                case "~fork" -> doAuthenticatedOperation(new HttpPost("https://api.github.com/user/repos/" + repo + "/forks"),
-                        environment, context, WebUtil::sendReturnNoContent,
-                        environment.newText("已fork仓库"), "github.repo.fork", "repo");
+                case "~unstar" ->
+                        doAuthenticatedOperation(new HttpDelete("https://api.github.com/user/starred/" + repo),
+                                environment, context, WebUtil::sendReturnNoContent,
+                                environment.newText("已取消star仓库"), "github.repo.unstar", "repo");
+                case "~fork" ->
+                        doAuthenticatedOperation(new HttpPost("https://api.github.com/user/repos/" + repo + "/forks"),
+                                environment, context, WebUtil::sendReturnNoContent,
+                                environment.newText("已fork仓库"), "github.repo.fork", "repo");
             }
         });
     }
