@@ -15,6 +15,7 @@ public class Settings {
     public static long id;
     public static String password;
     public static String protocol;
+    public static String version;
     public static int delegatePort;
 
     public static void loadSettings() throws IOException {
@@ -27,6 +28,7 @@ public class Settings {
         if (password == null)
             throw new IllegalArgumentException("Bot password is not set.");
         protocol = JsonUtil.getStringOrNull(config, "protocol");
+        version = JsonUtil.getStringOrElse(config, "version", "8.9.68");
 
         delegatePort = JsonUtil.getIntOrElse(config, "delegate_port", 52514);
     }

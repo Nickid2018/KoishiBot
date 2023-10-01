@@ -31,7 +31,7 @@ public class Main {
             LOGGER.error("Failed to load settings.", e);
             return;
         }
-        FixProtocolVersion.fetch(BotConfiguration.MiraiProtocol.ANDROID_PHONE, "8.9.63");
+        FixProtocolVersion.fetch(BotConfiguration.MiraiProtocol.ANDROID_PHONE, Settings.version);
 
         AtomicBoolean nudgeEnabled = new AtomicBoolean();
         Bot bot = BotFactory.INSTANCE.newBot(Settings.id, Settings.password, new BotConfiguration() {{
@@ -68,7 +68,7 @@ public class Main {
             }
             if (stopped.get())
                 System.exit(0);
-            LOGGER.info("Disconnected. Waiting 1min to reconnect.");
+            LOGGER.info("Disconnected. Waiting 10s to reconnect.");
             retry++;
             try {
                 Thread.sleep(10000);

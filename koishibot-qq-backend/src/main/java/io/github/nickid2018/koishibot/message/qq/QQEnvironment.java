@@ -25,7 +25,7 @@ public class QQEnvironment extends Environment {
         botID = "qq.user" + bot.getId();
         environmentName = "QQ";
         environmentUserPrefix = "qq.user";
-        forwardMessageSupported = true;
+        forwardMessageSupported = false;
         audioSupported = true;
         audioToFriendSupported = false;
         quoteSupported = true;
